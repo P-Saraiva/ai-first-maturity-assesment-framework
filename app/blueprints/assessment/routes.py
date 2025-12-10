@@ -230,7 +230,7 @@ def index():
             'pagination': assessments_pagination,
             'total_questions': total_questions,
             'sections': sections or [],
-            'total_sections': len(sections) if sections else 4,
+            'total_sections': len(sections),
             'total_assessments': total_assessments,
             'completed_assessments': completed_assessments,
             'in_progress_assessments': in_progress_assessments,
@@ -250,10 +250,10 @@ def index():
         flash('Error loading assessments', 'error')
         # Provide safe defaults
         return render_template('pages/assessment/index.html', 
-                               assessments=[], 
-                               sections=[], 
-                               total_questions=24,
-                               total_sections=4)
+                       assessments=[], 
+                       sections=[], 
+                       total_questions=0,
+                       total_sections=0)
 
 
 @assessment_bp.route('/create', methods=['GET', 'POST'])
@@ -1010,7 +1010,11 @@ def view_readonly_sections(assessment_id):
             'sections': sections,
             'progress': progress,
             'readonly': True,
-            'total_questions': sum(len(section.areas) for section in sections)
+            'total_questions': sum(
+                len(area.questions)
+                for section in sections
+                for area in section.areas
+            )
         }
         
         return render_template(
@@ -1710,7 +1714,9 @@ def _get_section_color(section_id):
         'FC': '#3b82f6',  # Blue
         'TC': '#10b981',  # Green
         'EI': '#f59e0b',  # Yellow
-        'SG': '#ef4444'   # Red
+        'SG': '#8b5cf6',  # Purple (align with seed)
+        'SE': '#ef4444',  # Red (Safety Engineering)
+        'HC': '#06b6d4'   # Cyan (Human-AI Experience)
     }
     return colors.get(section_id, '#6b7280')
 
