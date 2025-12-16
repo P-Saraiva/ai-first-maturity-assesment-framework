@@ -51,7 +51,8 @@ def create_application():
         # Check database connection
         try:
             with app.app_context():
-                db.engine.execute('SELECT 1')
+                from sqlalchemy import text
+                db.engine.execute(text('SELECT 1'))
             health_data['components']['database'] = 'healthy'
         except Exception as e:
             health_data['components']['database'] = f'unhealthy: {str(e)}'

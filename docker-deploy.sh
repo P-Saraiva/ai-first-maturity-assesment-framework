@@ -22,30 +22,40 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+## Detect docker compose command (new CLI vs legacy)
+if docker compose version >/dev/null 2>&1; then
+    DC="docker compose"
+elif docker-compose version >/dev/null 2>&1; then
+    DC="docker-compose"
+else
+    log_error "Neither 'docker compose' nor 'docker-compose' is available. Please install Docker Compose."
+    exit 1
+fi
+
 case "$1" in
     build)
         log_info "Building Docker image..."
-        docker-compose build
+        $DC build
         ;;
     up|start)
         log_info "Starting application..."
-        docker-compose up -d
+        $DC up -d
         log_info "Application started at http://localhost:5001"
         ;;
     down|stop)
         log_info "Stopping application and removing volumes..."
-        docker-compose down -v
+        $DC down -v
         ;;
     logs)
-        docker-compose logs -f
+        $DC logs -f
         ;;
     shell)
         log_info "Accessing application shell..."
-        docker-compose exec app bash
+        $DC exec app bash
         ;;
     setup)
         log_info "Setting up database..."
-        docker-compose exec app python scripts/setup_database.py
+        $DC exec app python scripts/setup_database.py
         ;;
     *)
         echo "Usage: $0 {build|start|stop|logs|shell|setup}"

@@ -22,6 +22,35 @@ logger = get_logger(__name__)
 
 assessment_bp = Blueprint('assessment', __name__, url_prefix='/assessment')
 
+# Limit assessment to three sections in linear flow
+ALLOWED_SECTION_IDS = ['FC', 'TC', 'EI']
+
+def _compute_allowed_question_ids(db_session):
+    """Include all active binary checklist question IDs across allowed sections.
+    Returns (allowed_ids_set, binary_groups_map_by_base).
+    """
+    sections = db_session.query(Section).options(
+        joinedload(Section.areas).joinedload(Area.questions)
+    ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+    allowed_ids = set()
+    binary_groups = {}
+    for section in sections:
+        for area in section.areas:
+            for q in area.questions:
+                try:
+                    if getattr(q, 'is_active', 1) and q.is_binary:
+                        allowed_ids.add(q.id)
+                        # Group by base id (strip A-F suffix)
+                        if isinstance(q.id, str) and q.id and q.id[-1] in 'ABCDEF' and q.id[:-1][-2:].isdigit():
+                            base = q.id[:-1]
+                            binary_groups.setdefault(base, []).append(q.id)
+                except Exception:
+                    continue
+    # Ensure members are sorted for deterministic behavior
+    for base in list(binary_groups.keys()):
+        binary_groups[base] = sorted(binary_groups[base])
+    return allowed_ids, binary_groups
+
 
 def get_assessment_service():
     """Get assessment service instance with current database session"""
@@ -202,11 +231,12 @@ def index():
             maturity = get_maturity_level(assessment.overall_score)
             assessment.maturity_level = maturity
         
-        # Get framework statistics
-        total_questions = db.session.query(Question).count()
-        sections = db.session.query(Section).order_by(
-            Section.display_order
-        ).all()
+        # Get framework statistics (constrained logical question count)
+        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
+        total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
+        sections = db.session.query(Section).filter(
+            Section.id.in_(ALLOWED_SECTION_IDS)
+        ).order_by(Section.display_order).all()
         
         # Get assessment statistics
         total_assessments = db.session.query(Assessment).filter(
@@ -307,7 +337,9 @@ def create():
         from app.models.question import Section
         
         # Get the first section before creating assessment to avoid session issues
-        first_section = db.session.query(Section).order_by(Section.display_order).first()
+        first_section = db.session.query(Section).filter(
+            Section.id.in_(ALLOWED_SECTION_IDS)
+        ).order_by(Section.display_order).first()
         if not first_section:
             flash('No assessment sections found. Please contact support.', 'error')
             return render_template('pages/assessment/org_information.html')
@@ -443,6 +475,15 @@ def section_questions(assessment_id, section_id):
         section = db.session.query(Section).options(
             joinedload(Section.areas).joinedload(Area.questions)
         ).filter(Section.id == section_id).first()
+
+        # Redirect to first allowed section if not in allowed set
+        if section and section.id not in ALLOWED_SECTION_IDS:
+            first_allowed = db.session.query(Section).filter(
+                Section.id.in_(ALLOWED_SECTION_IDS)
+            ).order_by(Section.display_order).first()
+            return redirect(url_for('assessment.section_questions',
+                                    assessment_id=assessment_id,
+                                    section_id=first_allowed.id))
         
         if not section:
             logger.error(f"Section {section_id} not found")
@@ -461,8 +502,9 @@ def section_questions(assessment_id, section_id):
             }
         
         # Get all sections for navigation
-        all_sections = db.session.query(Section).order_by(
-            Section.display_order).all()
+        all_sections = db.session.query(Section).filter(
+            Section.id.in_(ALLOWED_SECTION_IDS)
+        ).order_by(Section.display_order).all()
         
         # Find current section index
         current_section_index = next(
@@ -472,9 +514,15 @@ def section_questions(assessment_id, section_id):
         # Update session metadata
         session['assessment_metadata']['current_section_index'] = current_section_index
         session['assessment_metadata']['assessment_id'] = assessment.id
+        # Allowed questions: include all active binary items for this section
+        all_allowed_ids, _ = _compute_allowed_question_ids(db.session)
         question_ids = []
+        allowed_question_ids = set()
         for area in section.areas:
-            question_ids.extend([q.id for q in area.questions])
+            for q in area.questions:
+                question_ids.append(q.id)
+                if q.id in all_allowed_ids:
+                    allowed_question_ids.add(q.id)
         
         existing_responses = {}
         if question_ids:
@@ -492,7 +540,8 @@ def section_questions(assessment_id, section_id):
             'total_sections': len(all_sections),
             'existing_responses': existing_responses,
             'is_last_section': current_section_index == len(all_sections) - 1,
-            'area_progressions': area_progressions
+            'area_progressions': area_progressions,
+            'allowed_question_ids': list(allowed_question_ids)
         }
         
         return render_template('pages/assessment/section_questions.html', 
@@ -621,8 +670,9 @@ def submit_section_responses(assessment_id, section_id):
         session['assessment_responses'].update(responses_data)
         
         # Determine next action
-        all_sections = db.session.query(Section).order_by(
-            Section.display_order).all()
+        all_sections = db.session.query(Section).filter(
+            Section.id.in_(ALLOWED_SECTION_IDS)
+        ).order_by(Section.display_order).all()
         current_index = next(
             (i for i, s in enumerate(all_sections) if s.id == section_id), 0
         )
@@ -684,27 +734,29 @@ def final_review(assessment_id):
                 flash('Assessment not found', 'error')
                 return redirect(url_for('assessment.index'))
         
-        # Get all sections with responses
+        # Get all sections with responses (allowed only)
         sections = db.session.query(Section).options(
             joinedload(Section.areas).joinedload(Area.questions)
-        ).order_by(Section.display_order).all()
+        ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
         
         # Get all responses for this assessment
         responses = db.session.query(Response).filter(
             Response.assessment_id == assessment_id
         ).all()
         responses_dict = {r.question_id: r for r in responses}
+        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
         
-        # Calculate completion statistics
-        total_questions = 0
+        # Calculate completion against constrained logical questions
+        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
+        total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
         answered_questions = 0
-        
-        for section in sections:
-            for area in section.areas:
-                for question in area.questions:
-                    total_questions += 1
-                    if question.id in responses_dict:
-                        answered_questions += 1
+        for base, members in bin_groups.items():
+            if any(mid in responses_dict for mid in members):
+                answered_questions += 1
+        single_ids = [qid for qid in allowed_ids if not (isinstance(qid, str) and len(qid) >= 3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit())]
+        for qid in single_ids:
+            if qid in responses_dict:
+                answered_questions += 1
         
         completion_percentage = (
             (answered_questions / total_questions * 100) 
@@ -777,11 +829,19 @@ def generate_report(assessment_id):
             assessment_id=assessment_id
         ).all()
         logger.info(f"Found {len(responses)} responses for assessment {assessment_id}")
-        
-        # Get all questions for completion calculation
-        from sqlalchemy import func
-        total_questions = db.session.query(func.count(Question.id)).scalar()
-        answered_questions = len(responses) if responses else 0
+
+        # Compute logical totals for constrained flow
+        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
+        total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
+        responses_dict = {r.question_id: r for r in responses}
+        answered_questions = 0
+        for base, members in bin_groups.items():
+            if any(mid in responses_dict for mid in members):
+                answered_questions += 1
+        single_ids = [qid for qid in allowed_ids if not (isinstance(qid, str) and len(qid) >= 3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit())]
+        for qid in single_ids:
+            if qid in responses_dict:
+                answered_questions += 1
         completion_percentage = (
             (answered_questions / total_questions * 100) 
             if total_questions > 0 else 0
@@ -807,27 +867,24 @@ def generate_report(assessment_id):
         try:
             logger.info(f"Starting completion process for assessment {assessment_id}")
             
-            # Get responses by section for scoring
+            # Get responses by section for scoring (allowed only)
             responses_by_section = {}
             for response in responses:
+                if response.question_id not in allowed_ids:
+                    continue
                 question = db.session.get(Question, response.question_id)
                 if question and question.area:
                     section_id = question.area.section_id
                     if section_id not in responses_by_section:
                         responses_by_section[section_id] = []
                     responses_by_section[section_id].append(response)
-            
-            # Calculate section scores (average of responses in each section)
+
+            # Calculate simple averages per section
             section_scores = {}
             for section_id, section_responses in responses_by_section.items():
                 if section_responses:
-                    scores = [
-                        r.score for r in section_responses 
-                        if r.score
-                    ]
-                    section_scores[section_id] = (
-                        sum(scores) / len(scores) if scores else 0
-                    )
+                    scores = [r.score for r in section_responses if r.score]
+                    section_scores[section_id] = (sum(scores) / len(scores) if scores else 0)
             
             logger.info(f"Section scores calculated: {section_scores}")
             
@@ -999,22 +1056,21 @@ def view_readonly_sections(assessment_id):
         # Get all sections with their areas
         sections = db.session.query(Section).options(
             joinedload(Section.areas)
-        ).order_by(Section.display_order).all()
+        ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
         
         # Get progress information
         assessment_service = AssessmentService(db.session)
         progress = assessment_service.get_assessment_progress(assessment_id)
+        # Logical total questions under constrained flow
+        allowed_ids_ro, bin_groups_ro = _compute_allowed_question_ids(db.session)
+        logical_total = len(bin_groups_ro) + (len(allowed_ids_ro) - sum(len(v) for v in bin_groups_ro.values()))
         
         context = {
             'assessment': assessment,
             'sections': sections,
             'progress': progress,
             'readonly': True,
-            'total_questions': sum(
-                len(area.questions)
-                for section in sections
-                for area in section.areas
-            )
+            'total_questions': logical_total
         }
         
         return render_template(
@@ -1533,113 +1589,100 @@ def report(assessment_id):
             return redirect(url_for('assessment.detail',
                                     assessment_id=assessment_id))
         
-        # Get all sections with areas and questions
-        sections = db.session.query(Section).options(
-            joinedload(Section.areas).joinedload(Area.questions)
-        ).order_by(Section.display_order).all()
-        
-        # Get all responses for this assessment
+        # Use scoring service for binary weighted results
+        scoring_service = get_scoring_service()
+        scoring_results = scoring_service.calculate_assessment_score(assessment_id)
+
+        # Build section breakdown compatible with template expectations
+        section_scores = []
+        area_scores = {}
+        for sec in scoring_results.get('section_scores', {}).values():
+            areas_list = []
+            for area_key, a in sec.get('area_scores', {}).items():
+                areas_list.append({
+                    'id': a['area_id'],
+                    'name': a['area_name'],
+                    'score': a['score'],
+                    'level': _get_maturity_level_from_score(a['score']),
+                    'responses_count': a['responses_count'],
+                    'domain_normalized': a.get('domain_normalized'),
+                    'domain_level': a.get('domain_level'),
+                })
+                area_scores[a['area_id']] = {
+                    'score': a['score'],
+                    'name': a['area_name'],
+                    'responses_count': a['responses_count'],
+                    'max_possible': a['total_questions'] * 4
+                }
+            section_scores.append({
+                'id': sec['section_id'],
+                'name': sec['section_name'],
+                'score': sec['score'],
+                'level': _get_maturity_level_from_score(sec['score']),
+                'color': _get_section_color(sec['section_id']),
+                'areas': areas_list,
+                'responses_count': sec['responses_count'],
+                'percentage': round((sec['score'] / 4.0) * 100, 1)
+            })
+
+        overall_score = scoring_results.get('deviq_score', 0.0)
+        overall_level = scoring_results.get('maturity_level_display', _get_maturity_level_from_score(overall_score))
+
+        # Compute allowed ids and groups for counts
+        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
         responses = db.session.query(Response).filter(
             Response.assessment_id == assessment_id
         ).all()
         responses_dict = {r.question_id: r for r in responses}
         
-        # Calculate detailed scores
-        section_scores = []
-        area_scores = {}
-        all_scores = []
-        
-        for section in sections:
-            section_responses = []
-            section_areas = []
-            
-            for area in section.areas:
-                area_responses = []
-                for question in area.questions:
-                    if question.id in responses_dict:
-                        response_score = responses_dict[question.id].score
-                        area_responses.append(response_score)
-                
-                if area_responses:
-                    area_score = sum(area_responses) / len(area_responses)
-                    area_scores[area.id] = {
-                        'score': area_score,
-                        'name': area.name,
-                        'responses_count': len(area_responses),
-                        'max_possible': len(area.questions) * 4
+        # Generate area-level roadmap data based on computed domain maturity
+        from app.models.progression import (
+            get_all_progressions_for_area,
+            get_recommendations_for_area_current_level
+        )
+        area_roadmap_data = {}
+        # Build quick lookup of area responses and gaps (No/unanswered)
+        # Collect questions per area that are allowed
+        questions_by_area = {}
+        for qid in allowed_ids:
+            q = db.session.query(Question).get(qid)
+            if q and q.area:
+                questions_by_area.setdefault(q.area.id, []).append(q)
+        # For each section's area in scoring_results, compute recommendations
+        for sec in scoring_results.get('section_scores', {}).values():
+            for _, area in sec.get('area_scores', {}).items():
+                area_id = area['area_id']
+                area_name = area['area_name']
+                current_domain_level = int(area.get('domain_level') or _get_maturity_level_from_score(area['score']) or 1)
+                # Determine gaps: No answers (score==1) or unanswered
+                gaps = []
+                for q in questions_by_area.get(area_id, []):
+                    r = responses_dict.get(q.id)
+                    if not r or (hasattr(r, 'score') and int(r.score) < 2):
+                        gaps.append(q.question)
+                # Next-level recommendation from progression table
+                progression = get_recommendations_for_area_current_level(
+                    area_id, current_domain_level
+                )
+                next_level = current_domain_level + 1 if current_domain_level < 4 else None
+                next_reco = None
+                if progression and next_level:
+                    next_reco = {
+                        'level': next_level,
+                        'prerequisites': _parse_progression_text(progression.prerequisites),
+                        'action_items': _parse_progression_text(progression.action_items),
+                        'success_metrics': _parse_progression_text(progression.success_metrics),
+                        'timeline': progression.timeline,
+                        'common_pitfalls': _parse_progression_text(progression.common_pitfall)
                     }
-                    section_responses.extend(area_responses)
-                    section_areas.append({
-                        'id': area.id,
-                        'name': area.name,
-                        'score': area_score,
-                        'level': _get_maturity_level_from_score(area_score),
-                        'responses_count': len(area_responses)
-                    })
-            
-            if section_responses:
-                section_score = sum(section_responses) / len(section_responses)
-                all_scores.extend(section_responses)
-                
-                section_scores.append({
-                    'id': section.id,
-                    'name': section.name,
-                    'score': section_score,
-                    'level': _get_maturity_level_from_score(section_score),
-                    'color': _get_section_color(section.id),
-                    'areas': section_areas,
-                    'responses_count': len(section_responses),
-                    'percentage': round((section_score / 4.0) * 100, 1)
-                })
-        
-        # Calculate overall metrics
-        overall_score = round(sum(all_scores) / len(all_scores), 1) if all_scores else 0
-        overall_level = _get_maturity_level_from_score(overall_score)
-        
-        # Generate roadmap data for each answered question
-        roadmap_data = {}
-        for question_id, response in responses_dict.items():
-            question = db.session.query(Question).get(question_id)
-            if question and question.area:
-                area_id = question.area.id
-                current_level = response.score
-                
-                # Get progression data for next levels
-                progressions = get_all_progressions_for_area(area_id)
-                next_levels = []
-                
-                # Up to level 4
-                for target_level in range(current_level + 1, 5):
-                    if target_level in progressions:
-                        prog = progressions[target_level]
-                        next_levels.append({
-                            'level': target_level,
-                            'prerequisites': _parse_progression_text(
-                                prog.prerequisites
-                            ),
-                            'action_items': _parse_progression_text(
-                                prog.action_items
-                            ),
-                            'success_metrics': _parse_progression_text(
-                                prog.success_metrics
-                            ),
-                            'timeline': prog.timeline,
-                            'common_pitfalls': _parse_progression_text(
-                                prog.common_pitfall
-                            )
-                        })
-                
-                if next_levels:
-                    roadmap_data[question_id] = {
-                        'question': question.question,
-                        'area_name': question.area.name,
-                        'current_level': current_level,
-                        'current_description': _get_level_description(
-                            question, current_level
-                        ),
-                        'notes': getattr(response, 'notes', ''),
-                        'next_levels': next_levels
-                    }
+                area_roadmap_data[area_id] = {
+                    'area_name': area_name,
+                    'current_level': current_domain_level,
+                    'current_level_name': _get_maturity_level_from_score(float(current_domain_level)),
+                    'domain_normalized': area.get('domain_normalized'),
+                    'gaps': gaps,
+                    'next_recommendation': next_reco
+                }
         
         # Prepare chart data
         chart_data = {
@@ -1672,15 +1715,11 @@ def report(assessment_id):
             'section_scores': section_scores,
             'area_scores': area_scores,
             'chart_data': chart_data,
-            'roadmap_data': roadmap_data,
+            'area_roadmap_data': area_roadmap_data,
             'insights': insights,
             'priority_areas': priority_areas,
-            'responses_count': len(responses_dict),
-            'total_questions': sum(
-                len(area.questions)
-                for section in sections
-                for area in section.areas
-            ),
+            'responses_count': len({qid: r for qid, r in responses_dict.items() if qid in allowed_ids}),
+            'total_questions': len(allowed_ids),
             'completion_date': assessment.completion_date,
             'organization_name': (
                 assessment.organization_name or assessment.team_name
@@ -1698,11 +1737,11 @@ def report(assessment_id):
 
 def _get_maturity_level_from_score(score):
     """Convert numeric score to maturity level name"""
-    if score >= 3.3:
+    if score >= 4.2:
         return 'AI-First'
-    elif score >= 2.5:
+    elif score >= 3.4:
         return 'AI-Augmented'
-    elif score >= 1.8:
+    elif score >= 2.6:
         return 'AI-Assisted'
     else:
         return 'Traditional'
@@ -1895,16 +1934,17 @@ def download_pdf(assessment_id):
             return redirect(url_for('assessment.detail',
                                     assessment_id=assessment_id))
 
-        # Get all sections with areas and questions
+        # Get all sections with areas and questions (allowed only)
         sections = db.session.query(Section).options(
             joinedload(Section.areas).joinedload(Area.questions)
-        ).order_by(Section.display_order).all()
+        ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
 
         # Get all responses for this assessment
         responses = db.session.query(Response).filter(
             Response.assessment_id == assessment_id
         ).all()
         responses_dict = {r.question_id: r for r in responses}
+        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
 
         # Calculate detailed scores (same logic as report route)
         section_scores = []
@@ -1917,7 +1957,8 @@ def download_pdf(assessment_id):
 
             for area in section.areas:
                 area_responses = []
-                for question in area.questions:
+                allowed_area_questions = [q for q in area.questions if q.id in allowed_ids]
+                for question in allowed_area_questions:
                     if question.id in responses_dict:
                         response_score = responses_dict[question.id].score
                         area_responses.append(response_score)
@@ -1928,7 +1969,7 @@ def download_pdf(assessment_id):
                         'score': area_score,
                         'name': area.name,
                         'responses_count': len(area_responses),
-                        'max_possible': len(area.questions) * 4
+                        'max_possible': len(allowed_area_questions) * 5
                     }
                     section_responses.extend(area_responses)
                     section_areas.append({
@@ -1951,7 +1992,7 @@ def download_pdf(assessment_id):
                     'color': _get_section_color(section.id),
                     'areas': section_areas,
                     'responses_count': len(section_responses),
-                    'percentage': round((section_score / 4.0) * 100, 1)
+                    'percentage': round((section_score / 5.0) * 100, 1)
                 })
 
         # Calculate overall metrics
@@ -1967,6 +2008,8 @@ def download_pdf(assessment_id):
         # Generate roadmap data for each answered question
         roadmap_data = {}
         for question_id, response in responses_dict.items():
+            if question_id not in allowed_ids:
+                continue
             question = db.session.query(Question).get(question_id)
             if question and question.area:
                 area_id = question.area.id
@@ -2017,12 +2060,8 @@ def download_pdf(assessment_id):
             'roadmap_data': roadmap_data,
             'insights': insights,
             'priority_areas': priority_areas,
-            'responses_count': len(responses_dict),
-            'total_questions': sum(
-                len(area.questions)
-                for section in sections
-                for area in section.areas
-            ),
+            'responses_count': len({qid: r for qid, r in responses_dict.items() if qid in allowed_ids}),
+            'total_questions': len(bin_groups) + (len(allowed_ids) - sum(len(v) for v in bin_groups.values())),
             'completion_date': assessment.completion_date,
             'organization_name': (
                 assessment.organization_name or assessment.team_name

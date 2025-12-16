@@ -20,6 +20,33 @@ from app.utils.exceptions import (
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
+ALLOWED_SECTION_IDS = ['FC', 'TC', 'EI']
+
+def _compute_allowed_question_ids(session: Session):
+    sections = session.query(Section).options(
+        joinedload(Section.areas).joinedload(Area.questions)
+    ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+    allowed_ids = set()
+    binary_groups = {}
+    for section in sections:
+        section_binary = {}
+        non_binary = []
+        for area in section.areas:
+            for q in area.questions:
+                qid = q.id
+                if isinstance(qid, str) and len(qid) >= 3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit():
+                    base = qid[:-1]
+                    section_binary.setdefault(base, []).append(qid)
+                else:
+                    non_binary.append(qid)
+        if section_binary:
+            base = sorted(section_binary.keys())[0]
+            members = sorted(section_binary[base])
+            binary_groups[base] = members
+            allowed_ids.update(members)
+        if non_binary:
+            allowed_ids.add(sorted(non_binary)[0])
+    return allowed_ids, binary_groups
 
 
 class AssessmentService:
@@ -240,8 +267,9 @@ class AssessmentService:
             if not assessment:
                 raise AssessmentError(f"Assessment {assessment_id} not found")
             
-            # Get total questions count
-            total_questions = self.session.query(func.count(Question.id)).scalar()
+            # Get total questions (logical constrained)
+            allowed_ids, bin_groups = _compute_allowed_question_ids(self.session)
+            total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
             
             # Get responded questions count
             responded_questions = len(assessment.responses)
@@ -390,11 +418,14 @@ class AssessmentService:
             # Get answered question IDs
             answered_question_ids = {r.question_id for r in assessment.responses}
             
-            # Find first unanswered question (by display order)
+            # Find first unanswered question (by display order) within allowed set
+            allowed_ids, _ = _compute_allowed_question_ids(self.session)
             next_question = (
                 self.session.query(Question)
                 .join(Area)
                 .join(Section)
+                .filter(Section.id.in_(ALLOWED_SECTION_IDS))
+                .filter(Question.id.in_(allowed_ids))
                 .filter(Question.id.notin_(answered_question_ids))
                 .order_by(Section.display_order, Area.display_order,
                           Question.display_order)
@@ -411,7 +442,7 @@ class AssessmentService:
                                     assessment: Assessment) -> Dict[str, Any]:
         """Calculate progress by section."""
         try:
-            # Get all sections with question counts
+            # Get all sections with question counts (allowed only)
             sections_data = (
                 self.session.query(
                     Section.id,
@@ -420,6 +451,7 @@ class AssessmentService:
                 )
                 .join(Area, Section.id == Area.section_id)
                 .join(Question, Area.id == Question.area_id)
+                .filter(Section.id.in_(ALLOWED_SECTION_IDS))
                 .group_by(Section.id, Section.name)
                 .all()
             )
@@ -434,9 +466,18 @@ class AssessmentService:
                     responded_by_section[section_id] = 0
                 responded_by_section[section_id] += 1
             
-            # Calculate progress for each section
+            # Calculate progress for each section using constrained logical totals
             section_progress = {}
-            for section_id, section_name, total_questions in sections_data:
+            allowed_ids, bin_groups = _compute_allowed_question_ids(self.session)
+            for section_id, section_name, _ignored in sections_data:
+                # Determine logical total for this section
+                section_questions = (
+                    self.session.query(Question).join(Area)
+                    .filter(Area.section_id == section_id).all()
+                )
+                ids = [q.id for q in section_questions if q.id in allowed_ids]
+                bases = set([qid[:-1] for qid in ids if isinstance(qid, str) and len(qid)>=3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit()])
+                total_questions = len(bases) + len([qid for qid in ids if not (isinstance(qid, str) and len(qid)>=3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit())])
                 responded = responded_by_section.get(section_id, 0)
                 progress = ((responded / total_questions * 100)
                             if total_questions > 0 else 0)

@@ -19,7 +19,7 @@ INSERT OR IGNORE INTO sections VALUES('HC','HUMAN-AI EXPERIENCE DESIGN','Designi
 -- Areas Data
 -- ========================================
 -- Foundational Capabilities Areas
-INSERT OR IGNORE INTO areas VALUES('FC-AIT','FC','AI Infrastructure & Tooling','Deployment and management of AI development tools, platforms, and infrastructure to support team productivity and collaboration',1,'6-8 weeks','8-10 weeks','16-20 weeks','2025-09-04 16:06:55','2025-09-04 16:06:55');
+INSERT OR IGNORE INTO areas VALUES('FC-AIT','FC','Responsible AI - Ethical Values & Societal Impact','Establish and embed ethical decision-making, impact assessment, and responsible AI practices across the organization',1,'6-8 weeks','8-10 weeks','16-20 weeks','2025-09-04 16:06:55','2025-09-04 16:06:55');
 INSERT OR IGNORE INTO areas VALUES('FC-ALS','FC','Team AI Literacy & Skills','Development of team competencies in AI tools, prompt engineering, and AI-first development methodologies',2,'6-8 weeks','10-12 weeks','20-24 weeks','2025-09-04 16:06:55','2025-09-04 16:06:55');
 INSERT OR IGNORE INTO areas VALUES('FC-CGR','FC','Code Generation & Review','Integration of AI assistance in code creation, review, and quality assurance processes',3,'6-8 weeks','8-10 weeks','16-20 weeks','2025-09-04 16:06:55','2025-09-04 16:06:55');
 INSERT OR IGNORE INTO areas VALUES('FC-DKM','FC','Documentation & Knowledge Management','Use of AI to automate and enhance documentation creation, maintenance, and knowledge discovery',4,'5-6 weeks','10-12 weeks','20-24 weeks','2025-09-04 16:06:55','2025-09-04 16:06:55');
@@ -63,8 +63,20 @@ INSERT OR IGNORE INTO areas VALUES('HC-ACC','HC','Accessibility & Inclusivity','
 -- Questions Data
 -- ========================================
 -- Foundational Capabilities Questions
-INSERT OR IGNORE INTO questions VALUES('FC-AIT-01','FC-AIT','What level of AI development tools and infrastructure does your team currently have in place?','No AI tools in use','Basic AI assistants (GitHub Copilot, ChatGPT) with individual usage','Standardized AI toolchain with team-wide adoption','Enterprise-grade AI platform with integrated workflows',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
-INSERT OR IGNORE INTO questions VALUES('FC-ALS-01','FC-ALS','How would you assess your team''s AI literacy and prompt engineering capabilities?','Limited AI awareness, no formal training','Basic AI understanding, informal learning','Structured AI training programs, competent prompt engineering','Advanced AI expertise, AI-first mindset across team',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
+-- Replace original multi-level question with six binary sub-questions (Yes/No)
+INSERT OR IGNORE INTO questions VALUES('FC-AIT-01A','FC-AIT','Is there informal awareness of the potential ethical and societal impacts of AI systems?','No','Yes',NULL,NULL,1,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-AIT-01B','FC-AIT','Are ethical considerations occasionally discussed in an informal manner?','No','Yes',NULL,NULL,1,2,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-AIT-01C','FC-AIT','Have formal processes been established to assess AI`s ethical and societal impacts?','No','Yes',NULL,NULL,1,3,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-AIT-01D','FC-AIT','Is there an established framework guiding ethical decision-making for AI systems?','No','Yes',NULL,NULL,1,4,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-AIT-01E','FC-AIT','Are impact assessments systematically integrated into all AI projects, continuously reviewed, and updated?','No','Yes',NULL,NULL,1,5,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-AIT-01F','FC-AIT','Is ethical decision-making fully embedded in organizational processes, consistently guiding AI development and deployment?','No','Yes',NULL,NULL,1,6,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+-- Team AI Literacy binary checklist (six yes/no)
+INSERT OR IGNORE INTO questions VALUES('FC-ALS-01A','FC-ALS','Do teams use AI tools at least weekly?','No','Yes',NULL,NULL,1,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-ALS-01B','FC-ALS','Is basic prompt engineering training completed by most members?','No','Yes',NULL,NULL,1,2,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-ALS-01C','FC-ALS','Do you maintain shared prompt libraries or examples?','No','Yes',NULL,NULL,1,3,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-ALS-01D','FC-ALS','Are there documented AI-first development guidelines?','No','Yes',NULL,NULL,1,4,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-ALS-01E','FC-ALS','Do peer mentoring or office-hours exist for AI skills?','No','Yes',NULL,NULL,1,5,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('FC-ALS-01F','FC-ALS','Is an AI-first mindset embedded in team processes?','No','Yes',NULL,NULL,1,6,'2025-12-16 00:00:00','2025-12-16 00:00:00');
 INSERT OR IGNORE INTO questions VALUES('FC-CGR-01','FC-CGR','To what extent does AI assist in your code generation and review processes?','Manual coding with no AI assistance','Occasional AI suggestions for code completion','Regular AI-generated code with human review and integration','AI-first development with intelligent code generation and automated reviews',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
 INSERT OR IGNORE INTO questions VALUES('FC-DKM-01','FC-DKM','How does AI support your documentation and knowledge management practices?','Manual documentation processes','AI assistance for basic documentation tasks','Automated documentation generation with AI','Intelligent knowledge systems with AI-powered insights and semantic search',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
 
@@ -75,9 +87,36 @@ INSERT OR IGNORE INTO questions VALUES('TC-CID-01','TC-CID','How intelligent are
 INSERT OR IGNORE INTO questions VALUES('TC-MOB-01','TC-MOB','How does AI enhance your system monitoring and incident response?','Traditional monitoring with manual alert management','AI-enhanced anomaly detection with human response','Intelligent monitoring with automated incident classification and initial response','Fully autonomous monitoring with predictive issue resolution',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
 INSERT OR IGNORE INTO questions VALUES('TC-LSM-01','TC-LSM','How effectively can AI assist in analyzing and modernizing legacy systems?','Manual legacy system analysis and migration','AI-assisted code analysis and documentation generation','AI-powered migration planning with automated refactoring suggestions','Autonomous legacy system transformation with intelligent modernization',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
 
+-- Transformation Capabilities Binary Checklists (Mocked)
+-- AI-Driven Testing & Quality Assurance (TC-ATQ) binary set
+INSERT OR IGNORE INTO questions VALUES('TC-ATQ-01A','TC-ATQ','Do you generate unit tests with AI?','No','Yes',NULL,NULL,1,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('TC-ATQ-01B','TC-ATQ','Do you use AI for test case selection/prioritization?','No','Yes',NULL,NULL,2,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('TC-ATQ-01C','TC-ATQ','Do you leverage AI for flaky test detection?','No','Yes',NULL,NULL,3,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('TC-ATQ-01D','TC-ATQ','Do you have self-healing tests powered by AI?','No','Yes',NULL,NULL,4,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('TC-ATQ-01E','TC-ATQ','Do you apply AI to generate integration/end-to-end tests?','No','Yes',NULL,NULL,5,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('TC-ATQ-01F','TC-ATQ','Do you use AI for predictive quality and risk scoring?','No','Yes',NULL,NULL,6,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+
 -- Enterprise Integration Questions
 INSERT OR IGNORE INTO questions VALUES('EI-DGM-01','EI-DGM','How mature are your data governance practices for AI-driven development?','No formal data governance for AI development','Basic data classification with manual oversight','Systematic data governance with automated compliance checks','Advanced data governance with AI-powered data lineage and quality management',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
-INSERT OR IGNORE INTO questions VALUES('EI-VTS-01','EI-VTS','How standardized are your AI tools and vendor relationships across the enterprise?','Ad-hoc tool selection with no enterprise standards','Basic vendor evaluation with some standardization','Enterprise-wide AI tool standards with centralized procurement','Strategic AI vendor partnerships with integrated tool ecosystems',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
+-- Vendor & Tool Standardization binary checklist (six yes/no)
+INSERT OR IGNORE INTO questions VALUES('EI-VTS-01A','EI-VTS','Do you maintain an approved AI tools list?','No','Yes',NULL,NULL,1,1,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('EI-VTS-01B','EI-VTS','Is there a standard onboarding process for AI tools?','No','Yes',NULL,NULL,1,2,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('EI-VTS-01C','EI-VTS','Are enterprise licenses centrally managed?','No','Yes',NULL,NULL,1,3,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('EI-VTS-01D','EI-VTS','Do you have standardized configurations and plugins?','No','Yes',NULL,NULL,1,4,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('EI-VTS-01E','EI-VTS','Is vendor risk tracked with defined contingencies?','No','Yes',NULL,NULL,1,5,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+INSERT OR IGNORE INTO questions VALUES('EI-VTS-01F','EI-VTS','Are strategic partnerships managed with clear governance?','No','Yes',NULL,NULL,1,6,'2025-12-16 00:00:00','2025-12-16 00:00:00');
+-- Deactivate legacy multi-level questions (binary-only mode)
+UPDATE questions SET is_active = 0 WHERE id IN (
+	'FC-ALS-01','FC-CGR-01','FC-DKM-01',
+	'TC-IAT-01','TC-ATQ-01','TC-CID-01','TC-MOB-01','TC-LSM-01',
+	'EI-DGM-01','EI-VTS-01','EI-IES-01','EI-CMR-01','EI-PSM-01','EI-BCD-01',
+	'SG-AER-01','SG-PMV-01','SG-IPM-01','SG-RMS-01','SG-OCM-01','SG-CAC-01','SG-REC-01','SG-IFR-01'
+);
+
+-- Remove TC areas without binary questions to simplify UI and scoring
+-- (This will remove areas that do not have -01A..F binary items)
+DELETE FROM questions WHERE area_id IN ('TC-IAT','TC-CID','TC-MOB','TC-LSM');
+DELETE FROM areas WHERE id IN ('TC-IAT','TC-CID','TC-MOB','TC-LSM');
 INSERT OR IGNORE INTO questions VALUES('EI-IES-01','EI-IES','How well do your AI development tools integrate with existing enterprise systems (ERP, CRM, etc.)?','No integration with enterprise systems','Basic API integrations with manual configuration','Automated integration with enterprise systems using standard connectors','Seamless AI-powered integration with intelligent data flow and orchestration',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
 INSERT OR IGNORE INTO questions VALUES('EI-CMR-01','EI-CMR','How effectively do you track and optimize costs associated with AI development tools and infrastructure?','No cost tracking for AI development','Basic cost monitoring with manual reporting','Automated cost tracking with budget controls and optimization recommendations','Advanced cost optimization with predictive modeling and automated resource management',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');
 INSERT OR IGNORE INTO questions VALUES('EI-PSM-01','EI-PSM','How well do your AI development practices scale across teams and projects?','Limited scalability, works for small teams only','Moderate scalability with some standardization','Good scalability with established patterns and practices','Excellent scalability with automated provisioning and intelligent resource allocation',1,1,'2025-09-04 16:06:55','2025-09-04 16:06:55');

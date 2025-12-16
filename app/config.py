@@ -35,7 +35,8 @@ class ConfigValidator:
         try:
             from .extensions import db
             with app.app_context():
-                db.engine.execute('SELECT 1')
+                from sqlalchemy import text
+                db.engine.execute(text('SELECT 1'))
             app.logger.info("Database connection test successful")
             return True
         except Exception as e:

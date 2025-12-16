@@ -28,6 +28,9 @@ class MaturityProgression(BaseModel):
     # Foreign key to areas
     area_id = Column(String, ForeignKey('areas.id'), nullable=False)
     
+    # Optional current level (1-3), and required target level (2-4)
+    # Note: current_level is nullable for backward compatibility
+    current_level = Column(Integer, nullable=True)
     # Target level (2, 3, or 4 - level 1 is baseline)
     target_level = Column(Integer, nullable=False)
     
@@ -43,6 +46,10 @@ class MaturityProgression(BaseModel):
         CheckConstraint(
             'target_level >= 2 AND target_level <= 4',
             name='check_target_level'
+        ),
+        CheckConstraint(
+            'current_level IS NULL OR (current_level >= 1 AND current_level <= 3)',
+            name='check_current_level'
         ),
         {'sqlite_autoincrement': True}
     )
@@ -60,6 +67,7 @@ class MaturityProgression(BaseModel):
         return {
             'id': self.id,
             'area_id': self.area_id,
+            'current_level': self.current_level,
             'target_level': self.target_level,
             'prerequisites': self.prerequisites,
             'action_items': self.action_items,
@@ -173,8 +181,41 @@ def get_all_progressions_for_area(
     return {prog.target_level: prog for prog in progressions}
 
 
+def get_recommendations_for_area_current_level(
+    area_id: str, current_level: int
+) -> Optional[MaturityProgression]:
+    """
+    Get the recommended progression entry for the next maturity level, based on
+    the area's current maturity level.
+
+    Selection rules:
+    - Prefer entries where current_level matches and target_level == current_level + 1
+    - Fallback to generic entries where current_level is NULL with target_level == current_level + 1
+    - Return None if current_level >= 4 or no suitable progression exists
+    """
+    if current_level >= 4:
+        return None
+    from app.extensions import db
+    # Prefer specific from->to mapping
+    progression = db.session.query(MaturityProgression).filter(
+        MaturityProgression.area_id == area_id,
+        MaturityProgression.current_level == current_level,
+        MaturityProgression.target_level == current_level + 1
+    ).first()
+    if progression:
+        return progression
+    # Fallback to generic target-level-only entry
+    progression = db.session.query(MaturityProgression).filter(
+        MaturityProgression.area_id == area_id,
+        MaturityProgression.current_level.is_(None),
+        MaturityProgression.target_level == current_level + 1
+    ).first()
+    return progression
+
+
 __all__ = [
     'MaturityProgression',
     'get_progression_for_area_level',
-    'get_all_progressions_for_area'
+    'get_all_progressions_for_area',
+    'get_recommendations_for_area_current_level'
 ]

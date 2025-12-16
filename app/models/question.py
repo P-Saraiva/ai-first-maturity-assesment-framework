@@ -137,5 +137,72 @@ class Question(BaseModel):
                 })
         return levels
 
+    @property
+    def is_binary(self) -> bool:
+        """Infer if this question is binary Yes/No based on ID suffix.
+
+        Binary checklist items follow an ID convention like FC-AIT-01A .. FC-AIT-01F.
+        We treat these as binary items that will be grouped into a single logical question
+        for scoring and coverage purposes.
+        """
+        try:
+            if not isinstance(self.id, str):
+                return False
+            if len(self.id) < 2:
+                return False
+            suffix = self.id[-1]
+            if suffix in 'ABCDEF':
+                base = self.id[:-1]
+                return base[-2:].isdigit()
+            # Also consider two-level binary where only 1/2 levels used
+            # by checking presence of level_3_desc and level_4_desc as empty while 1/2 exist
+            has_l1 = bool(self.level_1_desc)
+            has_l2 = bool(self.level_2_desc)
+            has_l3 = bool(self.level_3_desc)
+            has_l4 = bool(self.level_4_desc)
+            return has_l1 and has_l2 and not has_l3 and not has_l4
+        except Exception:
+            return False
+
+    @property
+    def binary_weight(self) -> float:
+        """Derived binary weight for this question.
+
+        As the schema does not persist weights, default to 1.0 for all
+        binary questions for a fair weighted average, and 0.0 for non-binary
+        questions so they are naturally ignored by binary scoring.
+        """
+        try:
+            return 1.0 if self.is_binary else 0.0
+        except Exception:
+            return 0.0
+
+    @property
+    def binary_level(self) -> int:
+        """Derived maturity level (1..4) for this binary question.
+
+        We infer from the A-F suffix position within a six-item checklist:
+        - A,B -> Level 1
+        - C   -> Level 2
+        - D,E -> Level 3
+        - F   -> Level 4
+        For items without A-F suffix, default to Level 1.
+        """
+        try:
+            if not isinstance(self.id, str) or len(self.id) == 0:
+                return 1
+            suffix = self.id[-1]
+            mapping = {
+                'A': 1,
+                'B': 1,
+                'C': 2,
+                'D': 3,
+                'E': 3,
+                'F': 4,
+            }
+            return mapping.get(suffix, 1)
+        except Exception:
+            return 1
+
 
 __all__ = ['Section', 'Area', 'Question']

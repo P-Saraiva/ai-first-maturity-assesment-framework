@@ -20,6 +20,8 @@ from app.utils.scoring_utils import (
 
 logger = logging.getLogger(__name__)
 
+ALLOWED_SECTION_IDS = ['FC', 'TC', 'EI']
+
 
 class ScoringService:
     """
@@ -62,8 +64,12 @@ class ScoringService:
             # Calculate section scores
             section_scores = self._calculate_section_scores(assessment_id)
 
-            # Calculate overall AFS score
+            # Calculate overall AFS score (1.0-4.0 mapped from normalized)
             deviq_score = self._calculate_deviq_score(section_scores)
+
+            # Also compute normalized overall (0..1) for binary weighting flow
+            # Map 1.0-4.0 back to 0..1
+            overall_normalized = max(0.0, min(1.0, (deviq_score - 1.0) / 3.0))
 
             # Classify maturity level
             maturity_level, level_name = classify_maturity_level(deviq_score)
@@ -79,6 +85,7 @@ class ScoringService:
                 'maturity_level_display': level_name,
                 'maturity_details': get_maturity_level_details(maturity_level),
                 'section_scores': section_scores,
+                'overall_normalized': round(overall_normalized, 3),
                 'improvement_potential': calculate_improvement_potential(
                     deviq_score
                 ),
@@ -114,14 +121,16 @@ class ScoringService:
         section_scores = {}
 
         # Get all sections
-        sections = self.session.query(Section).order_by(
-            Section.display_order
-        ).all()
+        sections = self.session.query(Section).filter(
+            Section.id.in_(ALLOWED_SECTION_IDS)
+        ).order_by(Section.display_order).all()
+
+        allowed_ids = self._compute_allowed_question_ids()
 
         for section in sections:
             try:
                 score_data = self._calculate_single_section_score(
-                    assessment_id, section.id
+                    assessment_id, section.id, allowed_ids
                 )
                 section_scores[section.name.lower().replace(' ', '_')] = {
                     'section_id': section.id,
@@ -154,7 +163,8 @@ class ScoringService:
         return section_scores
 
     def _calculate_single_section_score(self, assessment_id: int,
-                                       section_id: int) -> Dict:
+                                       section_id: int,
+                                       allowed_ids: set) -> Dict:
         """
         Calculate score for a single section
 
@@ -186,15 +196,20 @@ class ScoringService:
         total_questions = 0
 
         for area in areas:
-            area_data = self._calculate_area_score(assessment_id, area.id)
+            area_data = self._calculate_area_score(assessment_id, area.id, allowed_ids)
+            # Skip areas without allowed questions
+            if area_data['total_questions'] == 0:
+                continue
             area_scores.append(area_data['score'])
             area_weights.append(area_data['weight'])
 
             area_details[area.name.lower().replace(' ', '_')] = {
                 'area_id': area.id,
                 'area_name': area.name,
-                'score': area_data['score'],
+                'score': area_data['score'],  # 1.0-4.0 mapped from normalized
                 'score_display': format_score_display(area_data['score']),
+                'domain_normalized': round(area_data['normalized'], 3),
+                'domain_level': area_data['domain_level'],
                 'weight': area_data['weight'],
                 'responses_count': area_data['responses_count'],
                 'total_questions': area_data['total_questions'],
@@ -223,7 +238,7 @@ class ScoringService:
             'total_questions': total_questions
         }
 
-    def _calculate_area_score(self, assessment_id: int, area_id: int) -> Dict:
+    def _calculate_area_score(self, assessment_id: int, area_id: int, allowed_ids: set) -> Dict:
         """
         Calculate score for a single area
 
@@ -239,56 +254,122 @@ class ScoringService:
             area_id=area_id
         ).order_by(Question.display_order).all()
 
+        # Filter to allowed questions only
+        questions = [q for q in questions if q.id in allowed_ids]
+
         if not questions:
             return {
                 'score': ScoringConstants.MIN_SCORE,
+                'normalized': 0.0,
+                'domain_level': 1,
                 'weight': 1.0,
                 'responses_count': 0,
                 'total_questions': 0,
                 'coverage': 0.0
             }
 
-        question_scores = []
-        question_weights = []
+        # New binary weighted scoring per domain (area)
+        total_weight = 0.0
+        weighted_yes = 0.0
         responses_count = 0
 
-        for question in questions:
-            # Get response for this question in this assessment
-            response = self.session.query(Response).filter_by(
+        # Track dependency data per level
+        level_weights = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}
+        level_yes_weights = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}
+
+        for q in questions:
+            # Only consider binary questions
+            if not q.is_binary:
+                continue
+
+            w = float(getattr(q, 'binary_weight', 1.0) or 1.0)
+            lvl = int(getattr(q, 'binary_level', 1) or 1)
+
+            total_weight += w
+            level_weights[lvl] += w
+
+            resp = self.session.query(Response).filter_by(
                 assessment_id=assessment_id,
-                question_id=question.id
+                question_id=q.id
             ).first()
 
-            if response and response.score is not None:
-                # Questions use 1-4 scale directly based on level selection
-                # Normalize to ensure score is within expected range
-                normalized_score = max(1.0, min(4.0, float(response.score)))
-                question_scores.append(normalized_score)
-                question_weights.append(1.0)  # Equal weight for all questions
+            if resp and resp.score is not None:
                 responses_count += 1
+                # Map 1 (No) -> 0, 2 (Yes) -> 1
+                ans = 1.0 if float(resp.score) >= 2.0 else 0.0
             else:
-                # No response - don't include in average calculation
-                # This maintains scoring integrity for incomplete assessments
-                pass
+                ans = 0.0
 
-        # Calculate area score
-        if question_scores:
-            validate_score_inputs(question_scores, question_weights)
-            area_score = calculate_weighted_average(question_scores,
-                                                   question_weights)
+            weighted_yes += ans * w
+            if ans > 0.0:
+                level_yes_weights[lvl] += w
+
+        if total_weight <= 0.0:
+            normalized = 0.0
         else:
-            area_score = ScoringConstants.MIN_SCORE
+            normalized = max(0.0, min(1.0, weighted_yes / total_weight))
 
-        # Calculate coverage
-        coverage = calculate_section_coverage(responses_count, len(questions))
+        # Infer domain maturity level from normalized score
+        if normalized <= 0.25:
+            inferred_level = 1
+        elif normalized <= 0.50:
+            inferred_level = 2
+        elif normalized <= 0.75:
+            inferred_level = 3
+        else:
+            inferred_level = 4
+
+        # Enforce dependency rule: cannot reach level N if lower levels < X%
+        DEP_THRESHOLD = 0.7  # 70% by default; can be made configurable
+        def lower_levels_satisfied(target_level: int) -> bool:
+            if target_level <= 1:
+                return True
+            total_lower = sum(level_weights[l] for l in range(1, target_level))
+            if total_lower <= 0:
+                return True
+            yes_lower = sum(level_yes_weights[l] for l in range(1, target_level))
+            return (yes_lower / total_lower) >= DEP_THRESHOLD
+
+        domain_level = inferred_level
+        while domain_level > 1 and not lower_levels_satisfied(domain_level):
+            domain_level -= 1
+
+        # Map normalized (0..1) to 1.0-4.0 scale for backwards compatibility
+        area_score_1to4 = 1.0 + (normalized * 3.0)
+
+        # Coverage = answered binary questions / total binary questions in area
+        total_binary_questions = sum(1 for q in questions if q.is_binary)
+        coverage = calculate_section_coverage(responses_count, total_binary_questions)
 
         return {
-            'score': area_score,
+            'score': area_score_1to4,
+            'normalized': normalized,
+            'domain_level': domain_level,
             'weight': 1.0,  # Equal weighting for areas within sections
             'responses_count': responses_count,
-            'total_questions': len(questions),
+            'total_questions': total_binary_questions,
             'coverage': coverage
         }
+
+    def _compute_allowed_question_ids(self) -> set:
+        """Compute the set of question IDs considered for scoring.
+        Include all active binary questions in allowed sections.
+        """
+        from sqlalchemy.orm import joinedload
+        allowed_ids: set = set()
+        sections = self.session.query(Section).options(
+            joinedload(Section.areas).joinedload(Area.questions)
+        ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+
+        for section in sections:
+            for area in section.areas:
+                for q in area.questions:
+                    try:
+                        if getattr(q, 'is_active', 1) and q.is_binary:
+                            allowed_ids.add(q.id)
+                    except Exception:
+                        continue
+        return allowed_ids
 
     def _calculate_deviq_score(self, section_scores: Dict) -> float:
         """
@@ -339,15 +420,40 @@ class ScoringService:
         Returns:
             Dictionary with completion statistics
         """
-        # Get answered questions count
-        answered_questions = self.session.query(Response).filter_by(
-            assessment_id=assessment_id
-        ).filter(
-            Response.score.isnot(None)
-        ).count()
+        allowed_ids = self._compute_allowed_question_ids()
 
-        # Get total questions count
-        total_questions = self.session.query(Question).count()
+        # Determine logical questions: one per binary group and one per multi-level
+        # Build groups
+        binary_groups = {}
+        single_questions = []
+        for qid in allowed_ids:
+            if qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit():
+                base = qid[:-1]
+                binary_groups.setdefault(base, []).append(qid)
+            else:
+                single_questions.append(qid)
+
+        total_questions = len(binary_groups) + len(single_questions)
+
+        # Count answered logical questions
+        answered_questions = 0
+        # Binary groups: count 1 if any sub-question answered
+        for base, members in binary_groups.items():
+            resp = self.session.query(Response).filter(
+                Response.assessment_id == assessment_id,
+                Response.question_id.in_(members),
+                Response.score.isnot(None)
+            ).first()
+            if resp:
+                answered_questions += 1
+        # Single questions
+        if single_questions:
+            count_single = self.session.query(Response).filter(
+                Response.assessment_id == assessment_id,
+                Response.question_id.in_(single_questions),
+                Response.score.isnot(None)
+            ).count()
+            answered_questions += count_single
 
         # Calculate percentages
         completion_percentage = (answered_questions / total_questions * 100

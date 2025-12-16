@@ -423,9 +423,9 @@
                         Here's which specific sections achieved each maturity level:
                     </p>
                     
-                    {% set maturity_levels = ['Traditional', 'AI-Assisted', 'AI-Augmented', 'AI-First'] %}
-                    {% set level_colors = ['#6c757d', '#ffc107', '#28a745', '#dc3545'] %}
-                    {% set level_icons = ['bi-archive', 'bi-gear', 'bi-lightning', 'bi-rocket-takeoff'] %}
+                    {% set maturity_levels = ['Traditional', 'AI-Assisted', 'AI-Augmented', 'AI-Advanced', 'AI-First'] %}
+                    {% set level_colors = ['#6c757d', '#ffc107', '#28a745', '#17a2b8', '#dc3545'] %}
+                    {% set level_icons = ['bi-archive', 'bi-gear', 'bi-lightning', 'bi-bar-chart', 'bi-rocket-takeoff'] %}
                     
                     <div class="row">
                         {% for i in range(4) %}
@@ -551,7 +551,7 @@
                 Based on your responses, here's your step-by-step guide to advancing through maturity levels.
             </p>
 
-            {% for question_id, roadmap in roadmap_data.items() %}
+            {% for area_id, roadmap in area_roadmap_data.items() %}
             <div class="roadmap-card fade-in">
                 <div class="card-body p-4">
                     <div class="roadmap-header">
@@ -559,33 +559,51 @@
                             <i class="bi bi-question-circle me-2"></i>
                             {{ roadmap.area_name }}
                         </h5>
-                        <p class="mb-0 opacity-75">{{ roadmap.question }}</p>
+                        <p class="mb-0 opacity-75">Area-level recommendations based on computed maturity</p>
                     </div>
 
                     <!-- Current Level -->
                     <div class="progress-indicator">
                         <div class="progress-step current">{{ roadmap.current_level }}</div>
                         <div>
-                            <h6 class="mb-1 fw-bold">Current Level {{ roadmap.current_level }}</h6>
-                            <p class="text-muted mb-0">{{ roadmap.current_description }}</p>
-                            {% if roadmap.notes %}
-                                <span class="fw-bold" style="color: #0d6efd;"><i class="bi bi-chat-text me-1"></i>Notes: <p class="text-muted mb-0">{{ roadmap.notes }}</p></span>
+                            <h6 class="mb-1 fw-bold">Current Level {{ roadmap.current_level }} ({{ roadmap.current_level_name }})</h6>
+                            {% if roadmap.domain_normalized is not none %}
+                            <p class="text-muted mb-0">Normalized score: {{ "%.2f"|format(roadmap.domain_normalized) }}</p>
                             {% endif %}
                         </div>
                     </div>
 
-                    <!-- Next Levels Roadmap -->
-                    {% for next_level in roadmap.next_levels %}
-                    <div class="roadmap-level level-{{ next_level.level }}">
+                    <!-- Key Gaps -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="fw-bold text-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Key Gaps (No/Unanswered)
+                            </h6>
+                            {% if roadmap.gaps and roadmap.gaps|length > 0 %}
+                                {% for gap in roadmap.gaps %}
+                                <div class="action-item">
+                                    <i class="bi bi-x-circle me-2 text-danger"></i>
+                                    {{ gap }}
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No gaps identified for this area.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Next Level Recommendation -->
+                    {% if roadmap.next_recommendation %}
+                    <div class="roadmap-level level-{{ roadmap.next_recommendation.level }}">
                         <div class="d-flex align-items-center mb-3">
-                            <div class="progress-step {% if loop.index == 1 %}next{% else %}future{% endif %}">
-                                {{ next_level.level }}
+                            <div class="progress-step next">
+                                {{ roadmap.next_recommendation.level }}
                             </div>
                             <div>
-                                <h6 class="mb-0 fw-bold">Level {{ next_level.level }} Advancement</h6>
-                                {% if next_level.timeline %}
+                                <h6 class="mb-0 fw-bold">Level {{ roadmap.next_recommendation.level }} Advancement</h6>
+                                {% if roadmap.next_recommendation.timeline %}
                                 <small class="text-muted">
-                                    <i class="bi bi-clock me-1"></i>{{ next_level.timeline }}
+                                    <i class="bi bi-clock me-1"></i>{{ roadmap.next_recommendation.timeline }}
                                 </small>
                                 {% endif %}
                             </div>
@@ -597,8 +615,8 @@
                                 <h6 class="fw-bold text-primary">
                                     <i class="bi bi-list-check me-2"></i>Prerequisites
                                 </h6>
-                                {% if next_level.prerequisites %}
-                                    {% for prerequisite in next_level.prerequisites %}
+                                {% if roadmap.next_recommendation.prerequisites %}
+                                    {% for prerequisite in roadmap.next_recommendation.prerequisites %}
                                     <div class="action-item">
                                         <i class="bi bi-arrow-right me-2 text-primary"></i>
                                         {{ prerequisite }}
@@ -614,8 +632,8 @@
                                 <h6 class="fw-bold text-success">
                                     <i class="bi bi-gear me-2"></i>Action Items
                                 </h6>
-                                {% if next_level.action_items %}
-                                    {% for action in next_level.action_items %}
+                                {% if roadmap.next_recommendation.action_items %}
+                                    {% for action in roadmap.next_recommendation.action_items %}
                                     <div class="action-item">
                                         <i class="bi bi-play-fill me-2 text-success"></i>
                                         {{ action }}
@@ -633,8 +651,8 @@
                                 <h6 class="fw-bold text-warning">
                                     <i class="bi bi-trophy me-2"></i>Success Metrics
                                 </h6>
-                                {% if next_level.success_metrics %}
-                                    {% for metric in next_level.success_metrics %}
+                                {% if roadmap.next_recommendation.success_metrics %}
+                                    {% for metric in roadmap.next_recommendation.success_metrics %}
                                     <div class="action-item">
                                         <i class="bi bi-check-circle me-2 text-warning"></i>
                                         {{ metric }}
@@ -650,8 +668,8 @@
                                 <h6 class="fw-bold text-danger">
                                     <i class="bi bi-exclamation-triangle me-2"></i>Common Pitfalls
                                 </h6>
-                                {% if next_level.common_pitfalls %}
-                                    {% for pitfall in next_level.common_pitfalls %}
+                                {% if roadmap.next_recommendation.common_pitfalls %}
+                                    {% for pitfall in roadmap.next_recommendation.common_pitfalls %}
                                     <div class="action-item">
                                         <i class="bi bi-x-circle me-2 text-danger"></i>
                                         {{ pitfall }}
@@ -663,12 +681,17 @@
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        No next-level recommendation available. You may already be at the highest level for this area.
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
 
-            {% if not roadmap_data %}
+            {% if not area_roadmap_data %}
             <div class="alert alert-info fade-in">
                 <h5 class="alert-heading">
                     <i class="bi bi-info-circle me-2"></i>

@@ -134,7 +134,8 @@ def health_check():
     try:
         # Check database connection
         from app.extensions import db
-        db.session.execute('SELECT 1')
+        from sqlalchemy import text
+        db.session.execute(text('SELECT 1'))
         
         return jsonify({
             'status': 'healthy',
@@ -148,6 +149,49 @@ def health_check():
         
     except Exception as e:
         logger.error(f"Health check failed: {e}")
+        return jsonify({
+            'status': 'unhealthy',
+            'timestamp': datetime.utcnow().isoformat(),
+            'error': str(e)
+        }), 500
+
+
+@main_bp.route('/health/write')
+def health_check_write():
+    """Health check that verifies database write capability.
+
+    Attempts to create a small table, insert a row, and then clean it up.
+    If any step fails, returns unhealthy with the error.
+    """
+    from flask import current_app
+    try:
+        from app.extensions import db
+        from sqlalchemy import text
+
+        # Create table if not exists
+        db.session.execute(text('CREATE TABLE IF NOT EXISTS health_write_test (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT)'))
+        # Insert a row
+        db.session.execute(text("INSERT INTO health_write_test (ts) VALUES (:ts)"), { 'ts': datetime.utcnow().isoformat() })
+        db.session.commit()
+
+        # Optional cleanup: keep small footprint by deleting older rows
+        db.session.execute(text("DELETE FROM health_write_test WHERE id < (SELECT IFNULL(MAX(id),0) FROM health_write_test)"))
+        db.session.commit()
+
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.utcnow().isoformat(),
+            'version': '1.0.0',
+            'components': {
+                'database_write': 'healthy'
+            }
+        })
+    except Exception as e:
+        current_app.logger.error(f"Write health check failed: {e}")
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
         return jsonify({
             'status': 'unhealthy',
             'timestamp': datetime.utcnow().isoformat(),

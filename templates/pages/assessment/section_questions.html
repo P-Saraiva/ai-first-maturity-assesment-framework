@@ -424,6 +424,14 @@
                             </div>
                             
                             {% for area in section.areas %}
+                            {# Render area only if it has any allowed (binary) questions #}
+                            {% set ns = namespace(has_allowed=false) %}
+                            {% for q in area.questions %}
+                                {% if q.id in allowed_question_ids %}
+                                    {% set ns.has_allowed = true %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if ns.has_allowed %}
                             <div class="area-section">
                                 <div class="area-header">
                                     <div class="area-title">
@@ -435,92 +443,46 @@
                                 
                                 <div class="questions-list">
                                     {% for question in area.questions %}
+                                    {% if question.id in allowed_question_ids %}
                                     <div class="question-item">
                                         <div class="question-header">
                                             <div class="question-text">
-                                                <div class="question-title">{{ question.question }}</div>
+                                                <div class="question-title">
+                                                    {{ question.question }}
+                                                    <button type="button" class="help-btn question-help-btn" 
+                                                            data-area-id="{{ area.id }}" 
+                                                            title="View guidance for this question">
+                                                        <i class="bi bi-question-circle"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                         
                                         <div class="response-options">
+                                            {% if question.is_binary %}
                                             <div class="response-option" data-value="1">
                                                 <div class="response-content">
                                                     <input type="radio" name="response_{{ question.id }}" value="1" 
                                                            class="response-radio" id="q{{ question.id }}_1"
-                                                           {% if existing_responses.get(question.id) and existing_responses[question.id].answer_value == '1' %}checked{% endif %}>
+                                                           {% if existing_responses.get(question.id) and existing_responses[question.id].score == 1 %}checked{% endif %}>
                                                     <div class="response-details">
-                                                        <div class="response-level">Level 1 - Basic</div>
+                                                        <div class="response-level">No</div>
                                                         <div class="response-description">{{ question.level_1_desc }}</div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            
                                             <div class="response-option" data-value="2">
                                                 <div class="response-content">
                                                     <input type="radio" name="response_{{ question.id }}" value="2" 
                                                            class="response-radio" id="q{{ question.id }}_2"
-                                                           {% if existing_responses.get(question.id) and existing_responses[question.id].answer_value == '2' %}checked{% endif %}>
+                                                           {% if existing_responses.get(question.id) and existing_responses[question.id].score == 2 %}checked{% endif %}>
                                                     <div class="response-details">
-                                                        <div class="response-level">
-                                                            <span class="level-text">Level 2 - Evolving</span>
-                                                            {% if area_progressions[area.id] and 2 in area_progressions[area.id] %}
-                                                            <button type="button" class="help-btn" 
-                                                                    data-area-id="{{ area.id }}" 
-                                                                    data-level="2" 
-                                                                    data-level-name="Evolving"
-                                                                    title="View progression steps">
-                                                                <i class="bi bi-question-circle"></i>
-                                                            </button>
-                                                            {% endif %}
-                                                        </div>
+                                                        <div class="response-level">Yes</div>
                                                         <div class="response-description">{{ question.level_2_desc }}</div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div class="response-option" data-value="3">
-                                                <div class="response-content">
-                                                    <input type="radio" name="response_{{ question.id }}" value="3" 
-                                                           class="response-radio" id="q{{ question.id }}_3"
-                                                           {% if existing_responses.get(question.id) and existing_responses[question.id].answer_value == '3' %}checked{% endif %}>
-                                                    <div class="response-details">
-                                                        <div class="response-level">
-                                                            <span class="level-text">Level 3 - Advanced</span>
-                                                            {% if area_progressions[area.id] and 3 in area_progressions[area.id] %}
-                                                            <button type="button" class="help-btn" 
-                                                                    data-area-id="{{ area.id }}" 
-                                                                    data-level="3" 
-                                                                    data-level-name="Advanced"
-                                                                    title="View progression steps">
-                                                                <i class="bi bi-question-circle"></i>
-                                                            </button>
-                                                            {% endif %}
-                                                        </div>
-                                                        <div class="response-description">{{ question.level_3_desc }}</div>
-                                                    </div>
-                                                </div>
-                                            </div>                                            <div class="response-option" data-value="4">
-                                                <div class="response-content">
-                                                    <input type="radio" name="response_{{ question.id }}" value="4" 
-                                                           class="response-radio" id="q{{ question.id }}_4"
-                                                           {% if existing_responses.get(question.id) and existing_responses[question.id].answer_value == '4' %}checked{% endif %}>
-                                                    <div class="response-details">
-                                                        <div class="response-level">
-                                                            <span class="level-text">Level 4 - Optimized</span>
-                                                            {% if area_progressions[area.id] and 4 in area_progressions[area.id] %}
-                                                            <button type="button" class="help-btn" 
-                                                                    data-area-id="{{ area.id }}" 
-                                                                    data-level="4" 
-                                                                    data-level-name="Optimized"
-                                                                    title="View progression steps">
-                                                                <i class="bi bi-question-circle"></i>
-                                                            </button>
-                                                            {% endif %}
-                                                        </div>
-                                                        <div class="response-description">{{ question.level_4_desc }}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            {% endif %}
                                         </div>
                                         
                                         <div class="notes-section">
@@ -534,9 +496,11 @@
                                                       placeholder="Add any additional context or clarification...">{{ existing_responses.get(question.id).notes if existing_responses.get(question.id) else '' }}</textarea>
                                         </div>
                                     </div>
+                                    {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>
+                            {% endif %}
                             {% endfor %}
                         </div>
                         
@@ -593,7 +557,7 @@
             <div class="modal-header border-0 pb-2">
                 <h5 class="modal-title" id="progressionModalLabel">
                     <i class="bi bi-bullseye text-primary me-2"></i>
-                    Steps to Achieve <span id="levelName"></span>
+                    Question Guidance
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -605,7 +569,7 @@
                                 <i class="bi bi-clock"></i> <span id="timelineText"></span>
                             </span>
                         </div>
-                        <div class="level-badge">
+                        <div class="level-badge d-none">
                             <span id="levelBadge" class="badge"></span>
                         </div>
                     </div>
@@ -966,65 +930,52 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Handle help button clicks
+    // Handle question-level help button clicks (level-independent)
     document.addEventListener('click', function(e) {
-        if (e.target.closest('.help-btn')) {
+        if (e.target.closest('.question-help-btn')) {
             e.preventDefault();
             e.stopPropagation();
-            
-            const helpBtn = e.target.closest('.help-btn');
-            const areaId = helpBtn.dataset.areaId;
-            const level = parseInt(helpBtn.dataset.level);
-            const levelName = helpBtn.dataset.levelName;
-            
-            showProgressionModal(areaId, level, levelName);
+            const btn = e.target.closest('.question-help-btn');
+            const areaId = btn.dataset.areaId;
+            showQuestionGuidanceModal(areaId);
         }
     });
-    
-    function showProgressionModal(areaId, level, levelName) {
-        if (!areaProgressions[areaId] || !areaProgressions[areaId][level]) {
-            console.warn('No progression data found for area', areaId, 'level', level);
-            return;
-        }
-        
-        const progression = areaProgressions[areaId][level];
-        
-        // Update modal title and level info
-        document.getElementById('levelName').textContent = `Level ${level} - ${levelName}`;
-        document.getElementById('timelineText').textContent = progression.timeline || 'Timeline not specified';
-        
-        // Update level badge
-        const levelBadge = document.getElementById('levelBadge');
-        levelBadge.textContent = `Level ${level}`;
-        levelBadge.className = `badge bg-${getLevelColor(level)}`;
-        
-        // Populate prerequisites
-        populatePrerequisites(progression.prerequisites);
-        
-        // Populate actions
-        populateActions(progression.action_items);
-        
-        // Populate metrics
-        populateMetrics(progression.success_metrics);
-        
-        // Populate pitfall
-        populatePitfall(progression.common_pitfall);
-        
-        // Reset to first tab
+
+    function showQuestionGuidanceModal(areaId) {
+        const areaData = areaProgressions[areaId] || {};
+        // Aggregate across levels 2-4
+        const levels = [2,3,4].filter(l => areaData[l]);
+        const agg = { prerequisites: [], action_items: [], success_metrics: [], common_pitfall: [], timeline: [] };
+        levels.forEach(l => {
+            const p = areaData[l];
+            if (p.prerequisites) agg.prerequisites.push(p.prerequisites);
+            if (p.action_items) agg.action_items.push(p.action_items);
+            if (p.success_metrics) agg.success_metrics.push(p.success_metrics);
+            if (p.common_pitfall) agg.common_pitfall.push(p.common_pitfall);
+            if (p.timeline) agg.timeline.push(p.timeline);
+        });
+
+        const timelineText = agg.timeline.length ? agg.timeline[agg.timeline.length-1] : 'Timeline varies by scope';
+        document.getElementById('timelineText').textContent = timelineText;
+        document.getElementById('levelBadge').classList.add('d-none');
+
+        // Merge and de-duplicate pipe-delimited lists
+        const mergePipes = (arr) => Array.from(new Set(arr.flatMap(s => s.split('|').map(t => t.trim()).filter(Boolean)))).join('|');
+        const mergedPrereq = mergePipes(agg.prerequisites);
+        const mergedActions = agg.action_items.join('|'); // keep categories intact, merged sequentially
+        const mergedMetrics = mergePipes(agg.success_metrics);
+        const mergedPitfall = agg.common_pitfall.length ? agg.common_pitfall[0] : '';
+
+        populatePrerequisites(mergedPrereq);
+        populateActions(mergedActions);
+        populateMetrics(mergedMetrics);
+        populatePitfall(mergedPitfall);
+
         resetModalTabs();
-        
-        // Show modal
         progressionModal.show();
     }
     
-    function getLevelColor(level) {
-        const colors = {
-            2: 'info',
-            3: 'warning', 
-            4: 'success'
-        };
-        return colors[level] || 'primary';
-    }
+    // Level badge not used in level-independent modal
     
     function populatePrerequisites(prerequisites) {
         const container = document.getElementById('prerequisitesList');
@@ -1192,16 +1143,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Progress tracking
     function updateProgress() {
-        const totalQuestions = radioInputs.length / 4; // 4 options per question
-        const answeredQuestions = new Set();
-        
+        const groupNames = new Set(Array.from(radioInputs).map(r => r.name));
+        const totalQuestions = groupNames.size || 0;
+        const answeredGroups = new Set();
+
         radioInputs.forEach(radio => {
-            if (radio.checked) {
-                answeredQuestions.add(radio.name);
-            }
+            if (radio.checked) answeredGroups.add(radio.name);
         });
-        
-        const progressPercentage = (answeredQuestions.size / totalQuestions * 100) || 0;
+
+        const progressPercentage = (answeredGroups.size / totalQuestions * 100) || 0;
         
         // Update any progress indicators if they exist
         const progressBars = document.querySelectorAll('.progress-bar');
