@@ -257,12 +257,12 @@
             <div class="col-md-4 text-center">
                 <div class="score-circle mx-auto mb-3">
                     <div class="text-center">
-                        <div class="fw-bold" style="font-size: 2.5rem;">{{ "%.1f"|format(overall_score) }}</div>
-                        <div class="fw-semibold">Overall Score</div>
+                        <div class="fw-bold" style="font-size: 2.2rem;">{{ (overall_percentage * 100)|round(1) }}%</div>
+                        <div class="fw-semibold">Overall Confirmed Capabilities</div>
                     </div>
                 </div>
                 <h4 class="fw-bold">{{ overall_level }}</h4>
-                <p class="mb-0">Current Maturity Level</p>
+                <p class="mb-0">Current SSE-CMM Maturity</p>
             </div>
         </div>
     </div>
@@ -338,15 +338,15 @@
                     <i class="bi bi-pie-chart"></i>
                 </div>
                 <h3 class="fw-bold mb-2" style="color: {{ section.color }};">
-                    {{ "%.1f"|format(section.score) }}
+                    {{ section.percentage }}%
                 </h3>
-                <h6 class="text-muted mb-1">{{ section.name }}</h6>
+                <h6 class="text-muted mb-1">{{ section.name }} — Confirmed Capabilities</h6>
                 <div class="progress mt-2" style="height: 6px;">
                     <div class="progress-bar" 
                          style="width: {{ section.percentage }}%; background-color: {{ section.color }};">
                     </div>
                 </div>
-                <small class="text-muted">{{ section.percentage }}% of max</small>
+                <small class="text-muted">{{ section.level }} (SSE Level)</small>
             </div>
         </div>
         {% endfor %}
@@ -366,8 +366,8 @@
                         <div class="card-body" style="height: 500px; position: relative; padding: 25px; margin-bottom: 20px;">
                             <p class="text-muted small mb-3">
                                 <i class="bi bi-info-circle me-1"></i>
-                                This chart shows your organization's performance across the four key AI maturity sections. 
-                                Each section is scored from 0-4, with higher scores indicating greater maturity.
+                                This chart shows your organization's performance across the key AI maturity sections.
+                                Each section reflects the percentage of confirmed capabilities (0%–100%). Higher percentages indicate greater maturity.
                             </p>
                             <div id="chartLoadingSection" class="text-center p-4">
                                 <div class="spinner-border text-primary" role="status">
@@ -393,7 +393,7 @@
                                 <i class="bi bi-info-circle me-1"></i>
                                 This chart displays how your responses are distributed across AI maturity levels. 
                                 Each bar represents the number of <strong>sections</strong> that achieved that maturity level.
-                                <strong>The numbers on the bars show how many sections (out of 4 total) are at each level.</strong>
+                                <strong>The numbers on the bars show how many sections (out of {{ section_scores|length }} total) are at each level.</strong>
                             </p>
                             <div id="chartLoadingMaturity" class="text-center p-4">
                                 <div class="spinner-border text-success" role="status">
@@ -423,12 +423,12 @@
                         Here's which specific sections achieved each maturity level:
                     </p>
                     
-                    {% set maturity_levels = ['Traditional', 'AI-Assisted', 'AI-Augmented', 'AI-Advanced', 'AI-First'] %}
-                    {% set level_colors = ['#6c757d', '#ffc107', '#28a745', '#17a2b8', '#dc3545'] %}
-                    {% set level_icons = ['bi-archive', 'bi-gear', 'bi-lightning', 'bi-bar-chart', 'bi-rocket-takeoff'] %}
+                    {% set maturity_levels = ['Informal', 'Defined', 'Systematic', 'Integrated', 'Optimized'] %}
+                    {% set level_colors = ['#a1a1aa', '#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6'] %}
+                    {% set level_icons = ['bi-archive', 'bi-gear', 'bi-diagram-3', 'bi-diagram-3-fill', 'bi-rocket-takeoff'] %}
                     
                     <div class="row">
-                        {% for i in range(4) %}
+                        {% for i in range(maturity_levels|length) %}
                         {% set level = maturity_levels[i] %}
                         {% set color = level_colors[i] %}
                         {% set icon = level_icons[i] %}
@@ -509,15 +509,15 @@
                         <div class="card-body">
                             <h5 class="fw-bold">{{ area.name }}</h5>
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span>Current Score:</span>
+                                <span>Current:</span>
                                 <span class="fw-bold fs-4" style="color: {{ area.color }};">
-                                    {{ "%.1f"|format(area.score) }}
+                                    {{ (area.percentage or 0)|round(1) }}%
                                 </span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span>Improvement Potential:</span>
                                 <span class="fw-bold text-success">
-                                    +{{ area.improvement_potential }} points
+                                    +{{ (area.improvement_potential or 0)|round(1) }} percentage points
                                 </span>
                             </div>
                             {% if area.areas %}
@@ -526,7 +526,7 @@
                                 {% for sub_area in area.areas %}
                                 <li class="mb-1">
                                     <small class="text-muted">
-                                        {{ sub_area.name }} ({{ "%.1f"|format(sub_area.score) }})
+                                        {{ sub_area.name }} ({{ ((sub_area.area_percentage or 0) * 100)|round(1) }}%)
                                     </small>
                                 </li>
                                 {% endfor %}
@@ -573,6 +573,25 @@
                         </div>
                     </div>
 
+                    <!-- Confirmed Capabilities -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="fw-bold text-success">
+                                <i class="bi bi-check-circle me-2"></i>Confirmed Capabilities (Yes)
+                            </h6>
+                            {% if roadmap.strengths and roadmap.strengths|length > 0 %}
+                                {% for strength in roadmap.strengths %}
+                                <div class="action-item">
+                                    <i class="bi bi-check2-circle me-2 text-success"></i>
+                                    {{ strength }}
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No confirmed capabilities identified yet for this area.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
                     <!-- Key Gaps -->
                     <div class="row mb-3">
                         <div class="col-md-12">
@@ -587,7 +606,7 @@
                                 </div>
                                 {% endfor %}
                             {% else %}
-                                <p class="text-muted">No gaps identified for this area.</p>
+                                <p class="text-muted">Well done. No gaps identified for this area.</p>
                             {% endif %}
                         </div>
                     </div>
@@ -793,7 +812,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         data: {
                             labels: sectionData.map(s => s.name || 'Unknown'),
                             datasets: [{
-                                data: sectionData.map(s => Math.max(0, s.score || 0)),
+                                // Use percentage values instead of legacy 0-4 scores
+                                data: sectionData.map(s => Math.max(0, s.percentage || 0)),
                                 backgroundColor: sectionData.map(s => s.color || '#999999'),
                                 borderWidth: 3,
                                 borderColor: '#fff',
@@ -829,7 +849,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     else if (label.includes('STRATEGIC')) shortLabel = 'Strategic';
                                                     
                                                     return {
-                                                        text: `${shortLabel}: ${value.toFixed(1)} (${percentage}%)`,
+                                                        text: `${shortLabel}: ${value.toFixed(1)}% (${percentage}% share)`,
                                                         fillStyle: dataset.backgroundColor[i],
                                                         strokeStyle: dataset.backgroundColor[i],
                                                         lineWidth: 0,
@@ -845,8 +865,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                     callbacks: {
                                         label: function(context) {
                                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                            const percentage = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
-                                            return context.label + ': ' + context.parsed.toFixed(1) + ' (' + percentage + '%)';
+                                            const share = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
+                                            return context.label + ': ' + context.parsed.toFixed(1) + '% (' + share + '% share)';
                                         }
                                     }
                                 }
@@ -878,11 +898,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                         ctx.lineWidth = 2;
                                         
                                         // Add stroke for better readability
-                                        ctx.strokeText(value.toFixed(1), x, y - 6);
-                                        ctx.fillText(value.toFixed(1), x, y - 6);
+                                        ctx.strokeText(value.toFixed(1) + '%', x, y - 6);
+                                        ctx.fillText(value.toFixed(1) + '%', x, y - 6);
                                         
-                                        ctx.strokeText(`(${percentage}%)`, x, y + 8);
-                                        ctx.fillText(`(${percentage}%)`, x, y + 8);
+                                        ctx.strokeText(`(${percentage}% share)`, x, y + 8);
+                                        ctx.fillText(`(${percentage}% share)`, x, y + 8);
                                         ctx.restore();
                                     }
                                 });
@@ -924,20 +944,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.maturityChartInstance = new Chart(maturityCtx, {
                         type: 'bar',
                         data: {
-                            labels: ['Traditional', 'AI-Assisted', 'AI-Augmented', 'AI-First'],
+                            labels: ['Informal', 'Defined', 'Systematic', 'Integrated', 'Optimized'],
                             datasets: [{
                                 label: 'Number of Sections',
                                 data: [
-                                    maturityData['Traditional'] || 0,
-                                    maturityData['AI-Assisted'] || 0,
-                                    maturityData['AI-Augmented'] || 0,
-                                    maturityData['AI-First'] || 0
+                                    maturityData['Informal'] || 0,
+                                    maturityData['Defined'] || 0,
+                                    maturityData['Systematic'] || 0,
+                                    maturityData['Integrated'] || 0,
+                                    maturityData['Optimized'] || 0
                                 ],
                                 backgroundColor: [
-                                    '#dc3545',  // Traditional - Red
-                                    '#ffc107',  // AI-Assisted - Yellow
-                                    '#28a745',  // AI-Augmented - Green
-                                    '#007bff'   // AI-First - Blue
+                                    '#a1a1aa',  // Informal - Gray
+                                    '#22c55e',  // Defined - Green
+                                    '#3b82f6',  // Systematic - Blue
+                                    '#f59e0b',  // Integrated - Amber
+                                    '#8b5cf6'   // Optimized - Violet
                                 ],
                                 borderRadius: 8,
                                 borderSkipped: false,
@@ -954,10 +976,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     callbacks: {
                                         label: function(context) {
                                             const total = [
-                                                maturityData['Traditional'] || 0,
-                                                maturityData['AI-Assisted'] || 0,
-                                                maturityData['AI-Augmented'] || 0,
-                                                maturityData['AI-First'] || 0
+                                                maturityData['Informal'] || 0,
+                                                maturityData['Defined'] || 0,
+                                                maturityData['Systematic'] || 0,
+                                                maturityData['Integrated'] || 0,
+                                                maturityData['Optimized'] || 0
                                             ].reduce((a, b) => a + b, 0);
                                             const percentage = total > 0 ? Math.round((context.parsed.y / total) * 100) : 0;
                                             const sectionText = context.parsed.y === 1 ? 'section' : 'sections';

@@ -492,6 +492,7 @@ def section_questions(assessment_id, section_id):
         
         # Get progression data for each area in the section
         from app.models.progression import get_all_progressions_for_area
+        from app.utils.scoring_utils import SSEConstants
         area_progressions = {}
         for area in section.areas:
             progressions = get_all_progressions_for_area(area.id)
@@ -1603,10 +1604,10 @@ def report(assessment_id):
                     'id': a['area_id'],
                     'name': a['area_name'],
                     'score': a['score'],
-                    'level': _get_maturity_level_from_score(a['score']),
+                    'level': a.get('sse_level'),
                     'responses_count': a['responses_count'],
                     'domain_normalized': a.get('domain_normalized'),
-                    'domain_level': a.get('domain_level'),
+                    'area_percentage': a.get('area_percentage'),
                 })
                 area_scores[a['area_id']] = {
                     'score': a['score'],
@@ -1614,19 +1615,38 @@ def report(assessment_id):
                     'responses_count': a['responses_count'],
                     'max_possible': a['total_questions'] * 4
                 }
+            # Compute section percentage from area percentages
+            area_pcts = []
+            area_wts = []
+            for a in sec.get('area_scores', {}).values():
+                pct = a.get('area_percentage')
+                if pct is not None:
+                    area_pcts.append(pct)
+                    from app.utils.scoring_utils import SSEConstants
+                    area_wts.append(SSEConstants.AREA_WEIGHTS.get(a['area_id'], a.get('weight', 1.0)))
+            section_pct = 0.0
+            if area_pcts:
+                total_w = sum(area_wts) if area_wts else len(area_pcts)
+                section_pct = sum(p * w for p, w in zip(area_pcts, area_wts)) / total_w
+            section_sse_level = SSEConstants.classify_percentage(section_pct)
+            section_sse = section_sse_level.value
+            sse_rank_num = {'Informal': 1, 'Defined': 2, 'Systematic': 3, 'Integrated': 4, 'Optimized': 5}
+            section_level_num = sse_rank_num.get(section_sse, 1)
+
             section_scores.append({
                 'id': sec['section_id'],
                 'name': sec['section_name'],
                 'score': sec['score'],
-                'level': _get_maturity_level_from_score(sec['score']),
+                'level': section_sse,
                 'color': _get_section_color(sec['section_id']),
                 'areas': areas_list,
                 'responses_count': sec['responses_count'],
-                'percentage': round((sec['score'] / 4.0) * 100, 1)
+                'percentage': round(section_pct * 100.0, 1),
+                'level_num': section_level_num
             })
 
         overall_score = scoring_results.get('deviq_score', 0.0)
-        overall_level = scoring_results.get('maturity_level_display', _get_maturity_level_from_score(overall_score))
+        overall_level = scoring_results.get('maturity_level_display', 'Informal')
 
         # Compute allowed ids and groups for counts
         allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
@@ -1649,20 +1669,28 @@ def report(assessment_id):
             if q and q.area:
                 questions_by_area.setdefault(q.area.id, []).append(q)
         # For each section's area in scoring_results, compute recommendations
+        sse_rank = {'Informal': 1, 'Defined': 2, 'Systematic': 3, 'Integrated': 4, 'Optimized': 5}
         for sec in scoring_results.get('section_scores', {}).values():
             for _, area in sec.get('area_scores', {}).items():
                 area_id = area['area_id']
                 area_name = area['area_name']
-                current_domain_level = int(area.get('domain_level') or _get_maturity_level_from_score(area['score']) or 1)
+                current_domain_level_name = area.get('sse_level') or 'Informal'
+                current_domain_level = sse_rank.get(current_domain_level_name, 1)
                 # Determine gaps: No answers (score==1) or unanswered
                 gaps = []
+                strengths = []
                 for q in questions_by_area.get(area_id, []):
                     r = responses_dict.get(q.id)
-                    if not r or (hasattr(r, 'score') and int(r.score) < 2):
+                    if not r:
+                        gaps.append(q.question)
+                    elif hasattr(r, 'score') and int(r.score) >= 2:
+                        strengths.append(q.question)
+                    else:
                         gaps.append(q.question)
                 # Next-level recommendation from progression table
+                # Progression table targets legacy 2..4; bound next-level to max 4
                 progression = get_recommendations_for_area_current_level(
-                    area_id, current_domain_level
+                    area_id, min(current_domain_level, 3)
                 )
                 next_level = current_domain_level + 1 if current_domain_level < 4 else None
                 next_reco = None
@@ -1678,16 +1706,24 @@ def report(assessment_id):
                 area_roadmap_data[area_id] = {
                     'area_name': area_name,
                     'current_level': current_domain_level,
-                    'current_level_name': _get_maturity_level_from_score(float(current_domain_level)),
+                    'current_level_name': current_domain_level_name,
                     'domain_normalized': area.get('domain_normalized'),
                     'gaps': gaps,
+                    'strengths': strengths,
                     'next_recommendation': next_reco
                 }
         
         # Prepare chart data
         chart_data = {
             'section_scores': [
-                {'name': s['name'], 'score': s['score'], 'color': s['color']}
+                {
+                    'name': s['name'],
+                    'score': s['score'],
+                    'percentage': s['percentage'],
+                    'level': s['level'],
+                    'level_num': s['level_num'],
+                    'color': s['color']
+                }
                 for s in section_scores
             ],
             'maturity_distribution': _calculate_maturity_distribution(
@@ -1711,6 +1747,7 @@ def report(assessment_id):
         context = {
             'assessment': assessment,
             'overall_score': overall_score,
+            'overall_percentage': scoring_results.get('overall_percentage', 0.0),
             'overall_level': overall_level,
             'section_scores': section_scores,
             'area_scores': area_scores,
@@ -1779,68 +1816,72 @@ def _get_level_description(question, level):
 
 
 def _calculate_maturity_distribution(section_scores):
-    """Calculate distribution of maturity levels across sections"""
+    """Calculate distribution of SSE-CMM maturity levels across sections"""
     distribution = {
-        'Traditional': 0,
-        'AI-Assisted': 0,
-        'AI-Augmented': 0,
-        'AI-First': 0
+        'Informal': 0,
+        'Defined': 0,
+        'Systematic': 0,
+        'Integrated': 0,
+        'Optimized': 0
     }
-    
     for section in section_scores:
-        level = section['level']
+        level = section.get('level')
         if level in distribution:
             distribution[level] += 1
-    
     return distribution
 
 
 def _generate_insights(section_scores, overall_score):
-    """Generate key insights from the assessment results"""
+    """Generate key insights from the assessment results.
+
+    Updated to use SSE percentage-based scoring (0–100%) rather than
+    legacy 0–4.0 numeric values.
+    """
     insights = []
-    
+
     if not section_scores:
         return insights
-    
-    # Find strongest and weakest sections
-    strongest = max(section_scores, key=lambda x: x['score'])
-    weakest = min(section_scores, key=lambda x: x['score'])
-    
+
+    # Use percentage (0–100%) as the ranking metric
+    strongest = max(section_scores, key=lambda x: x.get('percentage', 0.0))
+    weakest = min(section_scores, key=lambda x: x.get('percentage', 0.0))
+
     insights.append({
         'type': 'strength',
         'title': f"Strongest Area: {strongest['name']}",
         'description': (
             f"Your organization excels in {strongest['name']} "
-            f"with a score of {strongest['score']:.1f}"
+            f"with confirmed capabilities of {strongest.get('percentage', 0.0):.1f}%"
         ),
         'icon': 'trophy'
     })
-    
+
     insights.append({
         'type': 'improvement',
         'title': f"Priority for Improvement: {weakest['name']}",
         'description': (
-            f"{weakest['name']} scored {weakest['score']:.1f} and offers "
-            f"the greatest opportunity for advancement"
+            f"{weakest['name']} shows {weakest.get('percentage', 0.0):.1f}% confirmed capabilities "
+            f"and offers the greatest opportunity for advancement"
         ),
         'icon': 'target'
     })
-    
-    # Score variance insight
-    scores = [s['score'] for s in section_scores]
-    variance = max(scores) - min(scores)
-    
-    if variance > 1.5:
+
+    # Variance insight based on percentage points
+    percentages = [s.get('percentage', 0.0) for s in section_scores]
+    variance = max(percentages) - min(percentages)
+
+    # Heuristic thresholds for variance on 0–100 scale
+    if variance > 20.0:
         insights.append({
             'type': 'warning',
             'title': 'Uneven Maturity Distribution',
             'description': (
-                f'Large gap ({variance:.1f} points) between highest and '
+                f'Large gap ({variance:.1f} percentage points) between highest and '
                 f'lowest scoring areas suggests focused improvement needed'
             ),
             'icon': 'exclamation-triangle'
         })
-    elif variance < 0.5:
+    elif variance < 5.0:
         insights.append({
             'type': 'success',
             'title': 'Consistent Maturity Levels',
@@ -1850,30 +1891,34 @@ def _generate_insights(section_scores, overall_score):
             ),
             'icon': 'check-circle'
         })
-    
+
     return insights
 
 
 def _identify_priority_areas(section_scores):
-    """Identify priority areas for improvement"""
+    """Identify priority areas for improvement.
+
+    Updated to use percentage-based scoring with SSE levels.
+    """
     if not section_scores:
         return []
-    
-    # Sort by score ascending to get lowest scores first
-    sorted_sections = sorted(section_scores, key=lambda x: x['score'])
-    
+
+    # Sort by percentage ascending to get lowest confirmed capability first
+    sorted_sections = sorted(section_scores, key=lambda x: x.get('percentage', 0.0))
+
     priority_areas = []
     for i, section in enumerate(sorted_sections[:3]):  # Top 3 priority areas
         priority_areas.append({
             'rank': i + 1,
             'name': section['name'],
-            'score': section['score'],
+            'score': section.get('score'),  # kept for backward compatibility
+            'percentage': section.get('percentage', 0.0),
             'level': section['level'],
             'color': section['color'],
             'areas': section['areas'][:2],  # Top 2 areas within section
-            'improvement_potential': round((4.0 - section['score']), 1)
+            'improvement_potential': round(max(0.0, 100.0 - section.get('percentage', 0.0)), 1)
         })
-    
+
     return priority_areas
 
 

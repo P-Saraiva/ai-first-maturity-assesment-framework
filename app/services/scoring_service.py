@@ -12,6 +12,7 @@ from app.models.response import Response
 from app.models.question import Question, Section, Area
 from app.utils.scoring_utils import (
     ScoringConstants,
+    SSEConstants, SSELevel,
     calculate_weighted_average,
     classify_maturity_level, get_maturity_level_details,
     calculate_section_coverage, validate_score_inputs,
@@ -64,15 +65,25 @@ class ScoringService:
             # Calculate section scores
             section_scores = self._calculate_section_scores(assessment_id)
 
-            # Calculate overall AFS score (1.0-4.0 mapped from normalized)
+            # Legacy overall AFS score (1.0-4.0) for backward compatibility
             deviq_score = self._calculate_deviq_score(section_scores)
-
-            # Also compute normalized overall (0..1) for binary weighting flow
-            # Map 1.0-4.0 back to 0..1
+            # Map to normalized 0..1
             overall_normalized = max(0.0, min(1.0, (deviq_score - 1.0) / 3.0))
 
-            # Classify maturity level
-            maturity_level, level_name = classify_maturity_level(deviq_score)
+            # SSE overall percentage = weighted average of area percentages
+            all_area_percentages = []
+            all_area_weights = []
+            for sec in section_scores.values():
+                for area_key, a in sec['area_scores'].items():
+                    pct = a.get('area_percentage')
+                    w = SSEConstants.AREA_WEIGHTS.get(a['area_id'], a.get('weight', 1.0))
+                    if pct is not None:
+                        all_area_percentages.append(pct)
+                        all_area_weights.append(w)
+            overall_percentage = 0.0
+            if all_area_percentages:
+                overall_percentage = calculate_weighted_average(all_area_percentages, all_area_weights)
+            overall_sse_level = SSEConstants.classify_percentage(overall_percentage)
 
             # Get detailed results
             results = {
@@ -81,11 +92,12 @@ class ScoringService:
                                   f"Assessment {assessment_id}"),
                 'deviq_score': deviq_score,
                 'deviq_score_display': format_score_display(deviq_score),
-                'maturity_level': maturity_level.name,
-                'maturity_level_display': level_name,
-                'maturity_details': get_maturity_level_details(maturity_level),
+                'maturity_level': overall_sse_level.name,
+                'maturity_level_display': overall_sse_level.value,
+                'maturity_details': SSEConstants.get_level_details(overall_sse_level),
                 'section_scores': section_scores,
                 'overall_normalized': round(overall_normalized, 3),
+                'overall_percentage': round(overall_percentage, 3),
                 'improvement_potential': calculate_improvement_potential(
                     deviq_score
                 ),
@@ -99,8 +111,10 @@ class ScoringService:
                 }
             }
 
-            logger.info(f"Assessment {assessment_id} scored: "
-                       f"DevIQ {deviq_score}, Level: {level_name}")
+            logger.info(
+                f"Assessment {assessment_id} scored: DevIQ {deviq_score}, "
+                f"Level: {overall_sse_level.value}"
+            )
 
             return results
 
@@ -189,7 +203,7 @@ class ScoringService:
                 'total_questions': 0
             }
 
-        area_scores = []
+        area_scores = []  # legacy 1..4 mapping
         area_weights = []
         area_details = {}
         total_responses = 0
@@ -206,10 +220,11 @@ class ScoringService:
             area_details[area.name.lower().replace(' ', '_')] = {
                 'area_id': area.id,
                 'area_name': area.name,
-                'score': area_data['score'],  # 1.0-4.0 mapped from normalized
+                'score': area_data['score'],
                 'score_display': format_score_display(area_data['score']),
                 'domain_normalized': round(area_data['normalized'], 3),
-                'domain_level': area_data['domain_level'],
+                'sse_level': area_data['sse_level'].value,
+                'area_percentage': round(area_data['percentage'], 3),
                 'weight': area_data['weight'],
                 'responses_count': area_data['responses_count'],
                 'total_questions': area_data['total_questions'],
@@ -341,10 +356,15 @@ class ScoringService:
         total_binary_questions = sum(1 for q in questions if q.is_binary)
         coverage = calculate_section_coverage(responses_count, total_binary_questions)
 
+        # Percentage of confirmed capabilities (Yes answers)
+        percentage_yes = normalized  # normalized already 0..1 of weighted yes
+        sse_level = SSEConstants.classify_percentage(percentage_yes)
+
         return {
             'score': area_score_1to4,
-            'normalized': normalized,
-            'domain_level': domain_level,
+            'normalized': percentage_yes,
+            'sse_level': sse_level,
+            'percentage': percentage_yes,
             'weight': 1.0,  # Equal weighting for areas within sections
             'responses_count': responses_count,
             'total_questions': total_binary_questions,
@@ -392,7 +412,7 @@ class ScoringService:
             if 'score' in section_data and section_data['score'] is not None:
                 scores.append(section_data['score'])
                 # Use predefined weights or default to equal weighting
-                weight = ScoringConstants.SECTION_WEIGHTS.get(
+                weight = SSEConstants.SECTION_WEIGHTS.get(
                     section_key, 0.25
                 )
                 weights.append(weight)

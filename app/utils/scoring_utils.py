@@ -1,6 +1,10 @@
 """
 Scoring utility functions for AFS Assessment Framework
-Provides core scoring calculations and DevIQ classification logic
+Provides core scoring calculations and maturity classification logic
+
+Legacy 4-level DevIQ remains for backward compatibility, but primary
+classification uses SSE-CMM-inspired 5-level mapping based on percentage
+of confirmed capabilities (Yes responses) per Area.
 """
 
 from typing import Dict, List, Tuple
@@ -10,28 +14,90 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class MaturityLevel(Enum):
-    """DevIQ Maturity Level Classifications"""
+class LegacyMaturityLevel(Enum):
+    """Legacy 4-level DevIQ classification (backward compatibility)"""
     TRADITIONAL = "Traditional Development"
     ASSISTED = "AI-Assisted Development"
     AUGMENTED = "AI-Augmented Development"
     FIRST = "AI-First Development"
 
 
+class SSELevel(Enum):
+    """SSE-CMM-inspired 5-level maturity classification"""
+    INFORMAL = "Informal"
+    DEFINED = "Defined"
+    SYSTEMATIC = "Systematic"
+    INTEGRATED = "Integrated"
+    OPTIMIZED = "Optimized"
+
+
 class ScoringConstants:
-    """Constants for scoring calculations"""
+    """Constants for scoring calculations (legacy scale)"""
 
     # Score ranges (1.0-4.0 scale)
     MIN_SCORE = 1.0
     MAX_SCORE = 4.0
 
     # Maturity level thresholds
-    MATURITY_THRESHOLDS = {
-        MaturityLevel.TRADITIONAL: (1.0, 1.8),
-        MaturityLevel.ASSISTED: (1.8, 2.5),
-        MaturityLevel.AUGMENTED: (2.5, 3.3),
-        MaturityLevel.FIRST: (3.3, 4.0)
+    LEGACY_THRESHOLDS = {
+        LegacyMaturityLevel.TRADITIONAL: (1.0, 1.8),
+        LegacyMaturityLevel.ASSISTED: (1.8, 2.5),
+        LegacyMaturityLevel.AUGMENTED: (2.5, 3.3),
+        LegacyMaturityLevel.FIRST: (3.3, 4.0)
     }
+class SSEConstants:
+    """SSE-CMM-inspired thresholds and configuration (percentage-based)."""
+    # Percentage thresholds expressed as 0.0..1.0 for internal calculation
+    # Default mapping:
+    # 0–20% → Informal, 21–40% → Defined, 41–60% → Systematic,
+    # 61–80% → Integrated, 81–100% → Optimized
+    LEVEL_THRESHOLDS = [
+        (SSELevel.INFORMAL, 0.00, 0.20),
+        (SSELevel.DEFINED,  0.21, 0.40),
+        (SSELevel.SYSTEMATIC, 0.41, 0.60),
+        (SSELevel.INTEGRATED, 0.61, 0.80),
+        (SSELevel.OPTIMIZED, 0.81, 1.00),
+    ]
+
+    # Optional area weights (by area_id). Empty means equal weighting.
+    AREA_WEIGHTS: Dict[str, float] = {}
+
+    @staticmethod
+    def classify_percentage(p: float) -> SSELevel:
+        """Classify percentage (0..1) into SSELevel using configured thresholds."""
+        p = max(0.0, min(1.0, p))
+        for level, lo, hi in SSEConstants.LEVEL_THRESHOLDS:
+            # inclusive ranges
+            if lo <= p <= hi:
+                return level
+        return SSELevel.INFORMAL
+
+    @staticmethod
+    def get_level_details(level: SSELevel) -> Dict:
+        """Interpretation text and characteristics per SSE level."""
+        details = {
+            SSELevel.INFORMAL: {
+                "name": "Informal",
+                "description": "Ad-hoc controls; limited consistency; practices not standardized.",
+            },
+            SSELevel.DEFINED: {
+                "name": "Defined",
+                "description": "Controls defined; initial standardization; repeatable in pockets.",
+            },
+            SSELevel.SYSTEMATIC: {
+                "name": "Systematic",
+                "description": "Controls systematically applied; governance emerging; wider coverage.",
+            },
+            SSELevel.INTEGRATED: {
+                "name": "Integrated",
+                "description": "Controls integrated across lifecycle; cross-functional adoption; measurable.",
+            },
+            SSELevel.OPTIMIZED: {
+                "name": "Optimized",
+                "description": "Controls optimized; continuous improvement; predictive and proactive.",
+            },
+        }
+        return details.get(level, {"name": level.value, "description": ""})
 
     # Section weights (equal weighting for now)
     SECTION_WEIGHTS = {
@@ -86,7 +152,7 @@ def normalize_score(score: float, min_val: float = None,
     return round(normalized, 2)
 
 
-def classify_maturity_level(deviq_score: float) -> Tuple[MaturityLevel, str]:
+def classify_maturity_level(deviq_score: float) -> Tuple[LegacyMaturityLevel, str]:
     """Classify AFS score into maturity level"""
     if not isinstance(deviq_score, (int, float)):
         raise ValueError("AFS score must be numeric")
@@ -96,23 +162,23 @@ def classify_maturity_level(deviq_score: float) -> Tuple[MaturityLevel, str]:
     max_score = ScoringConstants.MAX_SCORE
     deviq_score = max(min_score, min(max_score, deviq_score))
 
-    thresholds = ScoringConstants.MATURITY_THRESHOLDS
+    thresholds = ScoringConstants.LEGACY_THRESHOLDS
     
     # Check each level in order (highest to lowest for proper boundary handling)
-    if deviq_score >= thresholds[MaturityLevel.FIRST][0]:
-        return MaturityLevel.FIRST, MaturityLevel.FIRST.value
-    elif deviq_score >= thresholds[MaturityLevel.AUGMENTED][0]:
-        return MaturityLevel.AUGMENTED, MaturityLevel.AUGMENTED.value
-    elif deviq_score >= thresholds[MaturityLevel.ASSISTED][0]:
-        return MaturityLevel.ASSISTED, MaturityLevel.ASSISTED.value
+    if deviq_score >= thresholds[LegacyMaturityLevel.FIRST][0]:
+        return LegacyMaturityLevel.FIRST, LegacyMaturityLevel.FIRST.value
+    elif deviq_score >= thresholds[LegacyMaturityLevel.AUGMENTED][0]:
+        return LegacyMaturityLevel.AUGMENTED, LegacyMaturityLevel.AUGMENTED.value
+    elif deviq_score >= thresholds[LegacyMaturityLevel.ASSISTED][0]:
+        return LegacyMaturityLevel.ASSISTED, LegacyMaturityLevel.ASSISTED.value
     else:
-        return MaturityLevel.TRADITIONAL, MaturityLevel.TRADITIONAL.value
+        return LegacyMaturityLevel.TRADITIONAL, LegacyMaturityLevel.TRADITIONAL.value
 
 
-def get_maturity_level_details(level: MaturityLevel) -> Dict:
-    """Get detailed information about a maturity level"""
+def get_maturity_level_details(level: LegacyMaturityLevel) -> Dict:
+    """Get detailed information about a legacy maturity level"""
     details = {
-        MaturityLevel.TRADITIONAL: {
+        LegacyMaturityLevel.TRADITIONAL: {
             "name": "Traditional Development",
             "short_name": "Basic",
             "description": "Manual development with limited AI integration",
@@ -123,7 +189,7 @@ def get_maturity_level_details(level: MaturityLevel) -> Dict:
                 "Limited automation"
             ]
         },
-        MaturityLevel.ASSISTED: {
+        LegacyMaturityLevel.ASSISTED: {
             "name": "AI-Assisted Development",
             "short_name": "Developing",
             "description": "Basic AI tools support individual developers",
@@ -134,7 +200,7 @@ def get_maturity_level_details(level: MaturityLevel) -> Dict:
                 "Limited team-wide adoption"
             ]
         },
-        MaturityLevel.AUGMENTED: {
+        LegacyMaturityLevel.AUGMENTED: {
             "name": "AI-Augmented Development",
             "short_name": "Advanced",
             "description": "Systematic AI integration across lifecycle",
@@ -145,7 +211,7 @@ def get_maturity_level_details(level: MaturityLevel) -> Dict:
                 "Intelligent CI/CD pipelines"
             ]
         },
-        MaturityLevel.FIRST: {
+        LegacyMaturityLevel.FIRST: {
             "name": "AI-First Development",
             "short_name": "Optimized",
             "description": "AI-native development with autonomous systems",
@@ -211,20 +277,20 @@ def format_score_display(score: float, precision: int = 1) -> str:
 
 
 def calculate_improvement_potential(current_score: float,
-                                   target_level: MaturityLevel = None) -> Dict:
+                                   target_level: LegacyMaturityLevel = None) -> Dict:
     """Calculate improvement potential to reach next or target level"""
     current_level, _ = classify_maturity_level(current_score)
 
     if target_level is None:
-        # Default to next level
-        levels = list(MaturityLevel)
+        # Default to next level (legacy DevIQ levels)
+        levels = list(LegacyMaturityLevel)
         current_idx = levels.index(current_level)
         if current_idx < len(levels) - 1:
             target_level = levels[current_idx + 1]
         else:
             target_level = current_level  # Already at highest level
 
-    thresholds = ScoringConstants.MATURITY_THRESHOLDS
+    thresholds = ScoringConstants.LEGACY_THRESHOLDS
     target_min, target_max = thresholds[target_level]
 
     improvement = {
