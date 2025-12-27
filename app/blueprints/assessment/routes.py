@@ -17,6 +17,7 @@ from app.services.recommendation_service import RecommendationService
 from app.utils.exceptions import AssessmentError, ValidationError
 from app.utils.helpers import get_maturity_level, format_score_display
 from app.core.logging import get_logger
+from app.extensions import csrf
 
 logger = get_logger(__name__)
 
@@ -490,10 +491,15 @@ def section_questions(assessment_id, section_id):
             flash('Section not found', 'error')
             return redirect(url_for('assessment.create'))
         
-        # Get progression data for each area in the section
+        # Get progression data for each area in the section (question-level guidance)
         from app.models.progression import get_all_progressions_for_area
+        from app.models.maturity_definition import get_area_definitions
         from app.utils.scoring_utils import SSEConstants
         area_progressions = {}
+        area_current_levels = {}
+        area_level_defs = {}
+        # Precompute allowed question ids for the whole app
+        all_allowed_ids, _ = _compute_allowed_question_ids(db.session)
         for area in section.areas:
             progressions = get_all_progressions_for_area(area.id)
             # Convert MaturityProgression objects to dictionaries for JSON serialization
@@ -501,6 +507,36 @@ def section_questions(assessment_id, section_id):
                 level: progression.to_dict() 
                 for level, progression in progressions.items()
             }
+            # Current level estimation for this area using existing responses
+            allowed_area_questions = [q for q in area.questions if q.id in all_allowed_ids]
+            total = len(allowed_area_questions)
+            yes_count = 0
+            if total > 0:
+                for q in allowed_area_questions:
+                    r = db.session.query(Response).filter(
+                        Response.assessment_id == assessment.id,
+                        Response.question_id == q.id
+                    ).first()
+                    if r and getattr(r, 'score', None) is not None and int(r.score) >= 2:
+                        yes_count += 1
+                pct = yes_count / float(total)
+                level = SSEConstants.classify_percentage(pct).value
+                # Map to numeric rank
+                sse_rank = {'Informal': 1, 'Defined': 2, 'Systematic': 3, 'Integrated': 4, 'Optimized': 5}
+                area_current_levels[area.id] = {
+                    'level_name': level,
+                    'level_num': sse_rank.get(level, 1),
+                    'percentage': round(pct * 100.0, 1)
+                }
+            else:
+                area_current_levels[area.id] = {
+                    'level_name': 'Informal',
+                    'level_num': 1,
+                    'percentage': 0.0
+                }
+            # Fetch area-level maturity definitions for modal rendering
+            defs = get_area_definitions(area.id)
+            area_level_defs[area.id] = {lvl: d.to_dict() for (lvl, d) in defs.items()}
         
         # Get all sections for navigation
         all_sections = db.session.query(Section).filter(
@@ -542,7 +578,10 @@ def section_questions(assessment_id, section_id):
             'existing_responses': existing_responses,
             'is_last_section': current_section_index == len(all_sections) - 1,
             'area_progressions': area_progressions,
-            'allowed_question_ids': list(allowed_question_ids)
+            'allowed_question_ids': list(allowed_question_ids),
+            # New: Area-level maturity definition data and current level estimate
+            'area_level_defs': area_level_defs,
+            'area_current_levels': area_current_levels
         }
         
         return render_template('pages/assessment/section_questions.html', 
@@ -1387,6 +1426,93 @@ def handle_navigation(assessment_id, current_question_id, next_action):
                                 assessment_id=assessment_id))
 
 
+@assessment_bp.route('/<int:assessment_id>/autosave', methods=['POST'])
+@csrf.exempt
+def autosave_response(assessment_id):
+    """
+    Autosave a single response (binary Yes/No) and return updated progress.
+
+    Expects JSON payload with:
+    - question_id: string question ID
+    - score: integer 1 (No) or 2 (Yes)
+    - notes: optional string
+    """
+    try:
+        from app.extensions import db
+
+        data = request.get_json(silent=True) or {}
+        question_id = str(data.get('question_id', '')).strip()
+        score = data.get('score')
+        notes = data.get('notes')
+
+        if not question_id or score is None:
+            return jsonify({'status': 'error', 'message': 'Missing question_id or score'}), 400
+
+        # Ensure binary score within allowed range (1..2)
+        try:
+            score_int = int(score)
+        except Exception:
+            return jsonify({'status': 'error', 'message': 'Invalid score'}), 400
+        if score_int not in (1, 2):
+            return jsonify({'status': 'error', 'message': 'Score must be 1 or 2'}), 400
+
+        # Upsert response
+        existing_response = db.session.query(Response).filter(
+            Response.assessment_id == assessment_id,
+            Response.question_id == question_id
+        ).first()
+
+        if existing_response:
+            existing_response.score = score_int
+            existing_response.timestamp = datetime.utcnow()
+            if notes is not None:
+                existing_response.notes = notes
+        else:
+            new_response = Response(
+                assessment_id=assessment_id,
+                question_id=question_id,
+                score=score_int,
+                notes=notes if notes else None,
+                timestamp=datetime.utcnow()
+            )
+            db.session.add(new_response)
+
+        db.session.commit()
+
+        # Calculate updated logical progress using constrained allowed set
+        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
+        # All responses for this assessment
+        responses = db.session.query(Response).filter(
+            Response.assessment_id == assessment_id
+        ).all()
+        responses_dict = {r.question_id: r for r in responses}
+
+        total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
+        answered_questions = 0
+        # Count binary groups: answered if any member has a response
+        for base, members in bin_groups.items():
+            if any(mid in responses_dict for mid in members):
+                answered_questions += 1
+        # Count single IDs
+        single_ids = [qid for qid in allowed_ids if not (isinstance(qid, str) and len(qid) >= 3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit())]
+        for qid in single_ids:
+            if qid in responses_dict:
+                answered_questions += 1
+
+        completion_percentage = (answered_questions / total_questions * 100.0) if total_questions > 0 else 0.0
+
+        return jsonify({
+            'status': 'success',
+            'answered_questions': answered_questions,
+            'total_questions': total_questions,
+            'progress_percentage': round(completion_percentage, 1)
+        })
+
+    except Exception as e:
+        logger.error(f"Autosave error: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to autosave response'}), 500
+
+
 @assessment_bp.route('/<int:assessment_id>/complete')
 def complete(assessment_id):
     """
@@ -1655,12 +1781,10 @@ def report(assessment_id):
         ).all()
         responses_dict = {r.question_id: r for r in responses}
         
-        # Generate area-level roadmap data based on computed domain maturity
-        from app.models.progression import (
-            get_all_progressions_for_area,
-            get_recommendations_for_area_current_level
-        )
+        # Generate area-level current-state data based on computed domain maturity
+        from app.models.maturity_definition import get_area_definition
         area_roadmap_data = {}
+        area_level_cards = {}
         # Build quick lookup of area responses and gaps (No/unanswered)
         # Collect questions per area that are allowed
         questions_by_area = {}
@@ -1687,30 +1811,20 @@ def report(assessment_id):
                         strengths.append(q.question)
                     else:
                         gaps.append(q.question)
-                # Next-level recommendation from progression table
-                # Progression table targets legacy 2..4; bound next-level to max 4
-                progression = get_recommendations_for_area_current_level(
-                    area_id, min(current_domain_level, 3)
-                )
-                next_level = current_domain_level + 1 if current_domain_level < 4 else None
-                next_reco = None
-                if progression and next_level:
-                    next_reco = {
-                        'level': next_level,
-                        'prerequisites': _parse_progression_text(progression.prerequisites),
-                        'action_items': _parse_progression_text(progression.action_items),
-                        'success_metrics': _parse_progression_text(progression.success_metrics),
-                        'timeline': progression.timeline,
-                        'common_pitfalls': _parse_progression_text(progression.common_pitfall)
-                    }
+                # Current-level definition card (Area-based, always show)
+                cur_def = get_area_definition(area_id, current_domain_level)
+                if cur_def:
+                    area_level_cards[area_id] = cur_def.to_dict()
+                else:
+                    area_level_cards[area_id] = None
+
                 area_roadmap_data[area_id] = {
                     'area_name': area_name,
                     'current_level': current_domain_level,
                     'current_level_name': current_domain_level_name,
                     'domain_normalized': area.get('domain_normalized'),
                     'gaps': gaps,
-                    'strengths': strengths,
-                    'next_recommendation': next_reco
+                    'strengths': strengths
                 }
         
         # Prepare chart data
@@ -1753,6 +1867,7 @@ def report(assessment_id):
             'area_scores': area_scores,
             'chart_data': chart_data,
             'area_roadmap_data': area_roadmap_data,
+            'area_level_cards': area_level_cards,
             'insights': insights,
             'priority_areas': priority_areas,
             'responses_count': len({qid: r for qid, r in responses_dict.items() if qid in allowed_ids}),
@@ -1964,7 +2079,6 @@ def download_pdf(assessment_id):
         from playwright.sync_api import sync_playwright
         from app.extensions import db
         from sqlalchemy.orm import joinedload
-        from app.models.progression import get_all_progressions_for_area
         import tempfile
         import os
         
@@ -1979,117 +2093,130 @@ def download_pdf(assessment_id):
             return redirect(url_for('assessment.detail',
                                     assessment_id=assessment_id))
 
-        # Get all sections with areas and questions (allowed only)
-        sections = db.session.query(Section).options(
-            joinedload(Section.areas).joinedload(Area.questions)
-        ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+        # Reuse scoring service and SSE logic from HTML report
+        scoring_service = get_scoring_service()
+        scoring_results = scoring_service.calculate_assessment_score(assessment_id)
 
-        # Get all responses for this assessment
+        # Build section breakdown compatible with template expectations (SSE-based)
+        section_scores = []
+        area_scores = {}
+        for sec in scoring_results.get('section_scores', {}).values():
+            areas_list = []
+            for area_key, a in sec.get('area_scores', {}).items():
+                areas_list.append({
+                    'id': a['area_id'],
+                    'name': a['area_name'],
+                    'score': a['score'],
+                    'level': a.get('sse_level'),
+                    'responses_count': a['responses_count'],
+                    'domain_normalized': a.get('domain_normalized'),
+                    'area_percentage': a.get('area_percentage'),
+                })
+                area_scores[a['area_id']] = {
+                    'score': a['score'],
+                    'name': a['area_name'],
+                    'responses_count': a['responses_count'],
+                    'max_possible': a['total_questions'] * 4
+                }
+            # Compute section percentage from area percentages
+            area_pcts = []
+            area_wts = []
+            for a in sec.get('area_scores', {}).values():
+                pct = a.get('area_percentage')
+                if pct is not None:
+                    area_pcts.append(pct)
+                    from app.utils.scoring_utils import SSEConstants
+                    area_wts.append(SSEConstants.AREA_WEIGHTS.get(a['area_id'], a.get('weight', 1.0)))
+            section_pct = 0.0
+            if area_pcts:
+                total_w = sum(area_wts) if area_wts else len(area_pcts)
+                section_pct = sum(p * w for p, w in zip(area_pcts, area_wts)) / total_w
+            section_sse_level = SSEConstants.classify_percentage(section_pct)
+            section_sse = section_sse_level.value
+            sse_rank_num = {'Informal': 1, 'Defined': 2, 'Systematic': 3, 'Integrated': 4, 'Optimized': 5}
+            section_level_num = sse_rank_num.get(section_sse, 1)
+
+            section_scores.append({
+                'id': sec['section_id'],
+                'name': sec['section_name'],
+                'score': sec['score'],
+                'level': section_sse,
+                'color': _get_section_color(sec['section_id']),
+                'areas': areas_list,
+                'responses_count': sec['responses_count'],
+                'percentage': round(section_pct * 100.0, 1),
+                'level_num': section_level_num
+            })
+
+        overall_score = scoring_results.get('deviq_score', 0.0)
+        overall_level = scoring_results.get('maturity_level_display', 'Informal')
+        overall_percentage = scoring_results.get('overall_percentage', 0.0)
+
+        # Compute allowed ids and groups for counts
+        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
         responses = db.session.query(Response).filter(
             Response.assessment_id == assessment_id
         ).all()
         responses_dict = {r.question_id: r for r in responses}
-        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
 
-        # Calculate detailed scores (same logic as report route)
-        section_scores = []
-        area_scores = {}
-        all_scores = []
+        # Generate area-level current-state data similar to HTML report
+        from app.models.maturity_definition import get_area_definition
+        area_roadmap_data = {}
+        area_level_cards = {}
+        # Collect questions per area that are allowed
+        questions_by_area = {}
+        for qid in allowed_ids:
+            q = db.session.query(Question).get(qid)
+            if q and q.area:
+                questions_by_area.setdefault(q.area.id, []).append(q)
+        sse_rank = {'Informal': 1, 'Defined': 2, 'Systematic': 3, 'Integrated': 4, 'Optimized': 5}
+        for sec in scoring_results.get('section_scores', {}).values():
+            for _, area in sec.get('area_scores', {}).items():
+                area_id = area['area_id']
+                area_name = area['area_name']
+                current_domain_level_name = area.get('sse_level') or 'Informal'
+                current_domain_level = sse_rank.get(current_domain_level_name, 1)
+                # Determine gaps/strengths from responses
+                gaps = []
+                strengths = []
+                for q in questions_by_area.get(area_id, []):
+                    r = responses_dict.get(q.id)
+                    if not r:
+                        gaps.append(q.question)
+                    elif hasattr(r, 'score') and int(r.score) >= 2:
+                        strengths.append(q.question)
+                    else:
+                        gaps.append(q.question)
+                cur_def = get_area_definition(area_id, current_domain_level)
+                if cur_def:
+                    area_level_cards[area_id] = cur_def.to_dict()
+                else:
+                    area_level_cards[area_id] = None
 
-        for section in sections:
-            section_responses = []
-            section_areas = []
-
-            for area in section.areas:
-                area_responses = []
-                allowed_area_questions = [q for q in area.questions if q.id in allowed_ids]
-                for question in allowed_area_questions:
-                    if question.id in responses_dict:
-                        response_score = responses_dict[question.id].score
-                        area_responses.append(response_score)
-
-                if area_responses:
-                    area_score = sum(area_responses) / len(area_responses)
-                    area_scores[area.id] = {
-                        'score': area_score,
-                        'name': area.name,
-                        'responses_count': len(area_responses),
-                        'max_possible': len(allowed_area_questions) * 5
-                    }
-                    section_responses.extend(area_responses)
-                    section_areas.append({
-                        'id': area.id,
-                        'name': area.name,
-                        'score': area_score,
-                        'level': _get_maturity_level_from_score(area_score),
-                        'responses_count': len(area_responses)
-                    })
-
-            if section_responses:
-                section_score = sum(section_responses) / len(section_responses)
-                all_scores.extend(section_responses)
-
-                section_scores.append({
-                    'id': section.id,
-                    'name': section.name,
-                    'score': section_score,
-                    'level': _get_maturity_level_from_score(section_score),
-                    'color': _get_section_color(section.id),
-                    'areas': section_areas,
-                    'responses_count': len(section_responses),
-                    'percentage': round((section_score / 5.0) * 100, 1)
-                })
-
-        # Calculate overall metrics
-        overall_score = round(sum(all_scores) / len(all_scores), 1) if all_scores else 0
-        overall_level = _get_maturity_level_from_score(overall_score)
+                area_roadmap_data[area_id] = {
+                    'area_name': area_name,
+                    'current_level': current_domain_level,
+                    'current_level_name': current_domain_level_name,
+                    'domain_normalized': area.get('domain_normalized'),
+                    'gaps': gaps,
+                    'strengths': strengths
+                }
 
         # Generate chart data
         chart_data = {
-            'section_scores': section_scores,
+            'section_scores': [
+                {
+                    'name': s['name'],
+                    'score': s['score'],
+                    'percentage': s['percentage'],
+                    'level': s['level'],
+                    'level_num': s['level_num'],
+                    'color': s['color']
+                }
+                for s in section_scores
+            ],
             'maturity_distribution': _calculate_maturity_distribution(section_scores)
         }
-
-        # Generate roadmap data for each answered question
-        roadmap_data = {}
-        for question_id, response in responses_dict.items():
-            if question_id not in allowed_ids:
-                continue
-            question = db.session.query(Question).get(question_id)
-            if question and question.area:
-                area_id = question.area.id
-                current_level = response.score
-
-                # Get progression data for next levels
-                progressions = get_all_progressions_for_area(area_id)
-                next_levels = []
-
-                # Up to level 4
-                for target_level in range(current_level + 1, 5):
-                    if target_level in progressions:
-                        prog = progressions[target_level]
-                        next_levels.append({
-                            'level': target_level,
-                            'level_name': _get_maturity_level_from_score(target_level),
-                            'prerequisites': _parse_progression_text(prog.prerequisites),
-                            'action_items': _parse_progression_text(prog.action_items),
-                            'success_metrics': _parse_progression_text(prog.success_metrics),
-                            'timeline': prog.timeline,
-                            'common_pitfalls': _parse_progression_text(prog.common_pitfall),
-                            'description': prog.prerequisites  # Fallback
-                        })
-
-                if next_levels:
-                    roadmap_data[question_id] = {
-                        'question': question.question,
-                        'area': question.area.name,
-                        'area_name': question.area.name,  # For template compatibility
-                        'current_level': current_level,
-                        'current_level_name': _get_maturity_level_from_score(current_level),
-                        'current_description': _get_level_description(question, current_level),
-                        'notes': getattr(response, 'notes', ''),
-                        'next_levels': next_levels
-                    }
 
         # Generate insights and recommendations
         insights = _generate_insights(section_scores, overall_score)
@@ -2098,11 +2225,13 @@ def download_pdf(assessment_id):
         context = {
             'assessment': assessment,
             'overall_score': overall_score,
+            'overall_percentage': overall_percentage,
             'overall_level': overall_level,
             'section_scores': section_scores,
             'area_scores': area_scores,
             'chart_data': chart_data,
-            'roadmap_data': roadmap_data,
+            'area_roadmap_data': area_roadmap_data,
+            'area_level_cards': area_level_cards,
             'insights': insights,
             'priority_areas': priority_areas,
             'responses_count': len({qid: r for qid, r in responses_dict.items() if qid in allowed_ids}),

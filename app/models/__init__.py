@@ -10,6 +10,7 @@ from .question import Section, Area, Question
 from .assessment import Assessment, AssessmentStatus
 from .response import Response
 from .progression import MaturityProgression
+from .maturity_definition import MaturityDefinition
 
 # Import database utilities
 from .database import (
@@ -38,6 +39,7 @@ __all__ = [
     'AssessmentStatus',
     'Response',
     'MaturityProgression',
+    'MaturityDefinition',
     
     # Database adapters
     'DatabaseAdapter',
@@ -66,7 +68,9 @@ def get_all_models():
         Area,
         Question, 
         Assessment,
-        Response
+        Response,
+        MaturityProgression,
+        MaturityDefinition
     ]
 
 

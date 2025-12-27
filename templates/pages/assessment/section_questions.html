@@ -437,6 +437,11 @@
                                     <div class="area-title">
                                         <div class="area-number">{{ loop.index }}</div>
                                         <span>{{ area.name }}</span>
+                                        <button type="button" class="help-btn area-help-btn" 
+                                                data-area-id="{{ area.id }}" 
+                                                title="View maturity details for this area">
+                                            <i class="bi bi-question-circle"></i>
+                                        </button>
                                     </div>
                                     <div class="area-description">{{ area.description }}</div>
                                 </div>
@@ -550,7 +555,7 @@
     </div>
 </div>
 
-<!-- Progression Modal -->
+<!-- Question Guidance Modal (question-level, unchanged) -->
 <div class="modal fade" id="progressionModal" tabindex="-1" aria-labelledby="progressionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -640,6 +645,56 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Area Level Maturity Modal (area-level, current level definition) -->
+<div class="modal fade" id="areaDefinitionModal" tabindex="-1" aria-labelledby="areaDefinitionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-2">
+                <h5 class="modal-title" id="areaDefinitionModalLabel">
+                    <i class="bi bi-question-circle text-primary me-2"></i>
+                    Area Maturity Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <div class="small text-muted">Current Level</div>
+                        <div class="fw-bold" id="areaCurrentLevelText">Level 1 - Informal</div>
+                    </div>
+                    <div class="badge bg-info" id="areaCurrentPct">0%</div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2" id="areaDefTitle"></h6>
+                    <p class="text-muted" id="areaDefSummary"></p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-stars me-2"></i>Characteristics</h6>
+                        <ul class="list-unstyled small" id="areaDefCharacteristics"></ul>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="fw-bold text-success"><i class="bi bi-flag me-2"></i>Expectations</h6>
+                        <ul class="list-unstyled small" id="areaDefExpectations"></ul>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <h6 class="fw-bold text-warning"><i class="bi bi-lightbulb me-2"></i>Guidance</h6>
+                    <div class="small" id="areaDefGuidance"></div>
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
@@ -886,19 +941,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('sectionForm');
     const responseOptions = document.querySelectorAll('.response-option');
     const radioInputs = document.querySelectorAll('input[type="radio"]');
+    let lastChangedRadio = null;
+    const notesTimers = new Map();
     const submitBtn = document.getElementById('nextBtn') || document.getElementById('completeBtn');
     
     // Modal instance
     let progressionModal;
+    let areaDefinitionModal;
     
     // Initialize modal
     const modalElement = document.getElementById('progressionModal');
     if (modalElement) {
         progressionModal = new bootstrap.Modal(modalElement);
     }
+    const areaModalEl = document.getElementById('areaDefinitionModal');
+    if (areaModalEl) {
+        areaDefinitionModal = new bootstrap.Modal(areaModalEl);
+    }
     
     // Area progressions data (passed from template)
     const areaProgressions = {{ area_progressions | tojson | safe }};
+    const areaLevelDefs = {{ area_level_defs | tojson | safe }};
+    const areaCurrentLevels = {{ area_current_levels | tojson | safe }};
     
     // Response option selection handlers
     responseOptions.forEach(option => {
@@ -925,7 +989,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.classList.add('selected');
                 
                 // Auto-save progress
-                autoSaveProgress();
+                lastChangedRadio = radio;
+                autoSaveProgress(radio);
             }
         });
     });
@@ -938,6 +1003,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const btn = e.target.closest('.question-help-btn');
             const areaId = btn.dataset.areaId;
             showQuestionGuidanceModal(areaId);
+        }
+        if (e.target.closest('.area-help-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const btn = e.target.closest('.area-help-btn');
+            const areaId = btn.dataset.areaId;
+            showAreaDefinitionModal(areaId);
         }
     });
 
@@ -976,6 +1048,48 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Level badge not used in level-independent modal
+
+    function parsePipeList(text) {
+        if (!text) return [];
+        return text.split('|').map(t => t.trim()).filter(Boolean);
+    }
+
+    function showAreaDefinitionModal(areaId) {
+        const defs = areaLevelDefs[areaId] || {};
+        const current = areaCurrentLevels[areaId] || { level_name: 'Informal', level_num: 1, percentage: 0 };
+        const def = defs[current.level_num] || null;
+
+        const levelText = `Level ${current.level_num} - ${current.level_name}`;
+        document.getElementById('areaCurrentLevelText').textContent = levelText;
+        document.getElementById('areaCurrentPct').textContent = `${(current.percentage || 0).toFixed(1)}%`;
+
+        document.getElementById('areaDefTitle').textContent = def && def.title ? def.title : '';
+        document.getElementById('areaDefSummary').textContent = def && def.summary ? def.summary : '';
+
+        const charUl = document.getElementById('areaDefCharacteristics');
+        charUl.innerHTML = '';
+        (parsePipeList(def && def.characteristics) || []).forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="bi bi-check2-circle text-primary me-2"></i>${item}`;
+            charUl.appendChild(li);
+        });
+
+        const expUl = document.getElementById('areaDefExpectations');
+        expUl.innerHTML = '';
+        (parsePipeList(def && def.expectations) || []).forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="bi bi-flag text-success me-2"></i>${item}`;
+            expUl.appendChild(li);
+        });
+
+        const guidanceDiv = document.getElementById('areaDefGuidance');
+        const guidanceItems = parsePipeList(def && def.guidance);
+        guidanceDiv.innerHTML = guidanceItems.length
+            ? `<ul class="mb-0">${guidanceItems.map(i => `<li>${i}</li>`).join('')}</ul>`
+            : '<span class="text-muted">No specific guidance defined for this level.</span>';
+
+        areaDefinitionModal.show();
+    }
     
     function populatePrerequisites(prerequisites) {
         const container = document.getElementById('prerequisitesList');
@@ -1082,22 +1196,89 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Auto-save progress function
-    function autoSaveProgress() {
-        // Simple indication that progress is being saved
-        const indicator = document.createElement('div');
-        indicator.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-dismissible fade show';
-        indicator.style.zIndex = '9999';
-        indicator.innerHTML = `
-            <i class="bi bi-check-circle me-2"></i>
-            Progress saved automatically
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.body.appendChild(indicator);
-        
-        setTimeout(() => {
-            indicator.remove();
-        }, 3000);
+    async function autoSaveProgress(targetRadio) {
+        const checkedRadio = targetRadio || lastChangedRadio || document.querySelector('input[type="radio"]:checked');
+        if (!checkedRadio) return;
+
+        // Extract question id from radio name pattern response_<id>
+        const name = checkedRadio.name || '';
+        const score = parseInt(checkedRadio.value, 10);
+        const qid = name.startsWith('response_') ? name.substring('response_'.length) : '';
+        const notesEl = document.getElementById(`notes_${qid}`);
+        const notes = notesEl ? notesEl.value : '';
+
+        if (!qid || Number.isNaN(score)) return;
+
+        try {
+            const csrfInput = document.querySelector('input[name="csrf_token"]');
+            const csrfToken = csrfInput ? csrfInput.value : '';
+            const res = await fetch(`{{ url_for('assessment.autosave_response', assessment_id=assessment.id) }}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    question_id: qid,
+                    score: score,
+                    notes: notes
+                })
+            });
+            const data = await res.json();
+            if (data && data.status === 'success') {
+                // Show lightweight toast/alert
+                const indicator = document.createElement('div');
+                indicator.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-dismissible fade show';
+                indicator.style.zIndex = '9999';
+                indicator.innerHTML = `
+                    <i class="bi bi-check-circle me-2"></i>
+                    Progress saved automatically (${data.progress_percentage}% complete)
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(indicator);
+                setTimeout(() => indicator.remove(), 2500);
+            }
+        } catch (err) {
+            console.error('Autosave error:', err);
+        }
     }
+
+    // Notes autosave with debounce: triggers when user types or blurs the textarea
+    function autoSaveNotes(qid) {
+        const notesEl = document.getElementById(`notes_${qid}`);
+        if (!notesEl) return;
+        const selected = document.querySelector(`input[name="response_${qid}"]:checked`);
+        if (!selected) {
+            // No answer yet; skip autosave for notes
+            return;
+        }
+        // Reuse autosave to send this specific question
+        autoSaveProgress(selected);
+    }
+
+    // Attach listeners to notes textareas
+    const notesAreas = document.querySelectorAll('.notes-textarea');
+    notesAreas.forEach((ta) => {
+        const match = ta.id.match(/^notes_(.+)$/);
+        const qid = match ? match[1] : null;
+        if (!qid) return;
+        // Debounced input
+        ta.addEventListener('input', () => {
+            if (notesTimers.has(qid)) {
+                clearTimeout(notesTimers.get(qid));
+            }
+            const timer = setTimeout(() => autoSaveNotes(qid), 600);
+            notesTimers.set(qid, timer);
+        });
+        // Save on blur immediately
+        ta.addEventListener('blur', () => {
+            if (notesTimers.has(qid)) {
+                clearTimeout(notesTimers.get(qid));
+                notesTimers.delete(qid);
+            }
+            autoSaveNotes(qid);
+        });
+    });
     
     // Form submission handling
     form.addEventListener('submit', function(e) {
@@ -1164,7 +1345,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update progress on radio change
     radioInputs.forEach(radio => {
-        radio.addEventListener('change', updateProgress);
+        radio.addEventListener('change', (e) => {
+            lastChangedRadio = e.target;
+            updateProgress();
+            autoSaveProgress(e.target);
+        });
     });
     
     // Initial progress update
