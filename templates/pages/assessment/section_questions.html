@@ -355,7 +355,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="section-assessment-container">
+<div class="section-assessment-container" data-assessment-id="{{ assessment.id }}">
     <div class="container-fluid px-3">
         <div class="row">
             <div class="col-12">
@@ -437,6 +437,11 @@
                                     <div class="area-title">
                                         <div class="area-number">{{ loop.index }}</div>
                                         <span>{{ area.name }}</span>
+                                        <button type="button" class="help-btn area-help-btn ms-2" 
+                                                data-area-id="{{ area.id }}" 
+                                                title="View maturity guidance for this area">
+                                            <i class="bi bi-info-circle"></i>
+                                        </button>
                                     </div>
                                     <div class="area-description">{{ area.description }}</div>
                                 </div>
@@ -462,7 +467,7 @@
                                             {% if question.is_binary %}
                                             <div class="response-option" data-value="1">
                                                 <div class="response-content">
-                                                    <input type="radio" name="response_{{ question.id }}" value="1" 
+                                                       <input type="radio" name="response_{{ question.id }}" value="1" data-question-id="{{ question.id }}"
                                                            class="response-radio" id="q{{ question.id }}_1"
                                                            {% if existing_responses.get(question.id) and existing_responses[question.id].score == 1 %}checked{% endif %}>
                                                     <div class="response-details">
@@ -473,7 +478,7 @@
                                             </div>
                                             <div class="response-option" data-value="2">
                                                 <div class="response-content">
-                                                    <input type="radio" name="response_{{ question.id }}" value="2" 
+                                                       <input type="radio" name="response_{{ question.id }}" value="2" data-question-id="{{ question.id }}"
                                                            class="response-radio" id="q{{ question.id }}_2"
                                                            {% if existing_responses.get(question.id) and existing_responses[question.id].score == 2 %}checked{% endif %}>
                                                     <div class="response-details">
@@ -650,6 +655,83 @@
         </div>
     </div>
 </div>
+
+<!-- Area-Level Maturity Modal -->
+<div class="modal fade" id="areaMaturityModal" tabindex="-1" aria-labelledby="areaMaturityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-2">
+                <h5 class="modal-title" id="areaMaturityModalLabel">
+                    <i class="bi bi-graph-up-arrow text-primary me-2"></i>
+                    Area Maturity Progress
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Maturity score display (must remain visible) -->
+                <div class="mb-3 d-flex align-items-center justify-content-between">
+                    <h6 class="mb-1 fw-bold" id="areaLevelHeader"></h6>
+                    <span class="badge bg-primary" id="areaLevelBadge"></span>
+                </div>
+
+                <!-- Descriptive Content -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-info-circle me-2"></i>About This Area
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2" id="areaDescription"></p>
+                    </div>
+                </div>
+
+                <!-- Risk Content -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Risk Context
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2" id="areaRiskDescription"></p>
+                    </div>
+                </div>
+
+                <!-- Capability Content -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-shield-check me-2"></i>Expected Capabilities
+                    </div>
+                    <div class="card-body">
+                        <div id="areaObjectivesList" class="mb-2"></div>
+                        <div id="areaCapabilitiesList"></div>
+                    </div>
+                </div>
+
+                <!-- References -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-bookmarks me-2"></i>References
+                    </div>
+                    <div class="card-body">
+                        <div id="areaReferences">
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-2">MITRE ATLAS</span>
+                                <div id="areaMitreRefs"></div>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-2">NIST AI RMF</span>
+                                <div id="areaNistRefs"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
 
 {% endblock %}
 
@@ -898,7 +980,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Area progressions data (passed from template)
-    const areaProgressions = {{ area_progressions | tojson | safe }};
+    const areaProgressions = {{ area_progressions | default({}) | tojson | safe }};
+    // Area-level definitions and current levels (passed from backend)
+    const areaLevelDefs = {{ area_level_defs | default({}) | tojson | safe }};
+    const areaCurrentLevels = {{ area_current_levels | default({}) | tojson | safe }};
+    const areaDomainDetails = {{ area_domain_details | default({}) | tojson | safe }};
     
     // Response option selection handlers
     responseOptions.forEach(option => {
@@ -924,8 +1010,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Add selected class to this option
                 this.classList.add('selected');
                 
-                // Auto-save progress
-                autoSaveProgress();
+                // Auto-save this single response
+                const qid = radio.getAttribute('data-question-id');
+                const score = radio.value;
+                saveResponse(qid, score);
             }
         });
     });
@@ -975,6 +1063,61 @@ document.addEventListener('DOMContentLoaded', function() {
         progressionModal.show();
     }
     
+    // Area-level help button: show modal for current level
+    let areaMaturityModal;
+    const areaModalEl = document.getElementById('areaMaturityModal');
+    if (areaModalEl) {
+        areaMaturityModal = new bootstrap.Modal(areaModalEl);
+    }
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.area-help-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const btn = e.target.closest('.area-help-btn');
+            const areaId = btn.dataset.areaId;
+            showAreaMaturityModal(areaId);
+        }
+    });
+
+    function showAreaMaturityModal(areaId) {
+        const cur = areaCurrentLevels[areaId];
+        const defs = areaLevelDefs[areaId] || {};
+        const levelNum = (cur && cur.level_num) ? cur.level_num : 1;
+        const def = defs[levelNum] || null;
+        const levelName = (cur && cur.level_name) ? cur.level_name : 'Informal';
+        // Header with percentage badge
+        document.getElementById('areaLevelHeader').textContent = `Current Level ${levelNum} (${levelName})`;
+        document.getElementById('areaLevelBadge').textContent = `${Math.round((cur && cur.percentage) ? cur.percentage : 0)}%`;
+        // Description - domain-driven preferred
+        const domain = areaDomainDetails[areaId] || {};
+        const areaDesc = domain.description || (def && def.description) || '';
+        document.getElementById('areaDescription').textContent = areaDesc;
+        // Render helper
+        const renderList = (containerId, items) => {
+            const c = document.getElementById(containerId);
+            c.innerHTML = '';
+            const list = (items || []).filter(Boolean);
+            if (list.length === 0) {
+                c.innerHTML = '<p class="text-muted">No specific content provided.</p>';
+                return;
+            }
+            list.forEach(txt => {
+                const div = document.createElement('div');
+                div.className = 'action-item';
+                div.innerHTML = `<i class="bi bi-dot me-2 text-primary"></i>${txt}`;
+                c.appendChild(div);
+            });
+        };
+        // Level-specific lists removed per requirements
+        // Risk and capability content
+        document.getElementById('areaRiskDescription').textContent = domain.risk_description || '';
+        renderList('areaObjectivesList', domain.objectives || []);
+        renderList('areaCapabilitiesList', domain.capabilities || []);
+        renderList('areaMitreRefs', (domain.references && domain.references.mitre) || []);
+        renderList('areaNistRefs', (domain.references && domain.references.nist) || []);
+        areaMaturityModal.show();
+    }
+
     // Level badge not used in level-independent modal
     
     function populatePrerequisites(prerequisites) {
@@ -1082,21 +1225,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Auto-save progress function
-    function autoSaveProgress() {
-        // Simple indication that progress is being saved
+    function showSaveToast(message, kind = 'success') {
         const indicator = document.createElement('div');
-        indicator.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-dismissible fade show';
+        indicator.className = `position-fixed top-0 end-0 m-3 alert alert-${kind} alert-dismissible fade show`;
         indicator.style.zIndex = '9999';
         indicator.innerHTML = `
             <i class="bi bi-check-circle me-2"></i>
-            Progress saved automatically
+            ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         document.body.appendChild(indicator);
-        
-        setTimeout(() => {
-            indicator.remove();
-        }, 3000);
+        setTimeout(() => { indicator.remove(); }, 2500);
+    }
+
+    function saveResponse(questionId, score) {
+        try {
+            const container = document.querySelector('.section-assessment-container');
+            const assessmentId = container ? container.getAttribute('data-assessment-id') : null;
+            if (!assessmentId || !questionId) return;
+            const payload = {
+                question_id: questionId,
+                score: parseInt(score, 10)
+            };
+            // Persist using server-side autosave route (DB-backed)
+            fetch(`/assessment/${assessmentId}/autosave`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify(payload)
+            }).then(resp => {
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                return resp.json();
+            }).then(() => {
+                showSaveToast('Response saved', 'success');
+            }).catch(err => {
+                console.error('Autosave failed:', err);
+                showSaveToast('Save failed', 'danger');
+            });
+        } catch (e) {
+            console.error('Autosave error:', e);
+        }
     }
     
     // Form submission handling
@@ -1121,7 +1288,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.key === 's') {
             e.preventDefault();
-            autoSaveProgress();
+            showSaveToast('Progress indicator', 'info');
         }
     });
     

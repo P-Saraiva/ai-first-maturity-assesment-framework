@@ -298,6 +298,21 @@ docker-deploy.bat shell
 **Note:**
 - The `stop` command will also remove all persistent volumes (database, uploads, logs).
 - The `setup` command runs the database initialization script inside the container.
+
+## Maturity Progress Refactor (Jan 2026)
+
+This release decouples "roadmap to next level" from "current-level maturity" and introduces Area-level Maturity Progress:
+
+- Question-level guidance: remains unchanged and is accessible via the question ℹ️ button; it aggregates practical prerequisites, actions, metrics, and pitfalls from progression content.
+- Area-level maturity: each Area now has its own ℹ️ button during the assessment and a dedicated card in the final report that reflects the current achieved maturity level (1–5), with characteristics, guidance, and expectations.
+- Final report: Area-level Maturity Progress is always shown, regardless of level, and reflects the current level (not the next level). Next-level roadmaps are no longer shown by default.
+
+Configuration-driven definitions:
+- Area-level maturity definitions are loaded from data/area_maturity_definitions.json. If not present, sensible defaults are derived from SSE level descriptions.
+
+Semantics:
+- Area-level cards describe the current state at the computed level.
+- Question-level modals provide actionable guidance independent of level, aggregated from progression entries.
 - The `shell` command opens a shell inside the running container for advanced troubleshooting or manual operations.
 
 ---

@@ -50,9 +50,11 @@
     border-left: 4px solid #007bff;
 }
 
+.roadmap-level.level-1 { border-left-color: #6c757d; }
 .roadmap-level.level-2 { border-left-color: #28a745; }
 .roadmap-level.level-3 { border-left-color: #ffc107; }
 .roadmap-level.level-4 { border-left-color: #dc3545; }
+.roadmap-level.level-5 { border-left-color: #8b5cf6; }
 
 .metric-card {
     background: white;
@@ -540,15 +542,15 @@
         </div>
     </div>
 
-    <!-- Roadmap Section -->
+    <!-- Area Maturity Overview -->
     <div class="row">
         <div class="col-12">
             <h2 class="fw-bold mb-4 fade-in">
-                <i class="bi bi-map me-2 text-primary"></i>
-                Personalized Maturity Roadmap
+                <i class="bi bi-collection me-2 text-primary"></i>
+                Area Maturity Overview
             </h2>
             <p class="lead text-muted mb-4 fade-in">
-                Based on your responses, here's your step-by-step guide to advancing through maturity levels.
+                This report describes the current assessed state: levels, answers, gaps, and risks.
             </p>
 
             {% for area_id, roadmap in area_roadmap_data.items() %}
@@ -559,7 +561,7 @@
                             <i class="bi bi-question-circle me-2"></i>
                             {{ roadmap.area_name }}
                         </h5>
-                        <p class="mb-0 opacity-75">Area-level recommendations based on computed maturity</p>
+                        <p class="mb-0 opacity-75">Area-level maturity based on assessed current level</p>
                     </div>
 
                     <!-- Current Level -->
@@ -570,6 +572,61 @@
                             {% if roadmap.domain_normalized is not none %}
                             <p class="text-muted mb-0">Normalized score: {{ "%.2f"|format(roadmap.domain_normalized) }}</p>
                             {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- About This Area -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="fw-bold">
+                                <i class="bi bi-info-circle me-2"></i>About this Area
+                            </h6>
+                            <p class="text-muted">{{ roadmap.area_description }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Risk Context -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="fw-bold text-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Risk Context
+                            </h6>
+                            {% set domain = (area_domain_details|default({})).get(area_id, {}) %}
+                            {% if domain and domain.risk_description %}
+                                <p class="text-muted">{{ domain.risk_description }}</p>
+                            {% else %}
+                                <p class="text-muted">No specific risk context provided.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- References -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="fw-bold">
+                                <i class="bi bi-bookmarks me-2"></i>References
+                            </h6>
+                            {% set refs = domain.references if domain else None %}
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-2">MITRE ATLAS</span>
+                                {% if refs and refs.mitre %}
+                                    {% for r in refs.mitre %}
+                                    <div class="action-item"><i class="bi bi-dot me-2 text-secondary"></i>{{ r }}</div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No MITRE references.</p>
+                                {% endif %}
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-2">NIST AI RMF</span>
+                                {% if refs and refs.nist %}
+                                    {% for r in refs.nist %}
+                                    <div class="action-item"><i class="bi bi-dot me-2 text-secondary"></i>{{ r }}</div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No NIST references.</p>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
 
@@ -611,101 +668,7 @@
                         </div>
                     </div>
 
-                    <!-- Next Level Recommendation -->
-                    {% if roadmap.next_recommendation %}
-                    <div class="roadmap-level level-{{ roadmap.next_recommendation.level }}">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="progress-step next">
-                                {{ roadmap.next_recommendation.level }}
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">Level {{ roadmap.next_recommendation.level }} Advancement</h6>
-                                {% if roadmap.next_recommendation.timeline %}
-                                <small class="text-muted">
-                                    <i class="bi bi-clock me-1"></i>{{ roadmap.next_recommendation.timeline }}
-                                </small>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <!-- Prerequisites -->
-                            <div class="col-md-6 mb-3">
-                                <h6 class="fw-bold text-primary">
-                                    <i class="bi bi-list-check me-2"></i>Prerequisites
-                                </h6>
-                                {% if roadmap.next_recommendation.prerequisites %}
-                                    {% for prerequisite in roadmap.next_recommendation.prerequisites %}
-                                    <div class="action-item">
-                                        <i class="bi bi-arrow-right me-2 text-primary"></i>
-                                        {{ prerequisite }}
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p class="text-muted">No specific prerequisites defined</p>
-                                {% endif %}
-                            </div>
-
-                            <!-- Action Items -->
-                            <div class="col-md-6 mb-3">
-                                <h6 class="fw-bold text-success">
-                                    <i class="bi bi-gear me-2"></i>Action Items
-                                </h6>
-                                {% if roadmap.next_recommendation.action_items %}
-                                    {% for action in roadmap.next_recommendation.action_items %}
-                                    <div class="action-item">
-                                        <i class="bi bi-play-fill me-2 text-success"></i>
-                                        {{ action }}
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p class="text-muted">No specific actions defined</p>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <!-- Success Metrics -->
-                            <div class="col-md-6 mb-3">
-                                <h6 class="fw-bold text-warning">
-                                    <i class="bi bi-trophy me-2"></i>Success Metrics
-                                </h6>
-                                {% if roadmap.next_recommendation.success_metrics %}
-                                    {% for metric in roadmap.next_recommendation.success_metrics %}
-                                    <div class="action-item">
-                                        <i class="bi bi-check-circle me-2 text-warning"></i>
-                                        {{ metric }}
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p class="text-muted">No specific metrics defined</p>
-                                {% endif %}
-                            </div>
-
-                            <!-- Common Pitfalls -->
-                            <div class="col-md-6 mb-3">
-                                <h6 class="fw-bold text-danger">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>Common Pitfalls
-                                </h6>
-                                {% if roadmap.next_recommendation.common_pitfalls %}
-                                    {% for pitfall in roadmap.next_recommendation.common_pitfalls %}
-                                    <div class="action-item">
-                                        <i class="bi bi-x-circle me-2 text-danger"></i>
-                                        {{ pitfall }}
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p class="text-muted">No specific pitfalls identified</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        No next-level recommendation available. You may already be at the highest level for this area.
-                    </div>
-                    {% endif %}
+                    <!-- Area-Level Maturity Card removed per requirements -->
                 </div>
             </div>
             {% endfor %}
