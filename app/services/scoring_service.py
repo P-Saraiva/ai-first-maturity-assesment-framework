@@ -21,7 +21,29 @@ from app.utils.scoring_utils import (
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_SECTION_IDS = ['FC', 'TC', 'EI']
+def _get_active_section_ids(session: Session) -> List[str]:
+    """Return list of active section IDs based on config/env, fallback to DB."""
+    import os
+    ids = None
+    try:
+        from flask import current_app
+        cfg_val = current_app.config.get('ACTIVE_SECTION_IDS') if current_app else None
+        if isinstance(cfg_val, str) and cfg_val.strip():
+            ids = [s.strip() for s in cfg_val.split(',') if s.strip()]
+        elif isinstance(cfg_val, (list, tuple)) and cfg_val:
+            ids = [str(s).strip() for s in cfg_val if str(s).strip()]
+    except Exception:
+        ids = None
+    if ids is None:
+        env_val = os.environ.get('ACTIVE_SECTION_IDS')
+        if env_val:
+            ids = [s.strip() for s in env_val.split(',') if s.strip()]
+    if ids is None and session is not None:
+        try:
+            ids = [s.id for s in session.query(Section).order_by(Section.display_order).all()]
+        except Exception:
+            ids = []
+    return ids or []
 
 
 class ScoringService:
@@ -135,9 +157,11 @@ class ScoringService:
         section_scores = {}
 
         # Get all sections
-        sections = self.session.query(Section).filter(
-            Section.id.in_(ALLOWED_SECTION_IDS)
-        ).order_by(Section.display_order).all()
+        sections_q = self.session.query(Section)
+        active_ids = _get_active_section_ids(self.session)
+        if active_ids:
+            sections_q = sections_q.filter(Section.id.in_(active_ids))
+        sections = sections_q.order_by(Section.display_order).all()
 
         allowed_ids = self._compute_allowed_question_ids()
 
@@ -377,9 +401,13 @@ class ScoringService:
         """
         from sqlalchemy.orm import joinedload
         allowed_ids: set = set()
-        sections = self.session.query(Section).options(
+        sections_q = self.session.query(Section).options(
             joinedload(Section.areas).joinedload(Area.questions)
-        ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+        )
+        active_ids = _get_active_section_ids(self.session)
+        if active_ids:
+            sections_q = sections_q.filter(Section.id.in_(active_ids))
+        sections = sections_q.order_by(Section.display_order).all()
 
         for section in sections:
             for area in section.areas:

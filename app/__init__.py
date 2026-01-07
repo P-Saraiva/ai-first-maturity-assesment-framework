@@ -35,9 +35,20 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     # Get the project root directory (parent of app directory)
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
-    app = Flask(__name__,
-                template_folder=os.path.join(project_root, 'templates'),
-                static_folder=os.path.join(project_root, 'static'))
+    app = Flask(
+        __name__,
+        template_folder=os.path.join(project_root, 'templates'),
+        static_folder=os.path.join(project_root, 'static'),
+        # Align Flask instance path with project root '/app/instance' (not '/app/app/instance')
+        instance_path=os.path.join(project_root, 'instance')
+    )
+
+    # Ensure instance directory exists for SQLite files under instance/
+    try:
+        instance_dir = os.path.join(project_root, 'instance')
+        os.makedirs(instance_dir, exist_ok=True)
+    except Exception:
+        pass
     
     # Load configuration
     config_name = config_name or _determine_config_name()
@@ -46,8 +57,54 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     # Set up logging
     setup_logging(app)
     app.logger.info(f"Starting AFS Assessment Framework in {config_name} mode")
-    
-    # Initialize extensions
+
+    # Ensure SQLite uses an absolute path under the instance directory BEFORE initializing db
+    try:
+        db_type = app.config.get('DATABASE_TYPE', 'sqlite').lower()
+        if db_type == 'sqlite':
+            cfg_name = app.config.get('CONFIG_NAME', 'development')
+            db_filename = 'app_dev.db' if cfg_name == 'development' else 'app.db'
+            db_file_path = os.path.join(app.instance_path, db_filename)
+            abs_uri = 'sqlite:///' + db_file_path
+            prev_uri = app.config.get('SQLALCHEMY_DATABASE_URI')
+            app.config['SQLALCHEMY_DATABASE_URI'] = abs_uri
+            app.logger.info(
+                f"SQLite URI set (pre-init): prev='{prev_uri}' -> new='{abs_uri}'"
+            )
+            try:
+                exists = os.path.exists(db_file_path)
+                size = os.path.getsize(db_file_path) if exists else 0
+                app.logger.info(
+                    "DB file check: path='%s' exists=%s size=%s bytes",
+                    db_file_path, exists, size
+                )
+            except Exception as fe:
+                app.logger.warning(f"DB file check failed: {fe}")
+        else:
+            app.logger.info(
+                f"Non-SQLite database configured (type={db_type}), URI={app.config.get('SQLALCHEMY_DATABASE_URI')}"
+            )
+    except Exception as e:
+        app.logger.warning(f"Could not set absolute SQLite URI before init: {e}")
+
+    # Diagnostics for filesystem and environment
+    try:
+        app.logger.info(
+            "DB debug: cwd='%s', instance_path='%s', exists=%s, writable=%s",
+            os.getcwd(),
+            app.instance_path,
+            os.path.isdir(app.instance_path),
+            os.access(app.instance_path, os.W_OK)
+        )
+        app.logger.info(
+            "DB debug: env DATABASE_URL='%s', config SQLALCHEMY_DATABASE_URI='%s'",
+            os.environ.get('DATABASE_URL'),
+            app.config.get('SQLALCHEMY_DATABASE_URI')
+        )
+    except Exception:
+        pass
+
+    # Initialize extensions AFTER DB URI is finalized
     _initialize_extensions(app)
     
     # Register blueprints

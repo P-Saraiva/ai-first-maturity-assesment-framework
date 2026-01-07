@@ -23,6 +23,34 @@ logger = get_logger(__name__)
 
 assessment_bp = Blueprint('assessment', __name__, url_prefix='/assessment')
 
+def _get_active_section_ids(db_session=None):
+    """Return list of active section IDs.
+
+    Order preference:
+    - If Flask config ACTIVE_SECTION_IDS is set (comma-separated), use it.
+    - Else, use env var ACTIVE_SECTION_IDS.
+    - Else, load all section IDs ordered by display_order from DB.
+    """
+    import os
+    ids = None
+    try:
+        env_val = current_app.config.get('ACTIVE_SECTION_IDS')
+        if isinstance(env_val, str) and env_val.strip():
+            ids = [s.strip() for s in env_val.split(',') if s.strip()]
+        elif isinstance(env_val, (list, tuple)) and env_val:
+            ids = [str(s).strip() for s in env_val if str(s).strip()]
+    except Exception:
+        pass
+    if ids is None:
+        env_val = os.environ.get('ACTIVE_SECTION_IDS')
+        if env_val:
+            ids = [s.strip() for s in env_val.split(',') if s.strip()]
+    if ids is None and db_session is not None:
+        try:
+            ids = [s.id for s in db_session.query(Section).order_by(Section.display_order).all()]
+        except Exception:
+            ids = []
+    return ids or []
 # Limit assessment to seeded sections in linear flow
 # Must match IDs present in scripts/database_seed_data.sql: FC, TC, EI, SG
 # Keeping to core three for initial flow
@@ -34,7 +62,12 @@ def _compute_allowed_question_ids(db_session):
     """
     sections = db_session.query(Section).options(
         joinedload(Section.areas).joinedload(Area.questions)
-    ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+    )
+    # Optionally filter by active section ids
+    active_ids = _get_active_section_ids(db_session)
+    if active_ids:
+        sections = sections.filter(Section.id.in_(active_ids))
+    sections = sections.order_by(Section.display_order).all()
     allowed_ids = set()
     binary_groups = {}
     for section in sections:
@@ -237,9 +270,12 @@ def index():
         # Get framework statistics (constrained logical question count)
         allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
         total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
-        sections = db.session.query(Section).filter(
-            Section.id.in_(ALLOWED_SECTION_IDS)
-        ).order_by(Section.display_order).all()
+        # Only show active sections
+        sections_q = db.session.query(Section)
+        active_ids = _get_active_section_ids(db.session)
+        if active_ids:
+            sections_q = sections_q.filter(Section.id.in_(active_ids))
+        sections = sections_q.order_by(Section.display_order).all()
         
         # Get assessment statistics
         total_assessments = db.session.query(Assessment).filter(
@@ -339,10 +375,12 @@ def create():
         from app.models import Assessment
         from app.models.question import Section
         
-        # Get the first section before creating assessment to avoid session issues
-        first_section = db.session.query(Section).filter(
-            Section.id.in_(ALLOWED_SECTION_IDS)
-        ).order_by(Section.display_order).first()
+        # Get the first section (optionally filtered by ACTIVE_SECTION_IDS)
+        sections_q = db.session.query(Section)
+        active_ids = _get_active_section_ids(db.session)
+        if active_ids:
+            sections_q = sections_q.filter(Section.id.in_(active_ids))
+        first_section = sections_q.order_by(Section.display_order).first()
         if not first_section:
             flash('No assessment sections found. Please contact support.', 'error')
             return render_template('pages/assessment/org_information.html')
@@ -411,7 +449,19 @@ def create():
         return render_template('pages/assessment/org_information.html')
     except Exception as e:
         flash('An unexpected error occurred while creating the assessment. Please try again.', 'error')
-        logger.error(f"Unexpected error in assessment creation: {str(e)}")
+        try:
+            from flask import current_app
+            import os
+            logger.error(
+                "Unexpected error in assessment creation: %s | uri='%s' instance='%s' exists=%s writable=%s",
+                e,
+                current_app.config.get('SQLALCHEMY_DATABASE_URI'),
+                current_app.instance_path,
+                os.path.isdir(current_app.instance_path),
+                os.access(current_app.instance_path, os.W_OK)
+            )
+        except Exception:
+            logger.error(f"Unexpected error in assessment creation: {str(e)}")
         return render_template('pages/assessment/org_information.html')
 
 
@@ -479,14 +529,7 @@ def section_questions(assessment_id, section_id):
             joinedload(Section.areas).joinedload(Area.questions)
         ).filter(Section.id == section_id).first()
 
-        # Redirect to first allowed section if not in allowed set
-        if section and section.id not in ALLOWED_SECTION_IDS:
-            first_allowed = db.session.query(Section).filter(
-                Section.id.in_(ALLOWED_SECTION_IDS)
-            ).order_by(Section.display_order).first()
-            return redirect(url_for('assessment.section_questions',
-                                    assessment_id=assessment_id,
-                                    section_id=first_allowed.id))
+        # No restriction: any existing section is valid
         
         if not section:
             logger.error(f"Section {section_id} not found")
@@ -549,10 +592,12 @@ def section_questions(assessment_id, section_id):
             except Exception:
                 area_domain_details[area.id] = {}
         
-        # Get all sections for navigation
-        all_sections = db.session.query(Section).filter(
-            Section.id.in_(ALLOWED_SECTION_IDS)
-        ).order_by(Section.display_order).all()
+        # Get all sections for navigation (optionally filtered)
+        all_sections_q = db.session.query(Section)
+        active_ids = _get_active_section_ids(db.session)
+        if active_ids:
+            all_sections_q = all_sections_q.filter(Section.id.in_(active_ids))
+        all_sections = all_sections_q.order_by(Section.display_order).all()
         
         # Find current section index
         current_section_index = next(
@@ -722,9 +767,11 @@ def submit_section_responses(assessment_id, section_id):
         session['assessment_responses'].update(responses_data)
         
         # Determine next action
-        all_sections = db.session.query(Section).filter(
-            Section.id.in_(ALLOWED_SECTION_IDS)
-        ).order_by(Section.display_order).all()
+        all_sections_q = db.session.query(Section)
+        active_ids = _get_active_section_ids(db.session)
+        if active_ids:
+            all_sections_q = all_sections_q.filter(Section.id.in_(active_ids))
+        all_sections = all_sections_q.order_by(Section.display_order).all()
         current_index = next(
             (i for i, s in enumerate(all_sections) if s.id == section_id), 0
         )
@@ -787,9 +834,13 @@ def final_review(assessment_id):
                 return redirect(url_for('assessment.index'))
         
         # Get all sections with responses (allowed only)
-        sections = db.session.query(Section).options(
+        sections_q = db.session.query(Section).options(
             joinedload(Section.areas).joinedload(Area.questions)
-        ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+        )
+        active_ids = _get_active_section_ids(db.session)
+        if active_ids:
+            sections_q = sections_q.filter(Section.id.in_(active_ids))
+        sections = sections_q.order_by(Section.display_order).all()
         
         # Get all responses for this assessment
         responses = db.session.query(Response).filter(
@@ -1106,9 +1157,13 @@ def view_readonly_sections(assessment_id):
             return redirect(url_for('assessment.index'))
         
         # Get all sections with their areas
-        sections = db.session.query(Section).options(
+        sections_q = db.session.query(Section).options(
             joinedload(Section.areas)
-        ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+        )
+        active_ids = _get_active_section_ids(db.session)
+        if active_ids:
+            sections_q = sections_q.filter(Section.id.in_(active_ids))
+        sections = sections_q.order_by(Section.display_order).all()
         
         # Get progress information
         assessment_service = AssessmentService(db.session)
@@ -1204,7 +1259,7 @@ def view_readonly_section(assessment_id, section_id):
 
 
 @assessment_bp.route('/<int:assessment_id>/question')
-@assessment_bp.route('/<int:assessment_id>/question/<int:question_id>')
+@assessment_bp.route('/<int:assessment_id>/question/<question_id>')
 def question(assessment_id, question_id=None):
     """
     Assessment question page
@@ -1226,8 +1281,9 @@ def question(assessment_id, question_id=None):
         
         # Get specific question or next question
         if question_id:
+            # IDs are TEXT (e.g., 'ETSI-ESI-01A'); accept string IDs
             question_obj = db.session.query(Question).filter(
-                Question.id == question_id
+                Question.id == str(question_id)
             ).first()
         else:
             question_obj = assessment_service.get_next_question(assessment_id)

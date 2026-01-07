@@ -424,14 +424,6 @@
                             </div>
                             
                             {% for area in section.areas %}
-                            {# Render area only if it has any allowed (binary) questions #}
-                            {% set ns = namespace(has_allowed=false) %}
-                            {% for q in area.questions %}
-                                {% if q.id in allowed_question_ids %}
-                                    {% set ns.has_allowed = true %}
-                                {% endif %}
-                            {% endfor %}
-                            {% if ns.has_allowed %}
                             <div class="area-section">
                                 <div class="area-header">
                                     <div class="area-title">
@@ -447,8 +439,10 @@
                                 </div>
                                 
                                 <div class="questions-list">
+                                    {% set any_rendered = false %}
                                     {% for question in area.questions %}
                                     {% if question.id in allowed_question_ids %}
+                                    {% set any_rendered = true %}
                                     <div class="question-item">
                                         <div class="question-header">
                                             <div class="question-text">
@@ -503,9 +497,14 @@
                                     </div>
                                     {% endif %}
                                     {% endfor %}
+                                    {% if not any_rendered %}
+                                    <div class="alert alert-secondary">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Questions for this area will be added soon.
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
-                            {% endif %}
                             {% endfor %}
                         </div>
                         

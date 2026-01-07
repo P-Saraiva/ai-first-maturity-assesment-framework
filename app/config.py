@@ -79,7 +79,8 @@ class ConfigValidator:
             app.config.get('UPLOAD_FOLDER', 'static/uploads'),
             app.config.get('EXPORT_FOLDER', 'data/exports'),
             'logs',
-            'backups'
+            'backups',
+            'instance'
         ]
         
         for directory in directories:

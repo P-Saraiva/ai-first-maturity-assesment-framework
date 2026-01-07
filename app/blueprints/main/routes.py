@@ -135,6 +135,21 @@ def health_check():
         # Check database connection
         from app.extensions import db
         from sqlalchemy import text
+        # Extra diagnostics before touching DB
+        try:
+            import os
+            from flask import current_app
+            current_app.logger.info(
+                "Health DB debug: uri='%s', instance='%s', exists=%s, writable=%s, cwd='%s'",
+                current_app.config.get('SQLALCHEMY_DATABASE_URI'),
+                current_app.instance_path,
+                os.path.isdir(current_app.instance_path),
+                os.access(current_app.instance_path, os.W_OK),
+                os.getcwd(),
+            )
+        except Exception:
+            pass
+
         db.session.execute(text('SELECT 1'))
         
         return jsonify({
@@ -148,7 +163,20 @@ def health_check():
         })
         
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
+        # Log more details when DB open fails
+        try:
+            import os
+            from flask import current_app
+            logger.error(
+                "Health check failed: %s | uri='%s' instance='%s' exists=%s writable=%s",
+                e,
+                current_app.config.get('SQLALCHEMY_DATABASE_URI'),
+                current_app.instance_path,
+                os.path.isdir(current_app.instance_path),
+                os.access(current_app.instance_path, os.W_OK)
+            )
+        except Exception:
+            logger.error(f"Health check failed: {e}")
         return jsonify({
             'status': 'unhealthy',
             'timestamp': datetime.utcnow().isoformat(),

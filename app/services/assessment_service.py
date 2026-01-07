@@ -20,32 +20,54 @@ from app.utils.exceptions import (
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
-ALLOWED_SECTION_IDS = ['FC', 'TC', 'EI']
+
+def _get_active_section_ids(session: Session):
+    """Return list of active section IDs based on config/env, fallback to DB."""
+    import os
+    ids = None
+    try:
+        from flask import current_app
+        cfg_val = current_app.config.get('ACTIVE_SECTION_IDS') if current_app else None
+        if isinstance(cfg_val, str) and cfg_val.strip():
+            ids = [s.strip() for s in cfg_val.split(',') if s.strip()]
+        elif isinstance(cfg_val, (list, tuple)) and cfg_val:
+            ids = [str(s).strip() for s in cfg_val if str(s).strip()]
+    except Exception:
+        ids = None
+    if ids is None:
+        env_val = os.environ.get('ACTIVE_SECTION_IDS')
+        if env_val:
+            ids = [s.strip() for s in env_val.split(',') if s.strip()]
+    if ids is None and session is not None:
+        try:
+            ids = [s.id for s in session.query(Section).order_by(Section.display_order).all()]
+        except Exception:
+            ids = []
+    return ids or []
 
 def _compute_allowed_question_ids(session: Session):
-    sections = session.query(Section).options(
+    sections_q = session.query(Section).options(
         joinedload(Section.areas).joinedload(Area.questions)
-    ).filter(Section.id.in_(ALLOWED_SECTION_IDS)).order_by(Section.display_order).all()
+    )
+    active_ids = _get_active_section_ids(session)
+    if active_ids:
+        sections_q = sections_q.filter(Section.id.in_(active_ids))
+    sections = sections_q.order_by(Section.display_order).all()
     allowed_ids = set()
     binary_groups = {}
     for section in sections:
-        section_binary = {}
-        non_binary = []
         for area in section.areas:
             for q in area.questions:
-                qid = q.id
-                if isinstance(qid, str) and len(qid) >= 3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit():
-                    base = qid[:-1]
-                    section_binary.setdefault(base, []).append(qid)
-                else:
-                    non_binary.append(qid)
-        if section_binary:
-            base = sorted(section_binary.keys())[0]
-            members = sorted(section_binary[base])
-            binary_groups[base] = members
-            allowed_ids.update(members)
-        if non_binary:
-            allowed_ids.add(sorted(non_binary)[0])
+                try:
+                    if getattr(q, 'is_active', 1) and q.is_binary:
+                        allowed_ids.add(q.id)
+                        if isinstance(q.id, str) and q.id and q.id[-1] in 'ABCDEF' and q.id[:-1][-2:].isdigit():
+                            base = q.id[:-1]
+                            binary_groups.setdefault(base, []).append(q.id)
+                except Exception:
+                    continue
+    for base in list(binary_groups.keys()):
+        binary_groups[base] = sorted(binary_groups[base])
     return allowed_ids, binary_groups
 
 
@@ -420,15 +442,14 @@ class AssessmentService:
             
             # Find first unanswered question (by display order) within allowed set
             allowed_ids, _ = _compute_allowed_question_ids(self.session)
+            next_q = self.session.query(Question).join(Area).join(Section)
+            active_ids = _get_active_section_ids(self.session)
+            if active_ids:
+                next_q = next_q.filter(Section.id.in_(active_ids))
             next_question = (
-                self.session.query(Question)
-                .join(Area)
-                .join(Section)
-                .filter(Section.id.in_(ALLOWED_SECTION_IDS))
-                .filter(Question.id.in_(allowed_ids))
+                next_q.filter(Question.id.in_(allowed_ids))
                 .filter(Question.id.notin_(answered_question_ids))
-                .order_by(Section.display_order, Area.display_order,
-                          Question.display_order)
+                .order_by(Section.display_order, Area.display_order, Question.display_order)
                 .first()
             )
             
@@ -451,7 +472,8 @@ class AssessmentService:
                 )
                 .join(Area, Section.id == Area.section_id)
                 .join(Question, Area.id == Question.area_id)
-                .filter(Section.id.in_(ALLOWED_SECTION_IDS))
+                # Optionally restrict to active sections
+                .filter(Section.id.in_(_get_active_section_ids(self.session)))
                 .group_by(Section.id, Section.name)
                 .all()
             )
