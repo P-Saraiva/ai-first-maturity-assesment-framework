@@ -450,27 +450,6 @@ INSERT OR IGNORE INTO maturity_progressions (area_id, target_level, prerequisite
 'Automation without human validation; governance overhead hindering productivity; user resistance');
 
 INSERT OR IGNORE INTO maturity_progressions (area_id, target_level, prerequisites, action_items, success_metrics, timeline, common_pitfall) VALUES 
-
--- ========================================
--- Maturity Definitions (Area current-level cards)
--- Minimal seed entries for demo; extend as needed
-INSERT OR IGNORE INTO maturity_definitions (entity_type, entity_id, maturity_level, title, summary, characteristics, expectations, guidance)
-VALUES
-('area','FC-ALS',1,'Foundational AI Literacy','Teams have basic awareness of AI tools','Limited usage|Ad-hoc exploration','Identify initial training needs|Establish minimal guardrails','Start a basic AI literacy program'),
-('area','FC-ALS',5,'Optimized AI Literacy','Teams are highly proficient and continuously learning','Standardized best practices|Advanced prompting|Peer coaching','Sustain excellence|Share learnings enterprise-wide','Run internal AI guilds|Measure impact regularly'),
-('area','TC-ATQ',1,'Initial AI Testing','Manual-heavy testing with limited AI support','Ad-hoc scripts|No traceability','Establish test baselines|Introduce AI-assisted tooling','Pilot AI test generation'),
-('area','TC-ATQ',5,'Optimized AI Testing','Autonomous, intelligent QA with predictive quality','Self-healing suites|Continuous assessment','Proactive risk detection|Near-zero escaped defects','Leverage predictive analytics across lifecycle'),
-('area','EI-VTS',1,'Vendor & Tool Basics','Tools vary by team with limited governance','Siloed contracts|Inconsistent usage','Define standards|Consolidate vendors','Create governance and usage analytics'),
-('area','EI-VTS',5,'Enterprise Standardization','Enterprise-wide standards and partnerships are optimized','Strategic partnerships|Advanced analytics','Continuous optimization|Joint roadmaps','Operate a vendor excellence function');
-
--- Additional definitions for Responsible AI - Ethical Values & Societal Impact (FC-AIT)
-INSERT OR IGNORE INTO maturity_definitions (entity_type, entity_id, maturity_level, title, summary, characteristics, expectations, guidance)
-VALUES
-('area','FC-AIT',1,'Ethics Awareness','Basic awareness of ethical AI issues','Informal awareness|No formal process','Identify risks|Start ethics discussions','Create a simple ethics checklist'),
-('area','FC-AIT',2,'Defined Ethics Practices','Defined basic responsible AI practices','Basic reviews|Ad-hoc impact checks','Document decisions|Assign responsibility','Adopt lightweight review template'),
-('area','FC-AIT',3,'Systematic Ethics Governance','Systematic ethics reviews integrated','Standardized reviews|Risk registers','Operate review cadence|Measure outcomes','Run formal impact assessments'),
-('area','FC-AIT',4,'Integrated Responsible AI','Ethics embedded in delivery workflows','Gated approvals|Cross-functional oversight','Prevent harms|Ensure compliance','Integrate ethics gates in CI/CD'),
-('area','FC-AIT',5,'Optimized Responsible AI','Continuous improvement with monitoring','Proactive detection|Audit trails','Continuously optimize|Report transparently','Automate monitoring and alerts');
 ('EI-DGM', 4,
 'Mature automated governance capabilities|Advanced data management infrastructure|Organization-wide governance culture',
 'AI-Powered Governance Intelligence: Deploy AI systems that continuously learn and improve governance, Implement intelligent data discovery and classification, Create predictive compliance risk assessment|Advanced Quality Management: Build AI-powered data quality prediction and remediation, Implement intelligent data lineage with semantic understanding, Create autonomous data lifecycle optimization|Strategic Governance Integration: Integrate with enterprise-wide data governance systems, Implement AI-powered policy recommendation and updates, Create intelligent governance coaching and improvement systems',

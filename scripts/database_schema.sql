@@ -74,23 +74,6 @@ CREATE TABLE maturity_progressions (
     UNIQUE(area_id, current_level, target_level)
 );
 
--- Area/Question maturity definitions table - Descriptions of current level characteristics
--- Supports showing the CURRENT level guidance (not next-level roadmap)
-CREATE TABLE IF NOT EXISTS maturity_definitions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    entity_type TEXT NOT NULL CHECK (entity_type IN ('area','question')),
-    entity_id TEXT NOT NULL,
-    maturity_level INTEGER NOT NULL CHECK (maturity_level >= 1 AND maturity_level <= 5),
-    title TEXT,
-    summary TEXT,
-    characteristics TEXT,  -- pipe-delimited list
-    expectations TEXT,     -- pipe-delimited list
-    guidance TEXT,         -- free text or pipe-delimited
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(entity_type, entity_id, maturity_level)
-);
-
 -- ========================================
 -- Assessment Tables
 -- ========================================
@@ -401,10 +384,6 @@ CREATE INDEX idx_team_progress_improvement ON team_progress(latest_overall_score
 CREATE INDEX idx_progressions_area ON maturity_progressions(area_id, target_level);
 CREATE INDEX idx_progressions_level ON maturity_progressions(target_level);
 CREATE INDEX idx_progressions_area_from_to ON maturity_progressions(area_id, current_level, target_level);
-
--- Maturity definitions indexes
-CREATE INDEX IF NOT EXISTS idx_maturity_def_entity ON maturity_definitions(entity_type, entity_id);
-CREATE INDEX IF NOT EXISTS idx_maturity_def_level ON maturity_definitions(maturity_level);
 
 -- ========================================
 -- End of Schema

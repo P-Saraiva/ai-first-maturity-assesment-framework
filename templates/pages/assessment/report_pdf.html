@@ -240,12 +240,12 @@
             <div class="col-4 text-center">
                 <div class="score-circle mb-3">
                     <div class="text-center">
-                        <div class="fw-bold" style="font-size: 2rem;">{{ (overall_percentage * 100)|round(1) }}%</div>
-                        <div class="fw-semibold">Overall Confirmed Capabilities</div>
+                        <div class="fw-bold" style="font-size: 2rem;">{{ "%.1f"|format(overall_score) }}</div>
+                        <div class="fw-semibold">Overall Score</div>
                     </div>
                 </div>
                 <h3 class="fw-bold">{{ overall_level }}</h3>
-                <p class="mb-0">Current SSE-CMM Maturity</p>
+                <p class="mb-0">Current Maturity Level</p>
             </div>
         </div>
     </div>
@@ -301,9 +301,9 @@
             <div class="col-6 mb-3">
                 <div class="metric-card">
                     <h3 class="fw-bold mb-2" style="color: {{ section.color }};">
-                        {{ section.percentage }}%
+                        {{ "%.1f"|format(section.score) }}
                     </h3>
-                    <h6 class="mb-2">{{ section.name }} — Confirmed Capabilities</h6>
+                    <h6 class="mb-2">{{ section.name }}</h6>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: {{ section.percentage }}%; background-color: {{ section.color }};"></div>
                     </div>
@@ -368,10 +368,10 @@
     <div class="no-break">
         <h4 class="fw-bold mb-4">Section Maturity Breakdown</h4>
         <div class="row">
-            {% set maturity_levels = ['Informal', 'Defined', 'Systematic', 'Integrated', 'Optimized'] %}
-            {% set level_colors = ['#a1a1aa', '#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6'] %}
+            {% set maturity_levels = ['Traditional', 'AI-Assisted', 'AI-Augmented', 'AI-First'] %}
+            {% set level_colors = ['#6c757d', '#ffc107', '#28a745', '#dc3545'] %}
             
-            {% for i in range(maturity_levels|length) %}
+            {% for i in range(4) %}
             {% set level = maturity_levels[i] %}
             {% set color = level_colors[i] %}
             {% set sections_at_level = [] %}
@@ -448,122 +448,122 @@
     </div>
     {% endif %}
 
-    <!-- Area Maturity Overview (current state only) -->
+    <!-- Roadmap Summary -->
+    {% if roadmap_data %}
     <div class="page-break">
-        <h4 class="fw-bold mb-4">Area Maturity Overview</h4>
-        {% if area_roadmap_data %}
-            {% for area_id, roadmap in area_roadmap_data.items() %}
-            <div class="roadmap-section mb-4" style="border: 1px solid #e9ecef; border-radius: 8px; background-color: #f8f9fa; padding: 20px;">
-                <!-- Header -->
-                <div class="mb-3" style="border-bottom: 1px solid #dee2e6; padding-bottom: 15px;">
-                    <h5 class="fw-bold mb-1" style="color: #495057;">
-                        <i class="bi bi-diagram-3 me-2"></i>{{ roadmap.area_name }}
-                    </h5>
-                    <p class="text-muted mb-0 small">Current maturity characteristics based on assessed level</p>
+        <h4 class="fw-bold mb-4">Implementation Roadmap Summary</h4>
+        {% for question_id, roadmap in roadmap_data.items() %}
+        <div class="roadmap-section mb-4" style="border: 1px solid #e9ecef; border-radius: 8px; background-color: #f8f9fa; padding: 20px;">
+            <!-- Header -->
+            <div class="mb-3" style="border-bottom: 1px solid #dee2e6; padding-bottom: 15px;">
+                <h5 class="fw-bold mb-1" style="color: #495057;">
+                    <i class="bi bi-question-circle me-2"></i>{{ roadmap.area_name or roadmap.area }}
+                </h5>
+                <p class="text-muted mb-0 small">{{ roadmap.question if roadmap.question else 'Area assessment question' }}</p>
+            </div>
+
+            <!-- Current Level -->
+            <div class="mb-3" style="background-color: #e3f2fd; padding: 12px; border-radius: 6px; border-left: 4px solid #2196f3;">
+                <h6 class="fw-bold mb-1">Current Level: {{ roadmap.current_level_name }}</h6>
+                <p class="mb-0 small">{{ roadmap.current_description if roadmap.current_description else 'Current assessment level' }}</p>
+                {% if roadmap.notes %}
+                <span class="fw-bold text-info"><i class="bi bi-chat-text me-1"></i>Notes:</span>
+                <span class="text-muted">{{ roadmap.notes }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Next Levels -->
+            {% if roadmap.next_levels %}
+            {% for next_level in roadmap.next_levels %}
+            <div class="mb-4" style="border-left: 4px solid #28a745; padding-left: 15px;">
+                <div class="d-flex align-items-center mb-3">
+                    <div style="background-color: #28a745; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px;">
+                        {{ next_level.level }}
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold" style="color: #28a745;">Next Step: {{ next_level.level_name }}</h6>
+                        {% if next_level.timeline %}
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>Timeline: {{ next_level.timeline }} weeks
+                        </small>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <!-- Current Level -->
-                <div class="mb-3" style="background-color: #e3f2fd; padding: 12px; border-radius: 6px; border-left: 4px solid #2196f3;">
-                    <h6 class="fw-bold mb-1">Current Level {{ roadmap.current_level }} ({{ roadmap.current_level_name }})</h6>
-                    {% if roadmap.domain_normalized is not none %}
-                    <p class="mb-0 small">Normalized score: {{ "%.2f"|format(roadmap.domain_normalized) }}</p>
-                    {% endif %}
-                </div>
-
-                <!-- Current Level Details -->
-                {% set defn = area_level_cards.get(area_id) if area_level_cards else None %}
+                <!-- Prerequisites -->
+                {% if next_level.prerequisites %}
                 <div class="mb-3">
-                    <h6 class="fw-bold"><i class="bi bi-info-circle me-2 text-primary"></i>Current Level Details</h6>
-                    {% if defn %}
-                        {% if defn.title %}
-                        <p class="mb-1 fw-semibold">{{ defn.title }}</p>
-                        {% endif %}
-                        {% if defn.summary %}
-                        <p class="text-muted">{{ defn.summary }}</p>
-                        {% endif %}
-                        <div class="row">
-                            <div class="col-6">
-                                <h6 class="text-primary fw-bold">Characteristics</h6>
-                                {% set chars = (defn.characteristics or '').split('|') %}
-                                {% if chars %}
-                                <ul class="small mb-3">
-                                    {% for c in chars if c.strip() %}
-                                    <li>{{ c.strip() }}</li>
-                                    {% endfor %}
-                                </ul>
-                                {% else %}
-                                <p class="text-muted small">No characteristics provided.</p>
-                                {% endif %}
-                            </div>
-                            <div class="col-6">
-                                <h6 class="text-success fw-bold">Expectations</h6>
-                                {% set exps = (defn.expectations or '').split('|') %}
-                                {% if exps %}
-                                <ul class="small mb-3">
-                                    {% for ex in exps if ex.strip() %}
-                                    <li>{{ ex.strip() }}</li>
-                                    {% endfor %}
-                                </ul>
-                                {% else %}
-                                <p class="text-muted small">No expectations provided.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% if defn.guidance %}
-                        <div class="mb-3">
-                            <h6 class="text-warning fw-bold">Guidance</h6>
-                            {% set gitems = (defn.guidance or '').split('|') %}
-                            <ul class="small mb-0">
-                                {% for g in gitems if g.strip() %}
-                                <li>{{ g.strip() }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="alert alert-light border small mb-0">
-                            <i class="bi bi-info-circle me-1"></i>
-                            No current-level definition available for this area.
-                        </div>
-                    {% endif %}
+                    <h6 class="fw-bold mb-2" style="color: #007bff;">
+                        <i class="bi bi-list-check me-2"></i>Prerequisites
+                    </h6>
+                    {% for prerequisite in next_level.prerequisites %}
+                    <div class="small mb-1" style="padding-left: 15px; position: relative;">
+                        <span style="position: absolute; left: 0; color: #007bff;">→</span>
+                        {{ prerequisite }}
+                    </div>
+                    {% endfor %}
                 </div>
+                {% endif %}
 
-                <!-- Confirmed Capabilities -->
+                <!-- Action Items -->
+                {% if next_level.action_items %}
                 <div class="mb-3">
-                    <h6 class="fw-bold text-success"><i class="bi bi-check-circle me-2"></i>Confirmed Capabilities (Yes)</h6>
-                    {% if roadmap.strengths and roadmap.strengths|length > 0 %}
-                        {% for strength in roadmap.strengths %}
-                        <div class="small mb-1" style="background: #ffffff; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 12px;">
-                            {{ strength }}
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted small">No confirmed capabilities identified yet for this area.</p>
-                    {% endif %}
+                    <h6 class="fw-bold mb-2" style="color: #28a745;">
+                        <i class="bi bi-gear me-2"></i>Action Items
+                    </h6>
+                    {% for action in next_level.action_items %}
+                    <div class="small mb-1" style="padding-left: 15px; position: relative;">
+                        <span style="position: absolute; left: 0; color: #28a745;">▶</span>
+                        {{ action }}
+                    </div>
+                    {% endfor %}
                 </div>
+                {% endif %}
 
-                <!-- Key Gaps -->
-                <div class="mb-1">
-                    <h6 class="fw-bold text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Key Gaps (No/Unanswered)</h6>
-                    {% if roadmap.gaps and roadmap.gaps|length > 0 %}
-                        {% for gap in roadmap.gaps %}
-                        <div class="small mb-1" style="background: #ffffff; border: 1px solid #e9ecef; border-radius: 6px; padding: 8px 12px;">
-                            {{ gap }}
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted small">Well done. No gaps identified for this area.</p>
-                    {% endif %}
+                <!-- Success Metrics -->
+                {% if next_level.success_metrics %}
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2" style="color: #ffc107;">
+                        <i class="bi bi-trophy me-2"></i>Success Metrics
+                    </h6>
+                    {% for metric in next_level.success_metrics %}
+                    <div class="small mb-1" style="padding-left: 15px; position: relative;">
+                        <span style="position: absolute; left: 0; color: #ffc107;">✓</span>
+                        {{ metric }}
+                    </div>
+                    {% endfor %}
                 </div>
+                {% endif %}
+
+                <!-- Common Pitfalls -->
+                {% if next_level.common_pitfalls %}
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2" style="color: #dc3545;">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Common Pitfalls
+                    </h6>
+                    {% for pitfall in next_level.common_pitfalls %}
+                    <div class="small mb-1" style="padding-left: 15px; position: relative;">
+                        <span style="position: absolute; left: 0; color: #dc3545;">⚠</span>
+                        {{ pitfall }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Basic description fallback -->
+                {% if next_level.description and not (next_level.prerequisites or next_level.action_items or next_level.success_metrics or next_level.common_pitfalls) %}
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2" style="color: #6c757d;">Description</h6>
+                    <p class="small mb-0">{{ next_level.description }}</p>
+                </div>
+                {% endif %}
             </div>
             {% endfor %}
-        {% else %}
-            <div class="alert alert-info">
-                <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>No Area Overview Available</h6>
-                <p class="mb-0 small">Complete more assessment questions to populate area maturity details.</p>
-            </div>
-        {% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
+    {% endif %}
 
     <!-- Footer -->
     <div class="mt-5 pt-4" style="border-top: 1px solid #e9ecef;">
