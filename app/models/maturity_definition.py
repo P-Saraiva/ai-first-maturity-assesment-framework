@@ -26,6 +26,7 @@ DATA_FILE = os.path.join(
 
 
 _AREA_DEFS_CACHE: Dict[str, Dict[int, "MaturityDefinition"]] = {}
+_AREA_DEFS_MTIME: float = -1.0
 
 
 @dataclass
@@ -60,9 +61,20 @@ class MaturityDefinition:
 
 def _load_area_defs() -> Dict[str, Dict[int, MaturityDefinition]]:
     """Load area definitions from JSON file, with sensible defaults."""
-    global _AREA_DEFS_CACHE
-    if _AREA_DEFS_CACHE:
-        return _AREA_DEFS_CACHE
+    global _AREA_DEFS_CACHE, _AREA_DEFS_MTIME
+
+    # Support live-reload when file changes or when env flag is set
+    reload_flag = os.environ.get('MATURITY_DEFS_RELOAD', 'false').lower() == 'true'
+    current_mtime = None
+    try:
+        current_mtime = os.path.getmtime(DATA_FILE) if os.path.exists(DATA_FILE) else -1.0
+    except Exception:
+        current_mtime = -1.0
+
+    if _AREA_DEFS_CACHE and not reload_flag:
+        # If cached and file unchanged, return cache
+        if current_mtime == _AREA_DEFS_MTIME:
+            return _AREA_DEFS_CACHE
 
     defs: Dict[str, Dict[int, MaturityDefinition]] = {}
 
@@ -114,6 +126,7 @@ def _load_area_defs() -> Dict[str, Dict[int, MaturityDefinition]]:
         defs['*'] = generic
 
     _AREA_DEFS_CACHE = defs
+    _AREA_DEFS_MTIME = current_mtime
     return defs
 
 
@@ -162,6 +175,12 @@ def get_area_definition(area_id: str, level: int) -> Optional[MaturityDefinition
     level = max(1, min(5, int(level)))
     defs = get_area_definitions(area_id)
     return defs.get(level)
+
+def invalidate_area_defs_cache() -> None:
+    """Force maturity definitions to reload on next access."""
+    global _AREA_DEFS_CACHE, _AREA_DEFS_MTIME
+    _AREA_DEFS_CACHE = {}
+    _AREA_DEFS_MTIME = -1.0
 
 
 __all__ = [

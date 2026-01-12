@@ -461,7 +461,7 @@
                                         About This Assessment
                                     </h6>
                                     <p class="mb-3 small">
-                                        This comprehensive assessment evaluates your organization's AI-first software engineering maturity across 4 key areas.
+                                        This comprehensive assessment evaluates your organization's AI-first software engineering maturity across {{ total_sections if total_sections is not none else 4 }} key sections.
                                     </p>
                                     <ul class="feature-list">
                                         <li><i class="bi bi-check-circle"></i> Foundational Capabilities</li>
@@ -479,11 +479,11 @@
                                     </h6>
                                     <div class="stats-grid">
                                         <div class="stat-item">
-                                            <div class="stat-value">23</div>
+                                            <div class="stat-value">{{ total_areas if total_areas is not none else 19 }}</div>
                                             <div class="stat-label">Areas</div>
                                         </div>
                                         <div class="stat-item">
-                                            <div class="stat-value">4</div>
+                                            <div class="stat-value">{{ total_sections if total_sections is not none else 4 }}</div>
                                             <div class="stat-label">Sections</div>
                                         </div>
                                         <div class="stat-item">

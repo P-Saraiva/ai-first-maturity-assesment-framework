@@ -593,7 +593,12 @@
                             </h6>
                             {% set domain = (area_domain_details|default({})).get(area_id, {}) %}
                             {% if domain and domain.risk_description %}
-                                <p class="text-muted">{{ domain.risk_description }}</p>
+                                {% set risk = domain.risk_description %}
+                                <p class="text-muted">
+                                    {% for line in risk.replace('|', '\n').split('\n') %}
+                                        {{ line }}{% if not loop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </p>
                             {% else %}
                                 <p class="text-muted">No specific risk context provided.</p>
                             {% endif %}

@@ -1109,7 +1109,23 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         // Level-specific lists removed per requirements
         // Risk and capability content
-        document.getElementById('areaRiskDescription').textContent = domain.risk_description || '';
+        // Render risk description with line breaks for '|' or '\n'
+        const renderTextWithBreaks = (elId, text) => {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            const raw = text || '';
+            // Escape HTML to prevent injection
+            const escaped = raw
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            // Convert separators to <br>
+            const withBreaks = escaped
+                .replace(/\|/g, '<br>')
+                .replace(/\r?\n/g, '<br>');
+            el.innerHTML = withBreaks;
+        };
+        renderTextWithBreaks('areaRiskDescription', domain.risk_description || '');
         renderList('areaObjectivesList', domain.objectives || []);
         renderList('areaCapabilitiesList', domain.capabilities || []);
         renderList('areaMitreRefs', (domain.references && domain.references.mitre) || []);

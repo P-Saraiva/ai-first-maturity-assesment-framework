@@ -10,18 +10,18 @@
 INSERT OR IGNORE INTO sections VALUES('ETSI','Ethics, Trust and Societal Impact','Ethics, explainability, fairness and societal impact of AI systems',1,'#1e3a8a','fas fa-scale-balanced',datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO sections VALUES('GSA','Governance, Strategy and Accountability','Strategy, compliance, accountability and organizational culture for AI',2,'#065f46','fas fa-gavel',datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO sections VALUES('IAA','Identity, Autonomy and Access Control for AI','Identity governance, secrets, and autonomous agent privilege',3,'#7c2d12','fas fa-user-shield',datetime('now'),datetime('now'));
-INSERT OR IGNORE INTO sections VALUES('DPR','Data, Provenance and Responsible Third-Party Usage','Data inventory, provenance and responsible third-party/data usage',4,'#0f766e','fas fa-database',datetime('now'),datetime('now'));
+INSERT OR IGNORE INTO sections VALUES('DPR','Data and Provenance','Data inventory and provenance of information',4,'#0f766e','fas fa-database',datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO sections VALUES('PUT','Privacy, User Rights and Operational Transparency','Privacy, user control and operational transparency for AI',5,'#7e22ce','fas fa-user-lock',datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO sections VALUES('TSA','Technical Security, Architecture and AI Operations','Threats, secure deployment, monitoring and harmful content handling',6,'#b45309','fas fa-network-wired',datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO sections VALUES('QEI','Quality, Evaluation, Incident Handling and Resilience','Testing, evaluation, incidents and operational resilience',7,'#0ea5e9','fas fa-clipboard-check',datetime('now'),datetime('now'));
-INSERT OR IGNORE INTO sections VALUES('FC','FOUNDATIONAL CAPABILITIES','Core building blocks for AI-driven development, including infrastructure, team skills, code generation processes, and knowledge management systems that enable basic AI integration into software engineering workflows',1,'#3b82f6','fas fa-foundation','2025-09-04 16:06:55','2025-09-04 16:06:55');
-INSERT OR IGNORE INTO sections VALUES('TC','TRANSFORMATION CAPABILITIES','Advanced capabilities that fundamentally transform how software is built, including intelligent architecture translation, autonomous testing, smart CI/CD, monitoring systems, and legacy modernization using AI',2,'#10b981','fas fa-magic','2025-09-04 16:06:55','2025-09-04 16:06:55');
-INSERT OR IGNORE INTO sections VALUES('EI','ENTERPRISE INTEGRATION','Enterprise-scale capabilities for integrating AI development practices across the organization, including data governance, vendor management, system integration, cost optimization, scalability, and business continuity',3,'#f59e0b','fas fa-building','2025-09-04 16:06:55','2025-09-04 16:06:55');
-INSERT OR IGNORE INTO sections VALUES('SG','STRATEGIC GOVERNANCE','Leadership and governance frameworks for responsible, compliant, and strategically aligned AI adoption, including ethics, performance measurement, IP management, risk management, change management, and future readiness',4,'#8b5cf6','fas fa-shield-alt','2025-09-04 16:06:55','2025-09-04 16:06:55');
+-- INSERT OR IGNORE INTO sections VALUES('FC','FOUNDATIONAL CAPABILITIES','Core building blocks for AI-driven development, including infrastructure, team skills, code generation processes, and knowledge management systems that enable basic AI integration into software engineering workflows',1,'#3b82f6','fas fa-foundation','2025-09-04 16:06:55','2025-09-04 16:06:55');
+-- INSERT OR IGNORE INTO sections VALUES('TC','TRANSFORMATION CAPABILITIES','Advanced capabilities that fundamentally transform how software is built, including intelligent architecture translation, autonomous testing, smart CI/CD, monitoring systems, and legacy modernization using AI',2,'#10b981','fas fa-magic','2025-09-04 16:06:55','2025-09-04 16:06:55');
+-- INSERT OR IGNORE INTO sections VALUES('EI','ENTERPRISE INTEGRATION','Enterprise-scale capabilities for integrating AI development practices across the organization, including data governance, vendor management, system integration, cost optimization, scalability, and business continuity',3,'#f59e0b','fas fa-building','2025-09-04 16:06:55','2025-09-04 16:06:55');
+-- INSERT OR IGNORE INTO sections VALUES('SG','STRATEGIC GOVERNANCE','Leadership and governance frameworks for responsible, compliant, and strategically aligned AI adoption, including ethics, performance measurement, IP management, risk management, change management, and future readiness',4,'#8b5cf6','fas fa-shield-alt','2025-09-04 16:06:55','2025-09-04 16:06:55');
 
 -- Additional Sections (Draft Set)
-INSERT OR IGNORE INTO sections VALUES('SE','AI SAFETY ENGINEERING','Engineering practices to ensure safe, robust, and trustworthy AI-enabled software, including safety cases, adversarial resilience, red-teaming, and human oversight',5,'#ef4444','fas fa-exclamation-triangle','2025-12-10 10:00:00','2025-12-10 10:00:00');
-INSERT OR IGNORE INTO sections VALUES('HC','HUMAN-AI EXPERIENCE DESIGN','Designing effective human-AI interaction, usability, accessibility, and trust, including prompt UX, explainability, and feedback loops',6,'#06b6d4','fas fa-users','2025-12-10 10:00:00','2025-12-10 10:00:00');
+-- INSERT OR IGNORE INTO sections VALUES('SE','AI SAFETY ENGINEERING','Engineering practices to ensure safe, robust, and trustworthy AI-enabled software, including safety cases, adversarial resilience, red-teaming, and human oversight',5,'#ef4444','fas fa-exclamation-triangle','2025-12-10 10:00:00','2025-12-10 10:00:00');
+-- INSERT OR IGNORE INTO sections VALUES('HC','HUMAN-AI EXPERIENCE DESIGN','Designing effective human-AI interaction, usability, accessibility, and trust, including prompt UX, explainability, and feedback loops',6,'#06b6d4','fas fa-users','2025-12-10 10:00:00','2025-12-10 10:00:00');
 
 -- ========================================
 -- Areas Data
@@ -52,11 +52,11 @@ VALUES('IAA-AAP','IAA','Agents, Autonomy and Privilege','Agents, Autonomy and Pr
 
 -- DPR Areas
 INSERT OR IGNORE INTO areas (id, section_id, name, description, display_order, timeline_l1_l2, timeline_l2_l3, timeline_l3_l4, created_at, updated_at)
-VALUES('DPR-IPU','DPR','Inventory, Provenance and Third-Party Usage','Inventory, Provenance and Third-Party Usage',1,NULL,NULL,NULL,datetime('now'),datetime('now'));
+VALUES('DPR-IPU','DPR','Inventory and Provenance','Inventory and Provenance',1,NULL,NULL,NULL,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO areas (id, section_id, name, description, display_order, timeline_l1_l2, timeline_l2_l3, timeline_l3_l4, created_at, updated_at)
 VALUES('DPR-DGM','DPR','Data Quality, Governance and Minimization','Data Quality, Governance and Minimization',2,NULL,NULL,NULL,datetime('now'),datetime('now'));
-INSERT OR IGNORE INTO areas (id, section_id, name, description, display_order, timeline_l1_l2, timeline_l2_l3, timeline_l3_l4, created_at, updated_at)
-VALUES('DPR-TDL','DPR','Third-Party Data, Ethics and Licensing','Third-Party Data, Ethics and Licensing',3,NULL,NULL,NULL,datetime('now'),datetime('now'));
+-- INSERT OR IGNORE INTO areas (id, section_id, name, description, display_order, timeline_l1_l2, timeline_l2_l3, timeline_l3_l4, created_at, updated_at)
+-- VALUES('DPR-TDL','DPR','Third-Party Data, Ethics and Licensing','Third-Party Data, Ethics and Licensing',3,NULL,NULL,NULL,datetime('now'),datetime('now'));
 
 -- PUT Areas
 INSERT OR IGNORE INTO areas (id, section_id, name, description, display_order, timeline_l1_l2, timeline_l2_l3, timeline_l3_l4, created_at, updated_at)

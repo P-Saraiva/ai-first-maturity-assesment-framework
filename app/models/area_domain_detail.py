@@ -10,6 +10,10 @@ import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+_DETAILS_FILE = os.path.join(_BASE_DIR, 'data', 'area_domain_details.json')
+_MATURITY_FILE = os.path.join(_BASE_DIR, 'data', 'area_maturity_definitions.json')
+
 
 @dataclass
 class AreaDomainDetail:
@@ -164,22 +168,70 @@ _DEFAULTS: Dict[str, Dict] = {
 }
 
 
+def _compute_latest_mtime() -> float:
+    try:
+        m1 = os.path.getmtime(_DETAILS_FILE) if os.path.exists(_DETAILS_FILE) else -1.0
+    except Exception:
+        m1 = -1.0
+    try:
+        m2 = os.path.getmtime(_MATURITY_FILE) if os.path.exists(_MATURITY_FILE) else -1.0
+    except Exception:
+        m2 = -1.0
+    return max(m1, m2)
+
+
 def _load_json_details() -> Dict[str, Dict]:
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    # Try data/area_domain_details.json at repo root
-    candidate = os.path.join(base_dir, 'data', 'area_domain_details.json')
-    if os.path.exists(candidate):
+    result: Dict[str, Dict] = {}
+    if os.path.exists(_DETAILS_FILE):
         try:
-            with open(candidate, 'r', encoding='utf-8') as f:
+            with open(_DETAILS_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 if isinstance(data, dict):
-                    return data
+                    result.update(data)
         except Exception:
             pass
-    return {}
+
+    # Also merge risk/references from area_maturity_definitions.json if present
+    if os.path.exists(_MATURITY_FILE):
+        try:
+            with open(_MATURITY_FILE, 'r', encoding='utf-8') as f:
+                data2 = json.load(f)
+                if isinstance(data2, dict):
+                    for area_id, payload in data2.items():
+                        if not isinstance(payload, dict):
+                            continue
+                        rd = payload.get('risk_description')
+                        refs = payload.get('references')
+                        if rd or refs:
+                            merged = result.get(area_id, {}).copy()
+                            if rd:
+                                merged['risk_description'] = rd
+                            if isinstance(refs, dict):
+                                existing_refs = merged.get('references') or {}
+                                new_refs = {
+                                    'mitre': refs.get('mitre', existing_refs.get('mitre', [])),
+                                    'nist': refs.get('nist', existing_refs.get('nist', [])),
+                                }
+                                merged['references'] = new_refs
+                            result[area_id] = merged
+        except Exception:
+            pass
+
+    return result
 
 
-_JSON_DETAILS = _load_json_details()
+_JSON_DETAILS: Dict[str, Dict] = {}
+_JSON_MTIME: float = -1.0
+
+
+def _ensure_loaded() -> None:
+    global _JSON_DETAILS, _JSON_MTIME
+    reload_flag = os.environ.get('AREA_DOMAIN_RELOAD', 'false').lower() == 'true'
+    latest = _compute_latest_mtime()
+    if _JSON_DETAILS and not reload_flag and latest == _JSON_MTIME:
+        return
+    _JSON_DETAILS = _load_json_details()
+    _JSON_MTIME = latest
 
 
 def get_area_domain_detail(area_id: str) -> Optional[AreaDomainDetail]:
@@ -187,6 +239,7 @@ def get_area_domain_detail(area_id: str) -> Optional[AreaDomainDetail]:
     Return AreaDomainDetail for a given area_id using JSON overrides
     if present, else built-in defaults.
     """
+    _ensure_loaded()
     src = _JSON_DETAILS.get(area_id) or _DEFAULTS.get(area_id)
     if not src:
         return None
@@ -195,3 +248,9 @@ def get_area_domain_detail(area_id: str) -> Optional[AreaDomainDetail]:
         risk_description=src.get('risk_description'),
         references=src.get('references') or {}
     )
+
+def invalidate_area_domain_cache() -> None:
+    """Force area domain details to reload on next access."""
+    global _JSON_DETAILS, _JSON_MTIME
+    _JSON_DETAILS = {}
+    _JSON_MTIME = -1.0

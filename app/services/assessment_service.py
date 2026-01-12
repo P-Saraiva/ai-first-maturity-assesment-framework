@@ -289,12 +289,12 @@ class AssessmentService:
             if not assessment:
                 raise AssessmentError(f"Assessment {assessment_id} not found")
             
-            # Get total questions (logical constrained)
+            # Get total questions (use ungrouped count to reflect UI items)
             allowed_ids, bin_groups = _compute_allowed_question_ids(self.session)
-            total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
-            
-            # Get responded questions count
-            responded_questions = len(assessment.responses)
+            total_questions = len(allowed_ids)
+
+            # Get responded questions count restricted to allowed set
+            responded_questions = sum(1 for r in assessment.responses if r.question_id in allowed_ids)
             
             # Calculate progress percentage
             progress_percentage = (

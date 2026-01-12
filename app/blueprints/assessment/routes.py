@@ -332,8 +332,25 @@ def create():
     Step 1: Collect organization + candidate details, then proceed directly to first section
     """
     if request.method == 'GET':
-        # Show the organization and candidate information form
-        return render_template('pages/assessment/org_information.html')
+        # Show the organization and candidate information form with dynamic counts
+        try:
+            from app.extensions import db
+            from sqlalchemy import func
+            from app.models.question import Section, Area, Question
+
+            total_sections = db.session.query(func.count(Section.id)).scalar() or 0
+            total_areas = db.session.query(func.count(Area.id)).scalar() or 0
+            total_questions = db.session.query(func.count(Question.id)).scalar() or 0
+
+            return render_template(
+                'pages/assessment/org_information.html',
+                total_sections=total_sections,
+                total_areas=total_areas,
+                total_questions=total_questions
+            )
+        except Exception as e:
+            logger.warning(f"Could not load counts for org_information: {e}")
+            return render_template('pages/assessment/org_information.html')
     
     # POST method - from form submission
     try:
@@ -529,12 +546,23 @@ def section_questions(assessment_id, section_id):
             joinedload(Section.areas).joinedload(Area.questions)
         ).filter(Section.id == section_id).first()
 
-        # No restriction: any existing section is valid
-        
+        # If the requested section is not found (e.g., legacy ID), redirect to first active
         if not section:
-            logger.error(f"Section {section_id} not found")
-            flash('Section not found', 'error')
-            return redirect(url_for('assessment.create'))
+            logger.warning(f"Section {section_id} not found; attempting fallback to first active section")
+            all_sections_q = db.session.query(Section)
+            active_ids = _get_active_section_ids(db.session)
+            if active_ids:
+                all_sections_q = all_sections_q.filter(Section.id.in_(active_ids))
+            all_sections_fallback = all_sections_q.order_by(Section.display_order).all()
+            if not all_sections_fallback:
+                logger.error("No sections available to fallback to")
+                flash('No sections available. Please contact support.', 'error')
+                return redirect(url_for('assessment.index'))
+            first_section = all_sections_fallback[0]
+            logger.info(f"Redirecting to fallback section {first_section.id}")
+            return redirect(url_for('assessment.section_questions',
+                                    assessment_id=assessment_id,
+                                    section_id=first_section.id))
         
         # Get progression data for each area in the section (question-level guidance)
         from app.models.progression import get_all_progressions_for_area
@@ -591,6 +619,15 @@ def section_questions(assessment_id, section_id):
                 area_domain_details[area.id] = domain.to_dict() if domain else {}
             except Exception:
                 area_domain_details[area.id] = {}
+            # Diagnostics: log availability of JSON-driven content per area
+            try:
+                def_levels = sorted(list(area_level_defs.get(area.id, {}).keys()))
+                dom_keys = list(area_domain_details.get(area.id, {}).keys())
+                logger.info(
+                    f"Area {area.id}: defs levels={def_levels if def_levels else 'none'}, domain keys={dom_keys if dom_keys else 'none'}"
+                )
+            except Exception:
+                pass
         
         # Get all sections for navigation (optionally filtered)
         all_sections_q = db.session.query(Section)
@@ -616,6 +653,13 @@ def section_questions(assessment_id, section_id):
                 question_ids.append(q.id)
                 if q.id in all_allowed_ids:
                     allowed_question_ids.add(q.id)
+
+        # Safe fallback: if filtering yields none, show all section questions
+        if not allowed_question_ids and question_ids:
+            current_app.logger.warning(
+                "Allowed question filter returned 0; falling back to all section questions"
+            )
+            allowed_question_ids = set(question_ids)
         
         existing_responses = {}
         if question_ids:
@@ -849,17 +893,10 @@ def final_review(assessment_id):
         responses_dict = {r.question_id: r for r in responses}
         allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
         
-        # Calculate completion against constrained logical questions
-        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
-        total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
-        answered_questions = 0
-        for base, members in bin_groups.items():
-            if any(mid in responses_dict for mid in members):
-                answered_questions += 1
-        single_ids = [qid for qid in allowed_ids if not (isinstance(qid, str) and len(qid) >= 3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit())]
-        for qid in single_ids:
-            if qid in responses_dict:
-                answered_questions += 1
+        # Calculate completion using ungrouped questions to match UI
+        allowed_ids, _bin_groups = _compute_allowed_question_ids(db.session)
+        total_questions = len(allowed_ids)
+        answered_questions = sum(1 for qid in allowed_ids if qid in responses_dict)
         
         completion_percentage = (
             (answered_questions / total_questions * 100) 
@@ -933,18 +970,11 @@ def generate_report(assessment_id):
         ).all()
         logger.info(f"Found {len(responses)} responses for assessment {assessment_id}")
 
-        # Compute logical totals for constrained flow
-        allowed_ids, bin_groups = _compute_allowed_question_ids(db.session)
-        total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
+        # Compute totals using ungrouped questions
+        allowed_ids, _bin_groups = _compute_allowed_question_ids(db.session)
+        total_questions = len(allowed_ids)
         responses_dict = {r.question_id: r for r in responses}
-        answered_questions = 0
-        for base, members in bin_groups.items():
-            if any(mid in responses_dict for mid in members):
-                answered_questions += 1
-        single_ids = [qid for qid in allowed_ids if not (isinstance(qid, str) and len(qid) >= 3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit())]
-        for qid in single_ids:
-            if qid in responses_dict:
-                answered_questions += 1
+        answered_questions = sum(1 for qid in allowed_ids if qid in responses_dict)
         completion_percentage = (
             (answered_questions / total_questions * 100) 
             if total_questions > 0 else 0
@@ -1168,9 +1198,9 @@ def view_readonly_sections(assessment_id):
         # Get progress information
         assessment_service = AssessmentService(db.session)
         progress = assessment_service.get_assessment_progress(assessment_id)
-        # Logical total questions under constrained flow
-        allowed_ids_ro, bin_groups_ro = _compute_allowed_question_ids(db.session)
-        logical_total = len(bin_groups_ro) + (len(allowed_ids_ro) - sum(len(v) for v in bin_groups_ro.values()))
+        # Total questions reflects ungrouped items as shown in UI
+        allowed_ids_ro, _bin_groups_ro = _compute_allowed_question_ids(db.session)
+        logical_total = len(allowed_ids_ro)
         
         context = {
             'assessment': assessment,
@@ -1555,17 +1585,8 @@ def autosave_response(assessment_id):
         ).all()
         responses_dict = {r.question_id: r for r in responses}
 
-        total_questions = len(bin_groups) + (len(allowed_ids) - sum(len(m) for m in bin_groups.values()))
-        answered_questions = 0
-        # Count binary groups: answered if any member has a response
-        for base, members in bin_groups.items():
-            if any(mid in responses_dict for mid in members):
-                answered_questions += 1
-        # Count single IDs
-        single_ids = [qid for qid in allowed_ids if not (isinstance(qid, str) and len(qid) >= 3 and qid[-1] in 'ABCDEF' and qid[:-1][-2:].isdigit())]
-        for qid in single_ids:
-            if qid in responses_dict:
-                answered_questions += 1
+        total_questions = len(allowed_ids)
+        answered_questions = sum(1 for qid in allowed_ids if qid in responses_dict)
 
         completion_percentage = (answered_questions / total_questions * 100.0) if total_questions > 0 else 0.0
 

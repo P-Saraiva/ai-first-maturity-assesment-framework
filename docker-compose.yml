@@ -16,6 +16,8 @@ services:
       DEBUG: "True"
       DATABASE_URL: sqlite:///instance/app_dev.db
       LOG_LEVEL: INFO
+      MATURITY_DEFS_RELOAD: "true"
+      AREA_DOMAIN_RELOAD: "true"
     volumes:
       - app_data:/app/instance
       - app_uploads:/app/static/uploads
