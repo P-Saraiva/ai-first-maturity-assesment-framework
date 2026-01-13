@@ -8,9 +8,6 @@ primary_region = 'gru'
 
 [build]
 
-[processes]
-  app = "python app.py"
-
 [http_service]
   internal_port = 5001
   force_https = true
