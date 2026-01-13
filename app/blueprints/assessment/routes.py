@@ -1885,21 +1885,31 @@ def report(assessment_id):
             q = db.session.query(Question).get(qid)
             if q and q.area:
                 questions_by_area.setdefault(q.area.id, []).append(q)
-        # For each section's area in scoring_results, compute recommendations
+        # Build lookup of area scores from scoring_results
         sse_rank = {'Informal': 1, 'Defined': 2, 'Systematic': 3, 'Integrated': 4, 'Optimized': 5}
+        area_scores_lookup = {}
         for sec in scoring_results.get('section_scores', {}).values():
-            for _, area in sec.get('area_scores', {}).items():
-                area_id = area['area_id']
-                area_name = area['area_name']
-                # Static descriptive About from Areas table
-                area_obj = db.session.query(Area).get(area_id)
-                area_description = area_obj.description if area_obj else ''
-                # Static descriptive About from Areas table
-                area_obj = db.session.query(Area).get(area_id)
-                area_description = area_obj.description if area_obj else ''
-                current_domain_level_name = area.get('sse_level') or 'Informal'
+            for _, a in sec.get('area_scores', {}).items():
+                area_scores_lookup[a['area_id']] = a
+
+        # Iterate all active sections and all their areas to include every area in the report
+        from app.models.question import Section as SectionModel
+        all_sections_q = db.session.query(SectionModel)
+        active_ids = _get_active_section_ids(db.session)
+        if active_ids:
+            all_sections_q = all_sections_q.filter(SectionModel.id.in_(active_ids))
+        all_sections = all_sections_q.order_by(SectionModel.display_order).all()
+
+        for sec in all_sections:
+            for area_obj in sec.areas:
+                area_id = area_obj.id
+                area_name = area_obj.name
+                area_description = area_obj.description or ''
+                a_score = area_scores_lookup.get(area_id, {})
+                current_domain_level_name = a_score.get('sse_level') or 'Informal'
                 current_domain_level = sse_rank.get(current_domain_level_name, 1)
-                # Determine gaps: No answers (score==1) or unanswered
+
+                # Determine gaps and strengths from responses
                 gaps = []
                 strengths = []
                 for q in questions_by_area.get(area_id, []):
@@ -1910,30 +1920,22 @@ def report(assessment_id):
                         strengths.append(q.question)
                     else:
                         gaps.append(q.question)
-                # Current-level definition card (Area-based, always show)
+
+                # Current-level definition card (Area-based)
                 cur_def = get_area_definition(area_id, current_domain_level)
-                if cur_def:
-                    area_level_cards[area_id] = cur_def.to_dict()
-                else:
-                    area_level_cards[area_id] = None
+                area_level_cards[area_id] = cur_def.to_dict() if cur_def else None
 
                 area_roadmap_data[area_id] = {
                     'area_name': area_name,
                     'current_level': current_domain_level,
                     'current_level_name': current_domain_level_name,
-                    'domain_normalized': area.get('domain_normalized'),
+                    'domain_normalized': a_score.get('domain_normalized'),
                     'area_description': area_description,
                     'gaps': gaps,
                     'strengths': strengths
                 }
-                # Fetch domain-driven area details (level-independent)
-                try:
-                    from app.models.area_domain_detail import get_area_domain_detail
-                    domain = get_area_domain_detail(area_id)
-                    area_domain_details[area_id] = domain.to_dict() if domain else {}
-                except Exception:
-                    area_domain_details[area_id] = {}
-                # Fetch domain-driven area details (level-independent)
+
+                # Domain-driven details (risk/references)
                 try:
                     from app.models.area_domain_detail import get_area_domain_detail
                     domain = get_area_domain_detail(area_id)
