@@ -5,14 +5,22 @@
         <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') if url_for else '/' }}">
             <div class="d-flex align-items-center">
                 <div class="me-3">
-                    <div class="bg-success rounded-3 d-flex align-items-center justify-content-center" 
-                         style="width: 40px; height: 40px;">
-                        <i class="bi bi-cpu-fill text-white fs-5"></i>
+                    <div class="bg-dark rounded-3 d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <img 
+                            src="{{ url_for('static', filename='assets/images/hero.png') }}" 
+                            alt="Logo" 
+                            class="img-fluid"
+                            style="max-width: 70%; max-height: 70%; object-fit: contain;"
+                            loading="lazy"
+                            onerror="this.classList.add('d-none'); document.getElementById('navIconFallback').classList.remove('d-none');"
+                        />
+                        <i id="navIconFallback" class="bi bi-cpu-fill text-white fs-5 d-none"></i>
                     </div>
                 </div>
                 <div>
-                    <div class="text-white fw-bold fs-6">AI-First Software Engineering</div>
-                    <div class="text-white-50 small">Maturity Assessment</div>
+                    <div class="text-white fw-bold fs-6">AI Trust & Security Maturity Framework</div>
+                    <div class="text-white-50 small">A Cybersecurity Maturity Assessment for AI</div>
                 </div>
             </div>
         </a>

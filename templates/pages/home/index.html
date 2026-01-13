@@ -122,6 +122,26 @@ body.home-page {
     transition: all 0.3s ease;
 }
 
+/* Responsive hero image sizing */
+.hero-illustration .hero-img {
+    width: clamp(180px, 30vw, 560px);
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 992px) {
+    .hero-illustration .hero-img {
+        width: clamp(160px, 40vw, 480px);
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-illustration .hero-img {
+        width: 80vw;
+    }
+}
+
 .feature-card:hover .feature-icon {
     background: #667eea;
     color: white;
@@ -388,12 +408,13 @@ p {
         <div class="row align-items-center">
             <div class="col-lg-8 hero-content scroll-reveal">
                 <h1 class="display-4 fw-bold mb-4">
-                    AI-First Software Engineering (AFS) Maturity Assessment
+                    AI Trust & Security Maturity Framework
                 </h1>
                 <p class="lead mb-4" style="font-size: 1.35rem; line-height: 1.6;">
-                    Evaluate your AI-driven development maturity across foundational capabilities, transformation 
-                    practices, enterprise integration, and strategic governance. Get your comprehensive AFS Score 
-                    and actionable roadmap for AI-first development excellence.
+                    Evaluate your AI-driven applications' trustworthiness and security posture across key dimensions
+                    including ethical AI practices, data privacy, robustness, and compliance, all based on market frameworks
+                    such as OWASP AIMA, NIST AI RMF and MITRE ATLAS. Obtain a comprehensive final report with potential risks and insights
+                    to build a secure-driven roadmap for AI-first applications.
                 </p>
                 <div class="hero-actions">
                     <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
@@ -408,7 +429,14 @@ p {
             </div>
             <div class="col-lg-4 text-center scroll-reveal">
                 <div class="hero-illustration">
-                    <i class="bi bi-cpu-fill" style="font-size: 200px; opacity: 0.9; color: rgba(8, 8, 8, 0.913);"></i>
+                    <img 
+                        src="{{ url_for('static', filename='assets/images/hero.png') }}" 
+                        alt="AI Trust & Security" 
+                        class="img-fluid hero-img"
+                        loading="lazy"
+                        onerror="this.classList.add('d-none'); document.getElementById('heroIconFallback').classList.remove('d-none');"
+                    />
+                    <i id="heroIconFallback" class="bi bi-cpu-fill d-none" style="font-size: 200px; opacity: 0.9; color: rgba(8, 8, 8, 0.913);"></i>
                 </div>
             </div>
         </div>

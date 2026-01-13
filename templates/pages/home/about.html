@@ -34,6 +34,23 @@
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.12);
     border-color: #667eea;
 }
+/* Responsive hero image sizing for About page */
+.about-hero .hero-img {
+    width: clamp(140px, 28vw, 360px);
+    height: auto;
+}
+
+@media (max-width: 992px) {
+    .about-hero .hero-img {
+        width: clamp(120px, 40vw, 300px);
+    }
+}
+
+@media (max-width: 576px) {
+    .about-hero .hero-img {
+        width: 75vw;
+    }
+}
 </style>
 {% endblock %}
 
@@ -44,11 +61,14 @@
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <h1 class="display-4 fw-bold mb-4">
-                    About Our AI-First Maturity Assessment
+                    About the AI Trust & Security Maturity Assessment
                 </h1>
                 <p class="lead mb-4">
-                    Empowering organizations worldwide to successfully navigate their AI transformation 
-                    journey through comprehensive assessment, actionable insights, and proven methodologies.
+                    Empowering organizations worldwide to securely navigate their AI transformation 
+                    journey through a comprehensive maturity assessment. Gain insights into your current 
+                    AI trust and security posture, using industry best practices, guidances and standards to
+                    identify gaps and opportunities for improvement. Receive a detailed report highlighting potential risks 
+                    to build a secure-driven roadmap for AI-first applications.
                 </p>
                 <div class="hero-badges">
                     <span class="badge bg-light text-dark fs-6 me-2 p-2">Research-Based</span>
@@ -57,7 +77,41 @@
                 </div>
             </div>
             <div class="col-lg-4 text-center">
-                <i class="bi bi-lightbulb-fill" style="font-size: 150px; opacity: 0.8;"></i>
+                <img 
+                    src="{{ url_for('static', filename='assets/images/hero.png') }}" 
+                    alt="AI Trust & Security" 
+                    class="img-fluid hero-img"
+                    loading="lazy"
+                    onerror="this.classList.add('d-none'); document.getElementById('aboutIconFallback').classList.remove('d-none');"
+                />
+                <i id="aboutIconFallback" class="bi bi-lightbulb-fill d-none" style="font-size: 150px; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Purpose of the Assessment -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h2 class="display-6 fw-bold mb-3">Purpose of the Assessment</h2>
+                <p class="lead text-muted">
+                    This assessment helps organizations understand, measure, and manage their maturity in the use of Artificial Intelligence from a trust, security, risk, and governance perspective.
+                </p>
+                <p class="text-muted">
+                    Rather than focusing solely on technical performance, the assessment evaluates AI systems as socio-technical systems, where risks emerge from the interaction between:
+                </p>
+                <ul class="text-muted">
+                    <li>Technology</li>
+                    <li>People</li>
+                    <li>Processes</li>
+                    <li>Data</li>
+                    <li>Governance structures</li>
+                </ul>
+                <p class="text-muted">
+                    The primary goal is to enable organizations to identify material AI risks early, understand root causes, and prioritize practical improvements aligned with frameworks such as OWASP AIMA, NIST AI RMF, and MITRE ATLAS.
+                </p>
             </div>
         </div>
     </div>
@@ -68,7 +122,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center mb-5">
-                <h2 class="display-5 fw-bold mb-4">Our Mission & Vision</h2>
+                <h2 class="display-5 fw-bold mb-4">Learn more about this project</h2>
             </div>
         </div>
         <div class="row g-4">
@@ -78,10 +132,10 @@
                         <div class="text-center mb-3">
                             <i class="bi bi-flag" style="font-size: 3rem;"></i>
                         </div>
-                        <h4 class="text-center mb-3">Our Mission</h4>
+                        <h4 class="text-center mb-3">The Mission</h4>
                         <p class="text-center mb-0">
-                            To democratize AI-first software engineering by providing organizations with 
-                            comprehensive assessment tools, actionable insights, and clear roadmaps that 
+                            This project has the goal to democratize AI-first and secure software engineering by providing organizations with 
+                            comprehensive assessment tools, actionable insights, and rich resources that 
                             accelerate their digital transformation and competitive advantage.
                         </p>
                     </div>
@@ -93,12 +147,52 @@
                         <div class="text-center mb-3">
                             <i class="bi bi-eye" style="font-size: 3rem;"></i>
                         </div>
-                        <h4 class="text-center mb-3">Our Vision</h4>
+                        <h4 class="text-center mb-3">The Vision</h4>
                         <p class="text-center mb-0">
-                            A world where every software engineering organization harnesses the full potential 
-                            of artificial intelligence to create innovative solutions, improve efficiency, 
-                            and deliver exceptional value to their customers and society.
+                            The vision is to move organizations from reactive, compliance-driven AI practices toward proactive, risk-informed, and maturity-driven AI governance.
                         </p>
+                        <ul class="text-muted">
+                            <li>AI risks are anticipated rather than discovered after incidents.</li>
+                            <li>Ethical, legal, and security considerations are embedded into business and operational processes.</li>
+                            <li>Decision-making is supported by evidence, metrics, and continuous monitoring.</li>
+                            <li>AI systems remain trustworthy, secure, and aligned with organizational values throughout their lifecycle.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- What This Assessment Is (and Is Not) -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card feature-card h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">This assessment is:</h5>
+                        <ul class="text-muted mb-0">
+                            <li>A maturity-based diagnostic tool, not a pass/fail audit</li>
+                            <li>A risk-oriented framework, not a checklist</li>
+                            <li>A way to surface hidden or emerging AI risks (incl. governance)</li>
+                            <li>A foundation for prioritized, roadmap-driven improvement</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card feature-card h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">This assessment is not:</h5>
+                        <ul class="text-muted mb-0">
+                            <li>A regulatory certification</li>
+                            <li>A one-time compliance exercise</li>
+                            <li>A purely technical evaluation of model performance</li>
+                            <li>A substitute for technical audits or penetration testing</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -113,9 +207,9 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-10 mx-auto text-center mb-5">
-                <h2 class="display-5 fw-bold mb-4">AFS Assessment Framework</h2>
+                <h2 class="display-5 fw-bold mb-4">AI Trust & Security Maturity Framework</h2>
                 <p class="lead text-muted">
-                    Comprehensive evaluation across 4 critical dimensions of AI-driven development maturity.
+                    Comprehensive evaluation across 7 critical dimensions of AI-driven systems maturity.
                 </p>
             </div>
         </div>
@@ -199,9 +293,9 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center mb-5">
-                <h2 class="display-5 fw-bold mb-4">AFS Maturity Levels</h2>
+                <h2 class="display-5 fw-bold mb-4"> Maturity Levels</h2>
                 <p class="lead text-muted">
-                    Understand your organization's current position and roadmap for AI-first excellence.
+                    The maturity model reflects how consistently and effectively AI-related practices are implemented across the organization. Each area is evaluated across five maturity levels:
                 </p>
             </div>
         </div>
@@ -214,13 +308,11 @@
                                 <span class="badge bg-danger fs-6">Level 1</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-danger">Traditional Development</h5>
-                                <p class="mb-0 fw-semibold text-muted">AFS Score: 1.0-1.7</p>
+                                <h5 class="fw-bold text-danger">Informal</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                    Minimal or no AI integration in development processes. Teams rely primarily on 
-                                    traditional manual methods with basic development tools and practices.
+                                    Ad-hoc level. Practices are reactive and inconsistent; risks often addressed after incidents.
                                 </p>
                             </div>
                         </div>
@@ -234,13 +326,11 @@
                                 <span class="badge bg-warning fs-6">Level 2</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-warning">AI-Assisted Development</h5>
-                                <p class="mb-0 fw-semibold text-muted">AFS Score: 1.8-2.4</p>
+                                <h5 class="fw-bold text-warning">Defined</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                    Basic AI tool adoption with individual usage patterns. Teams begin incorporating 
-                                    AI assistance for specific tasks like code completion and basic documentation.
+                                    Basic controls exist; practices depend heavily on individuals.
                                 </p>
                             </div>
                         </div>
@@ -254,33 +344,47 @@
                                 <span class="badge bg-info fs-6">Level 3</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-info">AI-Augmented Development</h5>
-                                <p class="mb-0 fw-semibold text-muted">AFS Score: 2.5-3.2</p>
+                                <h5 class="fw-bold text-info">Systematic</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                    Systematic AI integration across development workflows. Teams have standardized 
-                                    AI practices with coordinated usage and measurable productivity improvements.
+                                    Systematic AI integration across development workflows. Processes are documented, standardized, and repeatable; risk, ethics, and security are embedded.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="card mb-0 border-start border-success border-3">
+                <div class="card mb-3 border-start border-success border-3">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center">
                                 <span class="badge bg-success fs-6">Level 4</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-success">AI-First Development</h5>
-                                <p class="mb-0 fw-semibold text-muted">AFS Score: 3.3-4.0</p>
+                                <h5 class="fw-bold text-success">Integrated</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                    Advanced AI-native development with autonomous capabilities. Teams leverage 
-                                    intelligent systems for most development activities with predictive and self-improving processes.
+                                   Practices are measured; decisions informed by data, monitoring, and trends.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-0 border-start border-primary border-3">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 text-center">
+                                <span class="badge bg-primary fs-6">Level 5</span>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 class="fw-bold text-primary">Optimized</h5>
+                            </div>
+                            <div class="col-md-7">
+                                <p class="mb-0 text-muted">
+                                    Continuous improvement; lessons and emerging risks are systematically incorporated.
                                 </p>
                             </div>
                         </div>
@@ -311,10 +415,9 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-speedometer2 text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="fw-bold">AFS Score</h5>
+                        <h5 class="fw-bold">Identirfy Gaps</h5>
                         <p class="text-muted">
-                            Get your comprehensive AI-First Software Engineering score across all capability areas 
-                            with detailed breakdown and benchmarking.
+                            Identify high-risk gaps in AI governance, security, ethics, deployment, and operations.
                         </p>
                     </div>
                 </div>
@@ -325,10 +428,9 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-map text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="fw-bold">Roadmap</h5>
+                        <h5 class="fw-bold">Know where you stand</h5>
                         <p class="text-muted">
-                            Receive a customized roadmap with prioritized recommendations for advancing 
-                            to the next maturity level.
+                            Understand how organizational maturity influences AI risk exposure.
                         </p>
                     </div>
                 </div>
@@ -341,8 +443,49 @@
                         </div>
                         <h5 class="fw-bold">Benchmarks</h5>
                         <p class="text-muted">
-                            Compare your results against industry standards and identify areas 
+                            Get your results from industry standards and identify areas 
                             for competitive advantage.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card feature-card text-center h-100">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-speedometer2 text-primary" style="font-size: 2.2rem;"></i>
+                        </div>
+                        <h5 class="fw-bold">Map Risks</h5>
+                        <p class="text-muted">
+                            Prioritize remediation based on risk severity and maturity level. Create shared understanding of AI risk across stakeholders
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card feature-card text-center h-100">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-map text-primary" style="font-size: 2.2rem;"></i>
+                        </div>
+                        <h5 class="fw-bold">Security</h5>
+                        <p class="text-muted">
+                            Insights to deploy, pause, redesign, or decommission AI systems safely.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card feature-card text-center h-100">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-graph-up-arrow text-primary" style="font-size: 2.2rem;"></i>
+                        </div>
+                        <h5 class="fw-bold">Responsability</h5>
+                        <p class="text-muted">
+                            A tool you can use to demonstrate due diligence to regulators and auditors.
                         </p>
                     </div>
                 </div>
