@@ -20,7 +20,7 @@ primary_region = 'gru'
   processes = ['app']
 
 [[mounts]]
-  source = "app_data"
+  source = "data_volume"
   destination = "/app/instance"
   processes = ["app"]
 
