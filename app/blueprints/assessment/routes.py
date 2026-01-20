@@ -130,9 +130,9 @@ def manage_assessment_session(assessment_id):
     Args:
         assessment_id: Assessment ID to track in session
     """
+    # Store only a hint to the current assessment; treat session as ephemeral
     session['current_assessment_id'] = assessment_id
-    session['assessment_start_time'] = datetime.utcnow().isoformat()
-    session.permanent = True  # Keep session across browser restarts
+    session.permanent = True
 
 
 def get_current_assessment():
@@ -148,9 +148,6 @@ def get_current_assessment():
 def clear_assessment_session():
     """Clear assessment-related session data"""
     session.pop('current_assessment_id', None)
-    session.pop('assessment_start_time', None)
-    session.pop('assessment_responses', None)
-    session.pop('assessment_metadata', None)
 
 
 def validate_assessment_session(assessment_id):
@@ -422,24 +419,8 @@ def create():
         # Store the assessment ID before commit
         assessment_id = assessment.id
         
-        # Set up comprehensive session management with candidate details BEFORE commit
+        # Store only a non-authoritative hint of current assessment in session
         manage_assessment_session(assessment_id)
-        
-        # Initialize response tracking and metadata in session BEFORE commit
-        session['assessment_responses'] = {}
-        session['assessment_metadata'] = {
-            'organization_name': organization_name,
-            'account_name': account_name,
-            'first_name': first_name,
-            'last_name': last_name,
-            'email': email,
-            'industry': industry,
-            'assessor_name': assessor_name,
-            'assessor_email': assessor_email,
-            'created_at': datetime.utcnow().isoformat(),
-            'current_section_index': 0,
-            'assessment_id': assessment_id  # Store ID in session for reliability
-        }
         
         # Now commit the transaction - everything is set up
         db.session.commit()
@@ -495,51 +476,14 @@ def section_questions(assessment_id, section_id):
         
         # If assessment exists in DB, allow access regardless of session
         if assessment:
-            # If assessment is completed, redirect to report
-            if assessment.status == 'COMPLETED':
-                flash('This assessment has already been completed.', 'info')
+            # If assessment is completed or locked, redirect to report (read-only)
+            if assessment.status in ('COMPLETED', 'LOCKED'):
+                flash('This assessment is not editable.', 'info')
                 return redirect(url_for('assessment.report', assessment_id=assessment_id))
-            
-            # If no session metadata but assessment exists, recreate minimal session data
-            if 'assessment_metadata' not in session:
-                logger.info(f"Recreating session data for existing assessment {assessment_id}")
-                session['assessment_metadata'] = {
-                    'assessment_id': assessment_id,
-                    'organization_name': assessment.organization_name or assessment.team_name or 'Unknown Organization',
-                    'account_name': assessment.account_name or '',
-                    'first_name': assessment.first_name or '',
-                    'last_name': assessment.last_name or '',
-                    'email': assessment.email or '',
-                    'industry': assessment.industry or '',
-                    'assessor_name': assessment.assessor_name or '',
-                    'assessor_email': assessment.assessor_email or '',
-                    'created_at': assessment.created_at.isoformat() if assessment.created_at else datetime.utcnow().isoformat(),
-                    'current_section_index': 0
-                }
-                session['assessment_responses'] = {}
-                # Also set current_assessment_id for consistency with other routes
-                session['current_assessment_id'] = assessment_id
-                
         else:
-            # Assessment doesn't exist in DB, check session for new assessment creation
-            if 'assessment_metadata' not in session:
-                logger.error(f"No session data and no existing assessment {assessment_id}")
-                flash('Assessment session expired. Please start a new assessment.', 'error')
-                return redirect(url_for('assessment.create'))
-                
-            session_assessment_id = session['assessment_metadata'].get('assessment_id')
-            if session_assessment_id != assessment_id:
-                logger.error(f"Session assessment ID {session_assessment_id} doesn't match URL {assessment_id}")
-                flash('Assessment session mismatch. Please start a new assessment.', 'error')
-                return redirect(url_for('assessment.create'))
-            
-            # If no assessment in DB and session is valid, create a temporary assessment object
-            logger.warning(f"Assessment {assessment_id} not in DB yet, using session data")
-            assessment = type('Assessment', (), {
-                'id': assessment_id,
-                'team_name': session['assessment_metadata'].get('organization_name'),
-                'status': 'IN_PROGRESS'
-            })()
+            logger.error(f"Assessment {assessment_id} not found in database")
+            flash('Assessment not found. Please start a new assessment.', 'error')
+            return redirect(url_for('assessment.create'))
         
         # Get section with areas and questions
         section = db.session.query(Section).options(
@@ -641,9 +585,7 @@ def section_questions(assessment_id, section_id):
             (i for i, s in enumerate(all_sections) if s.id == section_id), 0
         )
         
-        # Update session metadata
-        session['assessment_metadata']['current_section_index'] = current_section_index
-        session['assessment_metadata']['assessment_id'] = assessment.id
+        # Session is not authoritative; do not persist navigation metadata
         # Allowed questions: include all active binary items for this section
         all_allowed_ids, _ = _compute_allowed_question_ids(db.session)
         question_ids = []
@@ -709,45 +651,23 @@ def submit_section_responses(assessment_id, section_id):
         
         logger.info(f"Submitting section {section_id} for assessment {assessment_id}")
         
-        # Try different approaches to get the assessment
-        try:
-            # First try: commit and refresh session
-            db.session.commit()
-            assessment = db.session.query(Assessment).get(assessment_id)
-        except:
-            # Second try: create new session
-            db.session.rollback()
-            assessment = db.session.query(Assessment).filter(Assessment.id == assessment_id).first()
-        
+        # Always read assessment from DB; session is not authoritative
+        assessment = db.session.query(Assessment).get(assessment_id)
         if not assessment:
-            # Third try: get from session data if it exists
-            if 'current_assessment_id' in session and session['current_assessment_id'] == assessment_id:
-                # Create a mock assessment object with the data we need
-                from app.models.assessment import Assessment as AssessmentModel
-                assessment = AssessmentModel()
-                assessment.id = assessment_id
-                # Get team name from session metadata
-                if 'assessment_metadata' in session:
-                    assessment.team_name = session['assessment_metadata'].get('organization_name', 'Unknown')
-                else:
-                    assessment.team_name = 'Unknown'
-                assessment.status = 'IN_PROGRESS'
-                logger.info(f"Using session data for assessment {assessment_id}")
-            else:
-                logger.error(f"Assessment {assessment_id} not found anywhere")
-                flash('Assessment not found', 'error')
-                return redirect(url_for('assessment.index'))
+            logger.error(f"Assessment {assessment_id} not found in database")
+            flash('Assessment not found', 'error')
+            return redirect(url_for('assessment.index'))
         
         section = db.session.query(Section).get(section_id)
         
         logger.info(f"Assessment query result: {assessment}")
         logger.info(f"Section query result: {section}")
         
-        if not assessment:
-            logger.error(f"Assessment {assessment_id} not found in database")
-            flash('Assessment not found', 'error')
-            return redirect(url_for('assessment.index'))
-            
+        # Validate lifecycle: prevent modification of completed/locked
+        if assessment.status in ('COMPLETED', 'LOCKED'):
+            flash('Completed assessments cannot be modified.', 'info')
+            return redirect(url_for('assessment.report', assessment_id=assessment_id))
+
         if not section:
             logger.error(f"Section {section_id} not found in database")
             flash('Section not found', 'error')
@@ -805,10 +725,7 @@ def submit_section_responses(assessment_id, section_id):
         db.session.commit()
         logger.info("All responses committed successfully")
         
-        # Update session tracking - ensure session dict exists
-        if 'assessment_responses' not in session:
-            session['assessment_responses'] = {}
-        session['assessment_responses'].update(responses_data)
+        # Session is ephemeral; do not mirror responses in session
         
         # Determine next action
         all_sections_q = db.session.query(Section)
@@ -855,27 +772,8 @@ def final_review(assessment_id):
         # Get assessment with responses
         assessment = db.session.query(Assessment).get(assessment_id)
         if not assessment:
-            # Try session fallback for transaction isolation issues
-            assessment_metadata = session.get('assessment_metadata', {})
-            if assessment_metadata.get('assessment_id') == assessment_id:
-                # Create temporary assessment object for review
-                class TempAssessment:
-                    def __init__(self, id, team_name, status='IN_PROGRESS'):
-                        self.id = id
-                        self.team_name = team_name
-                        self.status = status
-                        self.overall_score = None
-                        self.created_at = None
-                        self.completion_date = None
-                
-                assessment = TempAssessment(
-                    assessment_id, 
-                    assessment_metadata.get('team_name', 'Unknown Organization')
-                )
-                logger.info(f"Using session data for final review of assessment {assessment_id}")
-            else:
-                flash('Assessment not found', 'error')
-                return redirect(url_for('assessment.index'))
+            flash('Assessment not found', 'error')
+            return redirect(url_for('assessment.index'))
         
         # Get all sections with responses (allowed only)
         sections_q = db.session.query(Section).options(
@@ -903,14 +801,18 @@ def final_review(assessment_id):
             if total_questions > 0 else 0
         )
         
-        # Get metadata from session or create basic metadata
-        metadata = session.get('assessment_metadata', {})
-        if not metadata:
-            metadata = {
-                'team_name': getattr(assessment, 'team_name', 'Organization'),
-                'assessment_id': assessment_id,
-                'created_at': str(getattr(assessment, 'created_at', '')),
-            }
+        # Build metadata from authoritative DB state
+        metadata = {
+            'team_name': getattr(assessment, 'organization_name', None) or getattr(assessment, 'team_name', 'Organization'),
+            'organization_name': getattr(assessment, 'organization_name', None),
+            'account_name': getattr(assessment, 'account_name', None),
+            'first_name': getattr(assessment, 'first_name', None),
+            'last_name': getattr(assessment, 'last_name', None),
+            'email': getattr(assessment, 'email', None),
+            'industry': getattr(assessment, 'industry', None),
+            'assessment_id': assessment_id,
+            'created_at': assessment.created_at.isoformat() if getattr(assessment, 'created_at', None) else None,
+        }
         
         context = {
             'assessment': assessment,
@@ -958,8 +860,8 @@ def generate_report(assessment_id):
         
         logger.info(f"Found assessment {assessment_id}, status: {assessment_row.status}")
         
-        # Check if assessment is already completed
-        if assessment_row.status == 'COMPLETED':
+        # Check if assessment is already completed/locked
+        if assessment_row.status in ('COMPLETED', 'LOCKED'):
             flash('Assessment is already completed', 'info')
             return redirect(url_for('assessment.report', 
                                     assessment_id=assessment_id))
@@ -1041,20 +943,21 @@ def generate_report(assessment_id):
                 f"classification={deviq_classification}"
             )
             
-            # Prepare metadata for storage in results_json
-            metadata = session.get('assessment_metadata', {})
+            # Prepare metadata for storage in results_json (from DB only)
+            # Requery assessment as ORM object for easy field access
+            assessment_obj = db.session.query(Assessment).get(assessment_id)
             assessment_results = {
                 'scores': section_scores,
                 'overall_score': overall_score,
                 'deviq_classification': deviq_classification,
                 'metadata': {
-                    'organization_name': metadata.get('organization_name'),
-                    'account_name': metadata.get('account_name'),
-                    'first_name': metadata.get('first_name'),
-                    'last_name': metadata.get('last_name'),
-                    'email': metadata.get('email'),
-                    'industry': metadata.get('industry'),
-                    'created_at': metadata.get('created_at'),
+                    'organization_name': getattr(assessment_obj, 'organization_name', None),
+                    'account_name': getattr(assessment_obj, 'account_name', None),
+                    'first_name': getattr(assessment_obj, 'first_name', None),
+                    'last_name': getattr(assessment_obj, 'last_name', None),
+                    'email': getattr(assessment_obj, 'email', None),
+                    'industry': getattr(assessment_obj, 'industry', None),
+                    'created_at': assessment_obj.created_at.isoformat() if getattr(assessment_obj, 'created_at', None) else None,
                     'completion_date': datetime.utcnow().isoformat()
                 }
             }
@@ -1088,7 +991,7 @@ def generate_report(assessment_id):
             db.session.commit()
             logger.info(f"Assessment {assessment_id} committed to database")
             
-            # Clear session data as assessment is complete
+            # Session is not authoritative; optionally clear current hint
             clear_assessment_session()
             
             logger.info(f"Assessment {assessment_id} completed successfully")
@@ -1428,14 +1331,7 @@ def submit_response(assessment_id):
         
         response = assessment_service.submit_response(**response_data)
         
-        # Update session tracking
-        if 'assessment_responses' not in session:
-            session['assessment_responses'] = {}
-        session['assessment_responses'][str(question_id)] = {
-            'answer_value': answer_value,
-            'notes': notes,
-            'submitted_at': datetime.utcnow().isoformat()
-        }
+        # Do not mirror responses into session; DB is authoritative
         
         # Log response submission
         logger.info(f"Response submitted for assessment {assessment_id}, "

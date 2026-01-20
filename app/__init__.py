@@ -113,6 +113,9 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     # Register error handlers
     _register_error_handlers(app)
     
+    # Register lightweight health endpoints for container orchestration
+    _register_health_endpoints(app)
+    
     # Register context processors
     _register_context_processors(app)
     
@@ -347,6 +350,32 @@ def _register_context_processors(app: Flask) -> None:
         }
     
     app.logger.info("Context processors registered")
+
+
+def _register_health_endpoints(app: Flask) -> None:
+    """Register simple health endpoints accessible in all modes."""
+    @app.get('/health')
+    def health():
+        return jsonify({
+            'status': 'healthy',
+            'service': app.config.get('APP_NAME', 'AFS Assessment'),
+            'environment': app.config.get('CONFIG_NAME', 'unknown')
+        }), 200
+    
+    @app.get('/health/live')
+    def health_live():
+        return jsonify({'status': 'live'}), 200
+    
+    @app.get('/health/ready')
+    def health_ready():
+        # Basic DB readiness probe
+        try:
+            from sqlalchemy import text
+            with app.app_context():
+                db.engine.execute(text('SELECT 1'))
+            return jsonify({'status': 'ready'}), 200
+        except Exception as e:
+            return jsonify({'status': 'degraded', 'error': str(e)}), 503
 
 
 def _register_cli_commands(app: Flask) -> None:

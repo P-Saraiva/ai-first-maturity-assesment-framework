@@ -145,7 +145,7 @@ INSERT OR IGNORE INTO questions VALUES('IAA-CSM-01E','IAA-CSM','Credenciais de I
 
 -- Área: Agents, Autonomia e Privilégio (IAA-AAP)
 INSERT OR IGNORE INTO questions VALUES('IAA-AAP-01A','IAA-AAP','Existe limitação explícita de escopo de ação para agentes baseados em IA?','Não','Sim',NULL,NULL,1,1,datetime('now'),datetime('now'));
-INSERT OR IGNORE INTO questions VALUES('IAA-AAP-01B','IAA-AAP','Agentes de IA podem executar ações administrativas ou sensíveis sem aprovação humana?','Não','Sim',NULL,NULL,2,1,datetime('now'),datetime('now'));
+INSERT OR IGNORE INTO questions VALUES('IAA-AAP-01B','IAA-AAP','Agentes de IA executam ações administrativas ou sensíveis com aprovação humana?','Não','Sim',NULL,NULL,2,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('IAA-AAP-01C','IAA-AAP','Existem mecanismos de “human-in-the-loop” para ações privilegiadas executadas por agentes?','Não','Sim',NULL,NULL,3,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('IAA-AAP-01D','IAA-AAP','As ações executadas por agentes de IA são: autenticadas, registradas, auditáveis por identidade própria?','Não','Sim',NULL,NULL,4,1,datetime('now'),datetime('now'));
 
@@ -165,7 +165,7 @@ INSERT OR IGNORE INTO questions VALUES('DPR-DGM-01E','DPR-DGM','A governança de
 -- Section 5: Privacidade, Direitos do Usuário e Transparência (PUT)
 -- Área: Privacidade, Transparência ao Usuário e Controle (PUT-PUC)
 INSERT OR IGNORE INTO questions VALUES('PUT-PUC-01A','PUT-PUC','Existe conscientização básica sobre privacidade no uso de IA?','Não','Sim',NULL,NULL,1,1,datetime('now'),datetime('now'));
-INSERT OR IGNORE INTO questions VALUES('PUT-PUC-01B','PUT-PUC','Configurações padrão de privacidade são consideradas no uso de sistemas de IA?','Não','Sim',NULL,NULL,2,1,datetime('now'),datetime('now'));
+INSERT OR IGNORE INTO questions VALUES('PUT-PUC-01B','PUT-PUC','Configurações padrão de privacidade (Privacy by Default) são consideradas no uso de sistemas de IA?','Não','Sim',NULL,NULL,2,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('PUT-PUC-01C','PUT-PUC','Existem procedimentos formais de privacidade por design aplicáveis ao uso de IA?','Não','Sim',NULL,NULL,3,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('PUT-PUC-01D','PUT-PUC','Usuários recebem informações claras sobre uso de dados e IA?','Não','Sim',NULL,NULL,4,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('PUT-PUC-01E','PUT-PUC','Existem mecanismos para que usuários exerçam controle sobre seus dados pessoais?','Não','Sim',NULL,NULL,5,1,datetime('now'),datetime('now'));

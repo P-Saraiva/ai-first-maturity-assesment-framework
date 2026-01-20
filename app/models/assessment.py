@@ -20,11 +20,11 @@ from .base import BaseModel
 
 
 class AssessmentStatus(Enum):
-    """Assessment status enumeration"""
-    DRAFT = 'draft'
-    IN_PROGRESS = 'in_progress'
-    COMPLETED = 'completed'
-    ARCHIVED = 'archived'
+    """Assessment status enumeration (conceptual)."""
+    DRAFT = 'DRAFT'
+    IN_PROGRESS = 'IN_PROGRESS'
+    COMPLETED = 'COMPLETED'
+    LOCKED = 'LOCKED'
 
 
 class Assessment(BaseModel):
@@ -81,7 +81,7 @@ class Assessment(BaseModel):
     # Constraints
     __table_args__ = (
         CheckConstraint(
-            "status IN ('IN_PROGRESS', 'COMPLETED', 'DRAFT')",
+            "status IN ('IN_PROGRESS', 'COMPLETED', 'DRAFT', 'LOCKED')",
             name='check_assessment_status'
         ),
         CheckConstraint("overall_score >= 0", name='check_overall_score_positive'),
@@ -109,7 +109,7 @@ class Assessment(BaseModel):
             errors.append("Team name must be 200 characters or less")
         
         # Validate status
-        valid_statuses = ['IN_PROGRESS', 'COMPLETED', 'DRAFT']
+        valid_statuses = ['IN_PROGRESS', 'COMPLETED', 'DRAFT', 'LOCKED']
         if self.status not in valid_statuses:
             errors.append(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
         
@@ -168,6 +168,11 @@ class Assessment(BaseModel):
         if self.status == 'IN_PROGRESS':
             self.status = 'COMPLETED'
             self.completion_date = datetime.utcnow()
+
+    def lock(self) -> None:
+        """Lock assessment to prevent modification (post-completion)."""
+        if self.status == 'COMPLETED':
+            self.status = 'LOCKED'
     
     @property
     def is_draft(self) -> bool:
@@ -183,6 +188,11 @@ class Assessment(BaseModel):
     def is_completed(self) -> bool:
         """Check if assessment is completed"""
         return self.status == 'COMPLETED'
+
+    @property
+    def is_locked(self) -> bool:
+        """Check if assessment is locked (immutable)."""
+        return self.status == 'LOCKED'
     
     def to_dict(self, include_relationships: bool = False) -> Dict[str, Any]:
         """Convert to dictionary with parsed JSON fields"""

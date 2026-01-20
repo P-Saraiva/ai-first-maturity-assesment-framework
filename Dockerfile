@@ -53,7 +53,11 @@ EXPOSE 5001
 # Environment variables
 ENV FLASK_APP=run.py \
     PYTHONUNBUFFERED=1 \
-    DATABASE_URL=sqlite:///instance/app_dev.db
+    DATABASE_URL=sqlite:///instance/app_dev.db \
+    WORKERS=2 \
+    THREADS=2
 
-# Run database setup and start the application
-CMD python scripts/setup_database.py && python run.py
+# Entrypoint script for proper signal handling
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
