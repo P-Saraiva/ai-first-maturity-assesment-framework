@@ -92,7 +92,7 @@ class ScoringService:
             # Map to normalized 0..1
             overall_normalized = max(0.0, min(1.0, (deviq_score - 1.0) / 3.0))
 
-            # SSE overall percentage = weighted average of area percentages
+            # SSE overall percentage = weighted average of area percentages (0..1)
             all_area_percentages = []
             all_area_weights = []
             for sec in section_scores.values():
@@ -107,6 +107,9 @@ class ScoringService:
                 overall_percentage = calculate_weighted_average(all_area_percentages, all_area_weights)
             overall_sse_level = SSEConstants.classify_percentage(overall_percentage)
 
+            # Convert percentage (0..1) to 0..5 scale for final score display
+            overall_score_0to5 = round(max(0.0, min(5.0, overall_percentage * 5.0)), 2)
+
             # Get detailed results
             results = {
                 'assessment_id': assessment_id,
@@ -120,6 +123,7 @@ class ScoringService:
                 'section_scores': section_scores,
                 'overall_normalized': round(overall_normalized, 3),
                 'overall_percentage': round(overall_percentage, 3),
+                'overall_score_0to5': overall_score_0to5,
                 'improvement_potential': calculate_improvement_potential(
                     deviq_score
                 ),

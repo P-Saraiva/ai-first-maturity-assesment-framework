@@ -132,12 +132,12 @@ INSERT OR IGNORE INTO questions VALUES('GSA-CUL-01E','GSA-CUL','Existe uma cultu
 -- Section 3: Identidade, Autonomia e Controle de Acesso (IAA)
 -- Área: Governança de Identidade para IA e Agents (IAA-IGO)
 INSERT OR IGNORE INTO questions VALUES('IAA-IGO-01A','IAA-IGO','Existe clareza formal sobre quem é responsável por identidades e acessos de sistemas de IA e agentes automatizados?','Não','Sim',NULL,NULL,1,1,datetime('now'),datetime('now'));
-INSERT OR IGNORE INTO questions VALUES('IAA-IGO-01B','IAA-IGO','Sistemas de IA e agentes possuem identidades próprias, distintas de usuários humanos?','Não','Sim',NULL,NULL,2,1,datetime('now'),datetime('now'));
-INSERT OR IGNORE INTO questions VALUES('IAA-IGO-01C','IAA-IGO','Existe segregação clara entre identidades usadas para: experimentação, operação, administração de sistemas de IA?','Não','Sim',NULL,NULL,3,1,datetime('now'),datetime('now'));
+INSERT OR IGNORE INTO questions VALUES('IAA-IGO-01B','IAA-IGO','Sistemas de IA possuem algum controle de acesso ou segregação mínima entre ambientes e usuários?','Não','Sim',NULL,NULL,2,1,datetime('now'),datetime('now'));
+INSERT OR IGNORE INTO questions VALUES('IAA-IGO-01C','IAA-IGO','As contas e permissões utilizadas em projetos de prova de conceito com IA são limitadas e controladas por equipe de segurança?','Não','Sim',NULL,NULL,3,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('IAA-IGO-01D','IAA-IGO','O uso de contas genéricas ou compartilhadas por sistemas de IA é proibido ou controlado?','Não','Sim',NULL,NULL,4,1,datetime('now'),datetime('now'));
 
 -- Área: Gestão de Credenciais e Segredos (IAA-CSM)
-INSERT OR IGNORE INTO questions VALUES('IAA-CSM-01A','IAA-CSM','Credenciais, tokens e chaves usadas por sistemas de IA são armazenadas de forma segura (ex.: vault, secret manager)?','Não','Sim',NULL,NULL,1,1,datetime('now'),datetime('now'));
+INSERT OR IGNORE INTO questions VALUES('IAA-CSM-01A','IAA-CSM','Quando a IA acessa bases ou APIs internas, há mecanismos para proteger credenciais e evitar vazamentos?','Não','Sim',NULL,NULL,1,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('IAA-CSM-01B','IAA-CSM','Existe rotação automática de credenciais usadas por IA, agentes ou integrações remotas?','Não','Sim',NULL,NULL,2,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('IAA-CSM-01C','IAA-CSM','Sistemas de IA utilizam credenciais com privilégio mínimo, compatível com sua função operacional?','Não','Sim',NULL,NULL,3,1,datetime('now'),datetime('now'));
 INSERT OR IGNORE INTO questions VALUES('IAA-CSM-01D','IAA-CSM','Existe monitoramento de uso indevido ou anômalo de credenciais associadas a IA?','Não','Sim',NULL,NULL,4,1,datetime('now'),datetime('now'));

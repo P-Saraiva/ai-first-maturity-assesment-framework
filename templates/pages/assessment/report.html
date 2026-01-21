@@ -259,8 +259,8 @@
             <div class="col-md-4 text-center">
                 <div class="score-circle mx-auto mb-3">
                     <div class="text-center">
-                        <div class="fw-bold" style="font-size: 2.2rem;">{{ (overall_percentage * 100)|round(1) }}%</div>
-                        <div class="fw-semibold">Overall Confirmed Capabilities</div>
+                        <div class="fw-bold" style="font-size: 2.2rem;">{{ "%.1f"|format(overall_score_0to5) }}</div>
+                        <div class="fw-semibold">Final Score (0–5 Scale)</div>
                     </div>
                 </div>
                 <h4 class="fw-bold">{{ overall_level }}</h4>
@@ -340,7 +340,7 @@
                     <i class="bi bi-pie-chart"></i>
                 </div>
                 <h3 class="fw-bold mb-2" style="color: {{ section.color }};">
-                    {{ section.percentage }}%
+                    {{ "%.1f"|format(section.score_0to5) }}
                 </h3>
                 <h6 class="text-muted mb-1">{{ section.name }} — Confirmed Capabilities</h6>
                 <div class="progress mt-2" style="height: 6px;">
@@ -513,7 +513,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span>Current:</span>
                                 <span class="fw-bold fs-4" style="color: {{ area.color }};">
-                                    {{ (area.percentage or 0)|round(1) }}%
+                                    {{ "%.1f"|format(area.score_0to5) }}
                                 </span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -528,7 +528,7 @@
                                 {% for sub_area in area.areas %}
                                 <li class="mb-1">
                                     <small class="text-muted">
-                                        {{ sub_area.name }} ({{ ((sub_area.area_percentage or 0) * 100)|round(1) }}%)
+                                        {{ sub_area.name }} ({{ "%.1f"|format(sub_area.area_score_0to5) }})
                                     </small>
                                 </li>
                                 {% endfor %}

@@ -1719,6 +1719,7 @@ def report(assessment_id):
                     'responses_count': a['responses_count'],
                     'domain_normalized': a.get('domain_normalized'),
                     'area_percentage': a.get('area_percentage'),
+                    'area_score_0to5': round((a.get('area_percentage') or 0.0) * 5.0, 2),
                 })
                 area_scores[a['area_id']] = {
                     'score': a['score'],
@@ -1753,6 +1754,7 @@ def report(assessment_id):
                 'areas': areas_list,
                 'responses_count': sec['responses_count'],
                 'percentage': round(section_pct * 100.0, 1),
+                'score_0to5': round(section_pct * 5.0, 2),
                 'level_num': section_level_num
             })
 
@@ -1874,6 +1876,7 @@ def report(assessment_id):
             'assessment': assessment,
             'overall_score': overall_score,
             'overall_percentage': scoring_results.get('overall_percentage', 0.0),
+            'overall_score_0to5': scoring_results.get('overall_score_0to5', 0.0),
             'overall_level': overall_level,
             'section_scores': section_scores,
             'area_scores': area_scores,
@@ -2042,6 +2045,7 @@ def _identify_priority_areas(section_scores):
             'name': section['name'],
             'score': section.get('score'),  # kept for backward compatibility
             'percentage': section.get('percentage', 0.0),
+            'score_0to5': round((section.get('percentage', 0.0) / 100.0) * 5.0, 2),
             'level': section['level'],
             'color': section['color'],
             'areas': section['areas'][:2],  # Top 2 areas within section
@@ -2241,6 +2245,7 @@ def download_pdf(assessment_id):
             'assessment': assessment,
             'overall_score': overall_score,
             'overall_percentage': overall_percentage,
+            'overall_score_0to5': scoring_results.get('overall_score_0to5', 0.0),
             'overall_level': overall_level,
             'section_scores': section_scores,
             'area_scores': area_scores,
