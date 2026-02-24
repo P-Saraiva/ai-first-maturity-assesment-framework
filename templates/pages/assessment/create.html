@@ -1,0 +1,31 @@
+{% extends 'base/layout.html' %}
+{% block title %}Start Assessment{% endblock %}
+{% block content %}
+<div class="container py-4" id="create-root" data-config-url="{{ url_for('static', filename='assets/assessment_config.json') }}">
+  <h1 class="h3 mb-3">Create Cybersecurity Maturity Assessment</h1>
+  <p class="text-muted mb-4">Dynamically select domains and areas, answer binary questions, and generate a tailored report.</p>
+
+  <!-- Selection Stage -->
+  <div id="selection-stage" class="d-none">
+    {% include 'pages/assessment/create/components/selection.html' %}
+  </div>
+
+  <!-- Runner Stage -->
+  <div id="runner-stage" class="d-none">
+    {% include 'pages/assessment/create/components/runner.html' %}
+  </div>
+
+  <!-- Report Stage -->
+  <div id="report-stage" class="d-none">
+    {% include 'pages/assessment/create/components/report.html' %}
+  </div>
+</div>
+
+<!-- Intro Modal -->
+{% include 'pages/assessment/create/components/intro_modal.html' %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='src/js/create/create.js') }}"></script>
+{% endblock %}

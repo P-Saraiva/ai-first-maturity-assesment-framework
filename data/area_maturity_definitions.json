@@ -8,131 +8,131 @@
                 "title": "Level 2: Defined",
                 "description": "Para garantir confiança de stakeholders, conformidade com regulações e contribuição positiva para a sociedade, este sub-pilar busca avaliar, consistentemente, consequências éticas e sociais da implantação de sistemas de IA, ativamente gerenciando riscos e alinhando o uso da IA com valores organizacionais e expectativas públicas. É necessário garantir que decisões de sistemas com IA estejam alinhadas com valores éticos, como o foco no ser-humano, seu bem estar, respeito por direitos humanos, conformidade com leis e respeito pelo meio-ambiente."
                 },
-        "risk_description": "1. Unanticipated Negative Impacts: Failure to Identify Socio-Technical Risks, Inability to Detect Harmful Output\n2. Inconsistent Decision Making: Ethics Washing, Regulatory Non-Compliance\n3. Human-AI Configuration Failures: Automation Bias, Moral Crumple Zones",
+        "risk_description": "1. Impactos surpresa: Falha em identificar riscos sócio-técnicos e detectar conteúdos prejudiciais\n2. Não conformidade a normas/regulamentações: Tomada de decisões inconsistentes, Ethics washing\n3. Viés automatizado: Falhas em configurações Humano-IA, Moral Crumple Zones",
         "references": {
             "mitre": ["Tática: Impact \n Técnicas: External Harms — Societal Harm, User Harm, Reputational Harm, Financial Harm"],
-            "nist": ["Pedro AI RMF: Govern, Map, Measure, Manage — Transparency and Accountability"]
+            "nist": ["NIST AI RMF: Harm mitigation, Fairness, Transparency, Documentation"]
         }
     },
 
     "ETSI-ETC": {
-        "risk_description": "Falta de explicabilidade pode reduzir confiança e dificultar auditoria de decisões automatizadas.",
+        "risk_description": "1. Engano e Desgaste de confiança: Perda de influência e integridade de informação\n2. Pontos cegos de segurança: Falta de transparência em decisões e depurações, Incapacidade de depurar ou corrigir falhas\n3. Não conformidade a normas/regulamentações: Falha em prestação de contas e recurso, Impossibilidade de reparações",
         "references": {
-            "mitre": ["ATLAS: Model explainability challenges"],
+            "mitre": ["Táticas: Impact, Initial Access\nTécnicas: External Harms — Societal Harm, User Harm, Reputational Harm, Phishing"],
             "nist": ["AI RMF: Transparency, Documentation and Communication"]
         }
     },
     "ETSI-BFR": {
-        "risk_description": "Dados e modelos podem introduzir vieses, causando impactos discriminatórios em processos decisórios.",
+        "risk_description": "1. Viés prejudicial e Homogeneização: Amplificação de viés sistêmico, Danos morais, Allocative Harms\n2. Desvio do Modelo e Obsolescência: Desvio de conceitos, Débito técnico, Colapso do Modelo",
         "references": {
-            "mitre": ["ATLAS: Data poisoning and bias"],
-            "nist": ["AI RMF: Harm mitigation, Fairness"]
+            "mitre": ["Tática: Impact \n Técnicas: External Harms — Societal Harm, User Harm, Reputational Harm, Financial Harm"],
+            "nist": [""]
         }
     },
     
     "GSA-GSC": {
-        "risk_description": "Ausência de governança e métricas pode levar a decisões incoerentes e riscos regulatórios.",
+        "risk_description": "1. Shadow AI e Exposição não gerenciada: Expansão de Shadow AI, Gerenciamento inconsistente de riscos de IA \n2. Falta de alinhamento e Desperdício de recursos: Cultura de Retrabalho e silos, Baixa performance financeira\n3. Tomada de decisões cega: Decisões realizadas com falta de evidências, incapacidade de detectar falhas ou desvios, recursos mal-alocados",
         "references": {
-            "mitre": ["ATLAS: Governance and compliance patterns"],
-            "nist": ["AI RMF: Governance functions and roles"]
+            "mitre": ["Táticas: Initial Access, Impact\nTécnicas: Supply Chain Compromise, External Harms — Societal Harm, User Harm, Reputational Harm, Financial Harm"],
+            "nist": ["NIST AI RMF: Asset management, Risk management, Documentation"]
         }
     },
     "GSA-PLA": {
-        "risk_description": "Não conformidade com LGPD/GDPR e requisitos éticos pode resultar em sanções e prejuízos reputacionais.",
+        "risk_description": "1. Débito legal: Violação de leis, Infringimento de propriedade intelectual, incapacidade de provar responsabilidade\n2. Não conformidade a normas/regulamentações: Conformidade reativa x proativa\n3. Falhas silenciosas: Cultura de silêncio, supressão de sinais de riscos, incapacidade de corrigir a estratégia",
         "references": {
-            "mitre": ["ATLAS: Legal and regulatory considerations"],
-            "nist": ["AI RMF: Risk management, Documentation"]
+            "mitre": ["Táticas: Impact, Defense Evasion \n Técnicas: External Harms: AI Intellectual Property Theft, Corrupt AI Model, Masquerading"],
+            "nist": ["NIST AI RMF: Risk management, Documentation, Transparency"]
         }
     },
     "GSA-CUL": {
-        "risk_description": "Cultura fraca de segurança em IA aumenta probabilidade de erros operacionais e exposição a ameaças.",
+        "risk_description": "1. Falta de visibilidade operacional: Incapacidade de identificar ameaças específicas de IA, retrabalho e ineficiência\n2. Defesa e respostas inconsistentes: Falha ao adaptar para novas ameaças, dados sobre incidentes não compartilhados",
         "references": {
-            "mitre": ["ATLAS: Organizational readiness"],
-            "nist": ["AI RMF: Training and awareness"]
+            "mitre": ["Táticas: Initial Access, Lateral Movement, Reconnaissance\nTécnicas: Phishing, Spearphishing via Social Engineering LLM, Gather Victim Identity Information "],
+            "nist": ["NIST AI RMF: Training and awareness"]
         }
     },
     "IAA-IGO": {
-        "risk_description": "Identidades de agentes e sistemas de IA sem governança clara podem permitir ações não rastreáveis.",
+        "risk_description": "1. Shadow AI e Exposição não gerenciada: Superfície de ataque invisível, falta de responsabilidade legal e regulamentatória\n2. Vulnerabilidades herdadas: Incapacidade de aplicar Patchs, envenenamento e adulteração de dados\n3. Desgaste de confiança e Fraude: Perda de confiança, facilitação de fraudes",
         "references": {
-            "mitre": ["ATLAS: Identity and access risks for AI systems"],
-            "nist": ["AI RMF: Access control and accountability"]
+            "mitre": ["Táticas: Reconnaissance, Privilege Escalation, AI Attack Staging\nTécnicas: Search Open Technical Databases, LLM Jailbreak, Generate Deepfakes"],
+            "nist": ["NIST AI RMF: Access control and accountability"]
         }
     },
     "IAA-CSM": {
-        "risk_description": "Gestão inadequada de segredos e credenciais de IA pode permitir abuso e comprometimento de sistemas.",
+        "risk_description": "1. Comprometimento de acesso: Acesso não autorizado, vazamento de dados, uso indevido de sistemas\n2. Persistência de acessos indevidos: Backdoors com credenciais obsoletas, indisponibilidade de sistemas\n3. Falta de visibilidade de incidentes: Detecção tardia ou inexistente, perda de confiança em sistemas automatizados",
         "references": {
-            "mitre": ["ATLAS: Credential abuse and secret leakage"],
-            "nist": ["AI RMF: Secure development and operations"]
+            "mitre": ["Táticas: Credential Access, Persistence, Privilege Escalation, Defense Evasion\nTécnicas: Search Open Technical Databases, LLM Jailbreak, Generate Deepfakes, Create Account, Valid Accounts, Backdoors"],
+            "nist": [""]
         }
     },
     "IAA-AAP": {
-        "risk_description": "Agentes com privilégio elevado sem supervisão humana podem executar ações perigosas ou irreversíveis.",
+        "risk_description": "1. Perda de controle operacional: Ações indevidas em sistemas críticos, Erros automatizados em escala\n2. Excesso de privilégios para agentes de IA: Exclusão ou alteração de dados críticos, Interrupção de serviços, Incidentes com alto impacto e baixa rastreabilidade \n3. Falta de registros: Falha em prestação de contas, Uso contínuo sem detecção, Incidentes não atribuíveis, Perda de confiança em automação e IA",
         "references": {
-            "mitre": ["ATLAS: Autonomous agent risks"],
-            "nist": ["AI RMF: Human oversight (“human-in-the-loop”)"]
+            "mitre": ["Tática: Execution, Privilege Escalation, Defense Evasion\nTécnicas:LLM Prompt Injection, Valid Accounts, Escape to Host"],
+            "nist": [""]
         }
     },
     "DPR-IPU": {
-        "risk_description": "Inventário incompleto e falta de proveniência facilitam “Shadow AI” e uso de componentes vulneráveis.",
+        "risk_description": "1. Shadow AI e Exposição não gerenciada: Superfície de ataque invisível, falta de responsabilidade legal e regulamentatória\n2. Vulnerabilidades herdadas: Incapacidade de aplicar Patchs, envenenamento e adulteração de dados\n3. Desgaste de confiança e Fraude: Perda de confiança, facilitação de fraudes",
         "references": {
-            "mitre": ["ATLAS: Supply chain and third-party risks"],
-            "nist": ["AI RMF: Asset management and provenance"]
+            "mitre": ["Táticas: Reconnaissance, Privilege Escalation, AI Attack Staging\nTécnicas: Search Open Technical Databases, LLM Jailbreak, Generate Deepfakes"],
+            "nist": [""]
         }
     },
     "DPR-DGM": {
-        "risk_description": "Dados de baixa qualidade e governança fraca comprometem resultados e segurança dos sistemas de IA.",
+        "risk_description": "1. Garbage In, Garbage Out e Degradação do modelo: Erros compostos, Incapacidade de detectar desvios, alucinações\n2. Vulnerabilidade a envenenamento de dados: Adulteração não detectada, falta procedência\n3. Violação à privacidade: Vazamento de dados, uso de dados não autorizado",
         "references": {
-            "mitre": ["ATLAS: Data integrity and governance"],
-            "nist": ["AI RMF: Data quality and integrity"]
+            "mitre": ["Táticas: Impact,  AI Attack Staging, Execution\nTécnicas: External Harms, Poison AI Model, LLM Prompt Injection"],
+            "nist": [""]
         }
     },
     "PUT-PUC": {
-        "risk_description": "Falta de transparência e controle para usuários pode violar privacidade e reduzir confiança.",
+        "risk_description": "1. Vazamentos e inferência: Memorização de dados/vazamento de informação, ataques de reidentificação\n2. Débito legal: Incapacidade de honrar a revogação de consentimento, uso de dados não autorizado\n3. Engano e Desgaste de confiança: Perda de influência e integridade de informação",
         "references": {
-            "mitre": ["ATLAS: Privacy risks and transparency"],
-            "nist": ["AI RMF: Privacy-by-design, User control"]
+            "mitre": ["Tática: Exfiltration, Impact\nTécnicas: Exfiltration via AI Agent Tool Invocation, Exfiltration via AI Inference API, External Harm "],
+            "nist": [""]
         }
     },
     "TSA-TRO": {
-        "risk_description": "Ameaças específicas de IA (prompt injection, model abuse) exigem mitigação contínua.",
+        "risk_description": "1. Cadeia de suprimentos vulnerável: Superfície de ataque invisível, Ataques adversários não detectados\n2. Falhas silenciosas: Desvio e obsolescência do modelo não gerenciadas\n3. Mitigação ineficaz: Defesas fracas, não-conformidade",
         "references": {
-            "mitre": ["ATLAS: Prompt injection, Model abuse"],
-            "nist": ["AI RMF: Threat modeling and risk mitigation"]
+            "mitre": ["Táticas: Initial Access, AI Attack Staging, Impact\nTécnicas: AI Supply Chain Compromise, Verify Attack, Manipulate AI Model "],
+            "nist": [""]
         }
     },
     "TSA-SDA": {
-        "risk_description": "Implantação sem critérios e arquitetura segura pode expor modelos e dados sensíveis.",
+        "risk_description": "1. Comprometimento do modelo: Roubo de propriedade intelectual, exfiltração de pesos, adulteração/envenenamento do modelo, movimentação lateral\n2. Falha da implantação: Posição de segurança inconsistente, incapacidade de rollback\n3. Exposição não gerenciada: Implantação de sistemas não seguros, Falha em prestação de contas, Desalinhamento com objetivos do negócio",
         "references": {
-            "mitre": ["ATLAS: Secure deployment patterns"],
-            "nist": ["AI RMF: Secure operations and release management"]
+            "mitre": ["Táticas: Initial Access, Lateral Movement, Impact\nTécnicas: AI Supply Chain Compromise, Use Alternate Authentication Material, AI Intellectual Property Theft"],
+            "nist": [""]
         }
     },
     "TSA-DMH": {
-        "risk_description": "Falhas não rastreadas e ausência de bloqueio de conteúdo nocivo ampliam impactos negativos.",
+        "risk_description": "1. Vulnerabilidades persistentes e recorrentes: Incapacidade de identificar causas raiz, Pontos cegos em segurança, acúmulo de débito técnico\n2. Geração de conteúdo prejudicial: Produção de conteúdo ilegal, discuro de ódio, Recomendações perigosas e violentas\n3. Desgaste de confiança: Incapacidade de detectar alucinações, falta de prestação de contas",
         "references": {
-            "mitre": ["ATLAS: Defect management, Content safety"],
-            "nist": ["AI RMF: Monitoring and incident response"]
+            "mitre": ["Táticas: Impact, Resource Development\nTécnicas: External Harms, Publish Hallucinated Entities"],
+            "nist": [""]
         }
     },
     "QEI-TEI": {
-        "risk_description": "Ausência de testes adequados permite que riscos passem despercebidos para produção.",
+        "risk_description": "1. Viés de confirmação e \"Efeito manada\": Pontos cegos, conflito de interesses \n2. Vulnerabilidades à Ataques adversários: Modos de falhas não detectados, falso senso de segurança\n3. Baixa performance: Desalinhamento estratégico, incapacidade de defender decisões",
         "references": {
-            "mitre": ["ATLAS: Testing and evaluation"],
-            "nist": ["AI RMF: Measurement and evaluation"]
+            "mitre": ["Táticas: Initial Access, Execution, Defense Evasion\nTécnicas: AI Supply Chain Compromise, AI Model Inference, AI Model Manipulation"],
+            "nist": [""]
         }
     },
     "QEI-IEC": {
-        "risk_description": "Falta de resposta a incidentes específicos de IA aumenta tempo de impacto e danos.",
+        "risk_description": "1. Riscos operacionais e de segurança: Comportamento do sistema imprevisível, falhas descontroladas, incapacidade de gerencias erros em cascata\n2. Resposta ineficaz à ameças: Diagnóstico falso positivo, Remediaçãoes ineficazes\n3. Dano reputacional e Desgaste de confiança: Perda de investimentos, incapacidade de aprendizado",
         "references": {
-            "mitre": ["ATLAS: Incident response for AI"],
-            "nist": ["AI RMF: Incident management and recovery"]
+            "mitre": ["Táticas: Persistence, Defense Evasion, Impact\nTécnicas: Manipulate AI Model, Corrupt AI Model, External Harms"],
+            "nist": [""]
         }
     },
     "QEI-OCM": {
-        "risk_description": "Operação sem monitoramento contínuo impede detectar desvios e riscos em tempo hábil.",
+        "risk_description": "1. Desvio do Modelo e Obsolescência: Desvio de conceitos e dados, Falhas silenciosas\n2. Ataques adversários não detectados: Manipulação de sistemas, envenenamento de dados\n3. Não conformidade a normas/regulamentações: Falha em prestação de contas, Respostas inconsistentes a incidentes \n4. Débito técnico: Falha em feedbacks, falta de percepção de melhorias",
         "references": {
-            "mitre": ["ATLAS: Continuous monitoring"],
-            "nist": ["AI RMF: Continuous improvement"]
+            "mitre": ["Táticas: Defense Evasion, Persistence, Lateral Movement\nTécnicas: Manipulate AI Model, Corrupt AI Model,  Spearphishing via Social Engineering LLM"],
+            "nist": [""]
         }
     }
 }

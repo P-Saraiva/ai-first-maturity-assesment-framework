@@ -508,11 +508,72 @@
         </div>
     </div>
 </div>
+                    <!-- Intro Modal -->
+                    {% include 'pages/assessment/create/components/intro_modal.html' %}
+
+                    <!-- Embedded dynamic selection + runner + report flow -->
+                    <div id="embedded-flow" class="container py-4 d-none">
+                        <div id="create-root" data-config-url="{{ url_for('static', filename='assets/assessment_config.json') }}" data-skip-modal="true">
+                            <!-- Selection Stage -->
+                            <div id="selection-stage" class="d-none">
+                                {% include 'pages/assessment/create/components/selection.html' %}
+                            </div>
+                            <!-- Runner Stage -->
+                            <div id="runner-stage" class="d-none">
+                                {% include 'pages/assessment/create/components/runner.html' %}
+                            </div>
+                            <!-- Report Stage -->
+                            <div id="report-stage" class="d-none">
+                                {% include 'pages/assessment/create/components/report.html' %}
+                            </div>
+                        </div>
+  
+                        {% block embedded_flow_scripts %}{% endblock %}
+                    </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Intro Modal initialization (blocking)
+    (function() {
+        const modalEl = document.getElementById('introModal');
+        if (!modalEl) return;
+        const bs = (window.bootstrap || window.Bootstrap || null);
+        try {
+            const continueBtn = document.getElementById('introContinueBtn');
+            if (bs && typeof bs.Modal === 'function') {
+                const modal = new bs.Modal(modalEl, { backdrop: 'static', keyboard: false });
+                modal.show();
+                if (continueBtn) continueBtn.addEventListener('click', () => {
+                    modal.hide();
+                    const formCard = document.querySelector('.form-card');
+                    if (formCard) formCard.classList.add('d-none');
+                    const embedded = document.getElementById('embedded-flow');
+                    if (embedded) embedded.classList.remove('d-none');
+                    const sel = document.getElementById('selection-stage');
+                    if (sel) sel.classList.remove('d-none');
+                });
+            } else {
+                // Fallback if Bootstrap JS isn't available
+                modalEl.classList.add('show');
+                modalEl.style.display = 'block';
+                if (continueBtn) continueBtn.addEventListener('click', () => {
+                    modalEl.classList.remove('show');
+                    modalEl.style.display = 'none';
+                    const formCard = document.querySelector('.form-card');
+                    if (formCard) formCard.classList.add('d-none');
+                    const embedded = document.getElementById('embedded-flow');
+                    if (embedded) embedded.classList.remove('d-none');
+                    const sel = document.getElementById('selection-stage');
+                    if (sel) sel.classList.remove('d-none');
+                });
+            }
+        } catch (e) {
+            console.warn('Intro modal initialization failed:', e);
+        }
+    })();
+
     const form = document.getElementById('organizationForm');
     const submitBtn = document.getElementById('submitBtn');
     const industryOptions = document.querySelectorAll('.industry-option');
@@ -648,4 +709,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='src/js/create/create.js') }}"></script>
 {% endblock %}

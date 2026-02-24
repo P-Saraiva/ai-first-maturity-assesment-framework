@@ -325,29 +325,13 @@ def index():
 @assessment_bp.route('/create', methods=['GET', 'POST'])
 def create():
     """
-    Simplified Linear Assessment Creation Flow
-    Step 1: Collect organization + candidate details, then proceed directly to first section
+    Assessment Creation Flow
+    GET: Render selection + runner UI (client-driven) with modal intro
+    POST: Legacy org info handler (kept for backward compatibility)
     """
     if request.method == 'GET':
-        # Show the organization and candidate information form with dynamic counts
-        try:
-            from app.extensions import db
-            from sqlalchemy import func
-            from app.models.question import Section, Area, Question
-
-            total_sections = db.session.query(func.count(Section.id)).scalar() or 0
-            total_areas = db.session.query(func.count(Area.id)).scalar() or 0
-            total_questions = db.session.query(func.count(Question.id)).scalar() or 0
-
-            return render_template(
-                'pages/assessment/org_information.html',
-                total_sections=total_sections,
-                total_areas=total_areas,
-                total_questions=total_questions
-            )
-        except Exception as e:
-            logger.warning(f"Could not load counts for org_information: {e}")
-            return render_template('pages/assessment/org_information.html')
+        # Render the new create flow (client-side modal + selection + runner + report)
+        return render_template('pages/assessment/create.html')
     
     # POST method - from form submission
     try:
