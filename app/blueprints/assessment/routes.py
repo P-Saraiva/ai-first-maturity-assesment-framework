@@ -1755,10 +1755,8 @@ def report(assessment_id):
         # Generate area-level current-state data based on computed domain maturity
         from app.models.maturity_definition import get_area_definition
         from app.models.question import Area
-        from app.models.question import Area
         area_roadmap_data = {}
         area_level_cards = {}
-        area_domain_details = {}
         area_domain_details = {}
         # Build quick lookup of area responses and gaps (No/unanswered)
         # Collect questions per area that are allowed
@@ -2084,7 +2082,7 @@ def download_pdf(assessment_id):
         import tempfile
         import os
         
-        # Get assessment data (reuse the same logic as report route)
+        # Get assessment data (reuse the exact same logic as report route)
         assessment = db.session.query(Assessment).get(assessment_id)
         if not assessment:
             flash('Assessment not found', 'error')
@@ -2099,7 +2097,7 @@ def download_pdf(assessment_id):
         scoring_service = get_scoring_service()
         scoring_results = scoring_service.calculate_assessment_score(assessment_id)
 
-        # Build section breakdown compatible with template expectations (SSE-based)
+        # Build section breakdown identical to web report
         section_scores = []
         area_scores = {}
         for sec in scoring_results.get('section_scores', {}).values():
@@ -2113,6 +2111,7 @@ def download_pdf(assessment_id):
                     'responses_count': a['responses_count'],
                     'domain_normalized': a.get('domain_normalized'),
                     'area_percentage': a.get('area_percentage'),
+                    'area_score_0to5': round((a.get('area_percentage') or 0.0) * 5.0, 2),
                 })
                 area_scores[a['area_id']] = {
                     'score': a['score'],
@@ -2147,6 +2146,7 @@ def download_pdf(assessment_id):
                 'areas': areas_list,
                 'responses_count': sec['responses_count'],
                 'percentage': round(section_pct * 100.0, 1),
+                'score_0to5': round(section_pct * 5.0, 2),
                 'level_num': section_level_num
             })
 
@@ -2161,10 +2161,12 @@ def download_pdf(assessment_id):
         ).all()
         responses_dict = {r.question_id: r for r in responses}
 
-        # Generate area-level current-state data similar to HTML report
+        # Generate area-level current-state data identical to web report
         from app.models.maturity_definition import get_area_definition
+        from app.models.question import Area
         area_roadmap_data = {}
         area_level_cards = {}
+        area_domain_details = {}
         # Collect questions per area that are allowed
         questions_by_area = {}
         for qid in allowed_ids:
@@ -2172,13 +2174,29 @@ def download_pdf(assessment_id):
             if q and q.area:
                 questions_by_area.setdefault(q.area.id, []).append(q)
         sse_rank = {'Informal': 1, 'Defined': 2, 'Systematic': 3, 'Integrated': 4, 'Optimized': 5}
+        area_scores_lookup = {}
         for sec in scoring_results.get('section_scores', {}).values():
-            for _, area in sec.get('area_scores', {}).items():
-                area_id = area['area_id']
-                area_name = area['area_name']
-                current_domain_level_name = area.get('sse_level') or 'Informal'
+            for _, a in sec.get('area_scores', {}).items():
+                area_scores_lookup[a['area_id']] = a
+
+        # Iterate all active sections and all their areas (same as web report)
+        from app.models.question import Section as SectionModel
+        all_sections_q = db.session.query(SectionModel)
+        active_ids = _get_active_section_ids(db.session)
+        if active_ids:
+            all_sections_q = all_sections_q.filter(SectionModel.id.in_(active_ids))
+        all_sections = all_sections_q.order_by(SectionModel.display_order).all()
+
+        for sec in all_sections:
+            for area_obj in sec.areas:
+                area_id = area_obj.id
+                area_name = area_obj.name
+                area_description = area_obj.description or ''
+                a_score = area_scores_lookup.get(area_id, {})
+                current_domain_level_name = a_score.get('sse_level') or 'Informal'
                 current_domain_level = sse_rank.get(current_domain_level_name, 1)
-                # Determine gaps/strengths from responses
+
+                # Determine gaps and strengths from responses
                 gaps = []
                 strengths = []
                 for q in questions_by_area.get(area_id, []):
@@ -2189,21 +2207,28 @@ def download_pdf(assessment_id):
                         strengths.append(q.question)
                     else:
                         gaps.append(q.question)
+
+                # Current-level definition card
                 cur_def = get_area_definition(area_id, current_domain_level)
-                if cur_def:
-                    area_level_cards[area_id] = cur_def.to_dict()
-                else:
-                    area_level_cards[area_id] = None
+                area_level_cards[area_id] = cur_def.to_dict() if cur_def else None
 
                 area_roadmap_data[area_id] = {
                     'area_name': area_name,
                     'current_level': current_domain_level,
                     'current_level_name': current_domain_level_name,
-                    'domain_normalized': area.get('domain_normalized'),
+                    'domain_normalized': a_score.get('domain_normalized'),
                     'area_description': area_description,
                     'gaps': gaps,
                     'strengths': strengths
                 }
+
+                # Domain-driven details (risk/references)
+                try:
+                    from app.models.area_domain_detail import get_area_domain_detail
+                    domain = get_area_domain_detail(area_id)
+                    area_domain_details[area_id] = domain.to_dict() if domain else {}
+                except Exception:
+                    area_domain_details[area_id] = {}
 
         # Generate chart data
         chart_data = {
@@ -2240,12 +2265,12 @@ def download_pdf(assessment_id):
             'insights': insights,
             'priority_areas': priority_areas,
             'responses_count': len({qid: r for qid, r in responses_dict.items() if qid in allowed_ids}),
-            'total_questions': len(bin_groups) + (len(allowed_ids) - sum(len(v) for v in bin_groups.values())),
+            'total_questions': len(allowed_ids),
             'completion_date': assessment.completion_date,
             'organization_name': (
                 assessment.organization_name or assessment.team_name
             ),
-            'is_pdf': True  # Flag to indicate PDF generation
+            'is_pdf': True
         }
 
         # Render the same template with PDF-specific styling
