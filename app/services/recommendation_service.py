@@ -383,23 +383,25 @@ class RecommendationService:
         return priority_recs[:limit]
 
     def _maturity_level_to_number(self, level) -> int:
-        """Convert maturity level enum to number"""
+        """Convert SSE maturity level enum to number (1-5)"""
         level_map = {
-            'TRADITIONAL': 1,
-            'ASSISTED': 2,
-            'AUGMENTED': 3,
-            'FIRST': 4
+            'INFORMAL': 1,
+            'DEFINED': 2,
+            'SYSTEMATIC': 3,
+            'INTEGRATED': 4,
+            'OPTIMIZED': 5,
         }
         return level_map.get(level.name, 1)
 
     def _number_to_maturity_level(self, number: int):
-        """Convert number to maturity level enum"""
-        from app.utils.scoring_utils import MaturityLevel
-        
+        """Convert number to SSE maturity level enum"""
+        from app.utils.scoring_utils import SSELevel
+
         level_map = {
-            1: MaturityLevel.TRADITIONAL,
-            2: MaturityLevel.ASSISTED,
-            3: MaturityLevel.AUGMENTED,
-            4: MaturityLevel.FIRST
+            1: SSELevel.INFORMAL,
+            2: SSELevel.DEFINED,
+            3: SSELevel.SYSTEMATIC,
+            4: SSELevel.INTEGRATED,
+            5: SSELevel.OPTIMIZED,
         }
-        return level_map.get(number, MaturityLevel.TRADITIONAL)
+        return level_map.get(number, SSELevel.INFORMAL)

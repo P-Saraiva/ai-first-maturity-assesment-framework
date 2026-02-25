@@ -5,13 +5,17 @@ Utility functions for the AI First Maturity Assessment Framework
 
 def get_maturity_level(overall_score):
     """
-    Determine the maturity level based on overall score
-    
+    Determine the SSE-CMM maturity level based on overall score.
+
+    The score is on a 1.0-4.0 backward-compatible scale where
+    1.0 = 0% "Yes" answers and 4.0 = 100% "Yes" answers.
+    We convert to a 0-100 percentage and classify via SSE-CMM thresholds.
+
     Args:
         overall_score (float): The overall assessment score (1.0-4.0)
-        
+
     Returns:
-        dict: Contains level name, description, and score range
+        dict: Contains level name, description, score range and color
     """
     if overall_score is None:
         return {
@@ -20,33 +24,43 @@ def get_maturity_level(overall_score):
             'range': 'N/A',
             'color': 'secondary'
         }
-    
-    if 1.0 <= overall_score < 1.8:
+
+    # Convert 1.0-4.0 scale to 0-100 percentage
+    pct = max(0.0, min(100.0, (overall_score - 1.0) / 3.0 * 100.0))
+
+    if pct <= 20:
         return {
-            'name': 'Traditional Development',
-            'description': 'Minimal AI integration in development processes',
-            'range': '1.0-1.8',
+            'name': 'Informal',
+            'description': 'Processes are ad-hoc with minimal AI integration',
+            'range': '0-20%',
             'color': 'danger'
         }
-    elif 1.8 <= overall_score < 2.5:
+    elif pct <= 40:
         return {
-            'name': 'AI-Assisted Development',
-            'description': 'Basic AI tools supporting development activities',
-            'range': '1.8-2.5',
+            'name': 'Defined',
+            'description': 'Basic AI practices defined and documented',
+            'range': '21-40%',
             'color': 'warning'
         }
-    elif 2.5 <= overall_score < 3.3:
+    elif pct <= 60:
         return {
-            'name': 'AI-Augmented Development',
-            'description': 'Significant AI integration across development',
-            'range': '2.5-3.3',
+            'name': 'Systematic',
+            'description': 'Consistent AI integration across key areas',
+            'range': '41-60%',
             'color': 'info'
         }
-    elif 3.3 <= overall_score <= 4.0:
+    elif pct <= 80:
         return {
-            'name': 'AI-First Development',
-            'description': 'AI-native approach with comprehensive integration',
-            'range': '3.3-4.0',
+            'name': 'Integrated',
+            'description': 'AI deeply embedded into processes and workflows',
+            'range': '61-80%',
+            'color': 'primary'
+        }
+    elif pct <= 100:
+        return {
+            'name': 'Optimized',
+            'description': 'AI-native approach with continuous optimization',
+            'range': '81-100%',
             'color': 'success'
         }
     else:

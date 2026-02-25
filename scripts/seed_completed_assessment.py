@@ -131,26 +131,26 @@ RESPONSES_IN_ORDER: list[bool] = [
     False,  # TSA-SDA-01C
     True,   # TSA-SDA-01D
     # TSA-DMH (3 questions: 01A–01C)
-    False,  # TSA-DMH-01A
-    False,  # TSA-DMH-01B
-    False,  # TSA-DMH-01C
+    True,  # TSA-DMH-01A
+    True,  # TSA-DMH-01B
+    True,  # TSA-DMH-01C
 
     # QEI – Quality, Evaluation, Incident Handling and Resilience
     # QEI-TEI (3 questions: 01A–01C)
     True,   # QEI-TEI-01A
-    False,  # QEI-TEI-01B
+    True,  # QEI-TEI-01B
     False,  # QEI-TEI-01C
     # QEI-IEC (5 questions: 01A–01E)
-    True,   # QEI-IEC-01A
-    True,   # QEI-IEC-01B
+    False,   # QEI-IEC-01A
+    False,   # QEI-IEC-01B
     True,   # QEI-IEC-01C
-    True,   # QEI-IEC-01D
-    True,   # QEI-IEC-01E
+    False,   # QEI-IEC-01D
+    False,   # QEI-IEC-01E
     # QEI-OCM (5 questions: 01A–01E)
     False,  # QEI-OCM-01A
     False,  # QEI-OCM-01B
-    False,  # QEI-OCM-01C
-    True,   # QEI-OCM-01D
+    True,  # QEI-OCM-01C
+    False,   # QEI-OCM-01D
     False,  # QEI-OCM-01E
 ]
 
@@ -289,27 +289,23 @@ def seed_assessment():
             # Update assessment with results
             assessment.status = "COMPLETED"
             assessment.completion_date = now
-            assessment.overall_score = scoring_results.get("overall_score")
+            assessment.overall_score = scoring_results.get("overall_percentage")
             assessment.deviq_classification = scoring_results.get(
-                "deviq_classification",
-                scoring_results.get("maturity_level"),
+                "maturity_level_display"
             )
 
             # Store section scores if available
             section_scores = scoring_results.get("section_scores", {})
             if isinstance(section_scores, dict):
-                assessment.foundational_score = section_scores.get(
-                    "foundational", section_scores.get("ETSI")
-                )
-                assessment.transformation_score = section_scores.get(
-                    "transformation", section_scores.get("GSA")
-                )
-                assessment.enterprise_score = section_scores.get(
-                    "enterprise", section_scores.get("IAA")
-                )
-                assessment.governance_score = section_scores.get(
-                    "governance", section_scores.get("DPR")
-                )
+                keys = list(section_scores.keys())
+                if len(keys) > 0:
+                    assessment.foundational_score = section_scores[keys[0]].get("score")
+                if len(keys) > 1:
+                    assessment.transformation_score = section_scores[keys[1]].get("score")
+                if len(keys) > 2:
+                    assessment.enterprise_score = section_scores[keys[2]].get("score")
+                if len(keys) > 3:
+                    assessment.governance_score = section_scores[keys[3]].get("score")
 
             # Store full results as JSON
             import json
@@ -321,8 +317,8 @@ def seed_assessment():
             print(f"🎉 Seed assessment ready!")
             print(f"   Assessment ID : {assessment_id}")
             print(f"   Status        : COMPLETED")
-            print(f"   Overall Score : {assessment.overall_score}")
-            print(f"   Classification: {assessment.deviq_classification}")
+            print(f"   Overall %     : {scoring_results.get('overall_percentage', 0)*100:.1f}%")
+            print(f"   Maturity      : {assessment.deviq_classification}")
             print(f"{'='*60}")
 
         except Exception as e:
