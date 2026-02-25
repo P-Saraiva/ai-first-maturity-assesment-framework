@@ -1,5 +1,5 @@
 {% extends "base/layout.html" %}
-{% set page_title = "Server Error" %}
+{% set page_title = _('errors.500_title') %}
 {% set hide_breadcrumbs = true %}
 
 {% block head_extra %}
@@ -65,32 +65,32 @@
             </div>
             <h1 class="error-code">500</h1>
             <p class="error-message">
-                Something went wrong on our end.
+                {{ _('errors.500_subtitle') }}
             </p>
             <p class="text-muted mb-4">
-                We're experiencing some technical difficulties. Our team has been notified and is working to fix this issue.
+                {{ _('errors.500_desc') }}
             </p>
             
             <div class="error-details">
-                <h5 class="text-muted mb-3">What you can do:</h5>
+                <h5 class="text-muted mb-3">{{ _('errors.what_you_can_do') }}</h5>
                 <div class="row justify-content-center">
                     <div class="col-md-8">
                         <ul class="list-unstyled text-start">
                             <li class="mb-2">
                                 <i class="bi bi-arrow-clockwise text-primary me-2"></i>
-                                <strong>Refresh the page</strong> - This might be a temporary issue
+                                <strong>{{ _('errors.refresh_page') }}</strong> - {{ _('errors.refresh_reason') }}
                             </li>
                             <li class="mb-2">
                                 <i class="bi bi-clock text-warning me-2"></i>
-                                <strong>Wait a few minutes</strong> - We might be performing maintenance
+                                <strong>{{ _('errors.wait_minutes') }}</strong> - {{ _('errors.wait_reason') }}
                             </li>
                             <li class="mb-2">
                                 <i class="bi bi-house text-success me-2"></i>
-                                <strong>Go back to home</strong> - Try navigating from the main page
+                                <strong>{{ _('errors.go_home_suggestion') }}</strong> - {{ _('errors.go_home_reason') }}
                             </li>
                             <li class="mb-2">
                                 <i class="bi bi-envelope text-info me-2"></i>
-                                <strong>Contact support</strong> - If the problem persists
+                                <strong>{{ _('errors.contact_suggestion') }}</strong> - {{ _('errors.contact_reason') }}
                             </li>
                         </ul>
                     </div>
@@ -99,27 +99,27 @@
             
             <div class="error-actions">
                 <button onclick="location.reload()" class="btn btn-primary btn-lg">
-                    <i class="bi bi-arrow-clockwise me-2"></i>Refresh Page
+                    <i class="bi bi-arrow-clockwise me-2"></i>{{ _('errors.refresh') }}
                 </button>
                 <a href="{{ url_for('main.index') if url_for else '/' }}" 
                    class="btn btn-success btn-lg">
-                    <i class="bi bi-house me-2"></i>Go Home
+                    <i class="bi bi-house me-2"></i>{{ _('errors.go_home') }}
                 </a>
                 <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
-                    <i class="bi bi-arrow-left me-2"></i>Go Back
+                    <i class="bi bi-arrow-left me-2"></i>{{ _('errors.go_back') }}
                 </button>
             </div>
             
             <div class="mt-5">
                 <p class="text-muted">
-                    Error ID: <code id="errorId">{{ error_id or 'N/A' }}</code>
+                    {{ _('errors.error_id') }}: <code id="errorId">{{ error_id or 'N/A' }}</code>
                     <br>
-                    Time: <code>{{ timestamp or moment().format('YYYY-MM-DD HH:mm:ss') }}</code>
+                    {{ _('errors.time') }}: <code>{{ timestamp or moment().format('YYYY-MM-DD HH:mm:ss') }}</code>
                 </p>
                 <p class="text-muted">
-                    Still having trouble? 
+                    {{ _('errors.still_trouble') }}
                     <a href="mailto:support@afs-framework.com" class="text-decoration-none">
-                        Contact our support team
+                        {{ _('errors.contact_support') }}
                     </a>
                 </p>
             </div>
@@ -134,7 +134,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-activity me-2"></i>System Status
+                        <i class="bi bi-activity me-2"></i>{{ _('errors.system_status') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -143,9 +143,9 @@
                             <div class="status-indicator" id="apiStatus">
                                 <i class="bi bi-circle-fill text-warning"></i>
                                 <div class="mt-2">
-                                    <strong>API</strong>
+                                    <strong>{{ _('errors.api') }}</strong>
                                     <br>
-                                    <small class="text-muted">Checking...</small>
+                                    <small class="text-muted">{{ _('errors.checking') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -153,9 +153,9 @@
                             <div class="status-indicator" id="databaseStatus">
                                 <i class="bi bi-circle-fill text-warning"></i>
                                 <div class="mt-2">
-                                    <strong>Database</strong>
+                                    <strong>{{ _('errors.database') }}</strong>
                                     <br>
-                                    <small class="text-muted">Checking...</small>
+                                    <small class="text-muted">{{ _('errors.checking') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -163,9 +163,9 @@
                             <div class="status-indicator" id="servicesStatus">
                                 <i class="bi bi-circle-fill text-warning"></i>
                                 <div class="mt-2">
-                                    <strong>Services</strong>
+                                    <strong>{{ _('errors.services') }}</strong>
                                     <br>
-                                    <small class="text-muted">Checking...</small>
+                                    <small class="text-muted">{{ _('errors.checking') }}</small>
                                 </div>
                             </div>
                         </div>

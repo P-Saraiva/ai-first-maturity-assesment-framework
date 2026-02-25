@@ -3,6 +3,12 @@ Area Domain Detail Provider
 
 Provides risk context and references for each area. Loads from JSON if available,
 falls back to built-in defaults. Used by report rendering.
+
+Supports bilingual (en/pt) content. The JSON files can store values as either:
+  - A plain string (legacy format, treated as Portuguese)
+  - A dict with 'en' and 'pt' keys (bilingual format)
+
+The current language is resolved via the i18n module's get_locale().
 """
 
 import json
@@ -13,6 +19,27 @@ from typing import Dict, List, Optional
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 _DETAILS_FILE = os.path.join(_BASE_DIR, 'data', 'area_domain_details.json')
 _MATURITY_FILE = os.path.join(_BASE_DIR, 'data', 'area_maturity_definitions.json')
+
+
+def _resolve_lang_value(value, lang: str):
+    """Resolve a value that may be bilingual (dict with 'en'/'pt') or plain.
+
+    If *value* is a dict with language keys, return the value for *lang*,
+    falling back to 'en', then 'pt', then the first available value.
+    Otherwise return the value as-is (legacy plain string/list).
+    """
+    if isinstance(value, dict) and ('en' in value or 'pt' in value):
+        return value.get(lang) or value.get('en') or value.get('pt') or ''
+    return value
+
+
+def _get_current_lang() -> str:
+    """Get the current language from the i18n module, defaulting to 'en'."""
+    try:
+        from app.i18n import get_locale
+        return get_locale()
+    except Exception:
+        return 'en'
 
 
 @dataclass
@@ -181,6 +208,10 @@ def _compute_latest_mtime() -> float:
 
 
 def _load_json_details() -> Dict[str, Dict]:
+    """Load raw JSON data (preserving bilingual dicts as-is).
+
+    Language resolution happens later in get_area_domain_detail().
+    """
     result: Dict[str, Dict] = {}
     if os.path.exists(_DETAILS_FILE):
         try:
@@ -238,15 +269,38 @@ def get_area_domain_detail(area_id: str) -> Optional[AreaDomainDetail]:
     """
     Return AreaDomainDetail for a given area_id using JSON overrides
     if present, else built-in defaults.
+
+    Bilingual fields are resolved to the current session language
+    via the i18n module's get_locale().
     """
     _ensure_loaded()
     src = _JSON_DETAILS.get(area_id) or _DEFAULTS.get(area_id)
     if not src:
         return None
+
+    lang = _get_current_lang()
+
+    # Resolve risk_description (may be a bilingual dict or plain string)
+    raw_rd = src.get('risk_description')
+    risk_description = _resolve_lang_value(raw_rd, lang) if raw_rd else None
+
+    # Resolve references (each sub-key may be bilingual)
+    raw_refs = src.get('references') or {}
+    resolved_refs: Dict[str, List[str]] = {}
+    for ref_key in ('mitre', 'nist'):
+        raw_val = raw_refs.get(ref_key, [])
+        resolved = _resolve_lang_value(raw_val, lang)
+        if isinstance(resolved, list):
+            resolved_refs[ref_key] = resolved
+        elif isinstance(resolved, str):
+            resolved_refs[ref_key] = [resolved]
+        else:
+            resolved_refs[ref_key] = []
+
     return AreaDomainDetail(
         area_id=area_id,
-        risk_description=src.get('risk_description'),
-        references=src.get('references') or {}
+        risk_description=risk_description,
+        references=resolved_refs
     )
 
 def invalidate_area_domain_cache() -> None:

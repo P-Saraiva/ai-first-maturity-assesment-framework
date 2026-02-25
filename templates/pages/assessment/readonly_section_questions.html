@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% set page_title = "Assessment Section - " + section.name if section else "Assessment Section" %}
+{% set page_title = _('readonly.assessment_section') + " - " + section.name if section else _('readonly.assessment_section') %}
 
 {% block head_extra %}
 {% raw %}
@@ -48,7 +48,7 @@
                         <div class="section-progress">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
-                                    <h6 class="mb-2">Section Progress</h6>
+                                    <h6 class="mb-2">{{ _('readonly.section_progress') }}</h6>
                                     <div class="progress" style="height: 8px;">
                                         <div class="progress-bar bg-light" 
                                              data-width="{{ section_progress.get('progress_percentage', 0)|int }}"></div>
@@ -56,7 +56,7 @@
                                 </div>
                                 <div class="col-md-4 text-md-end">
                                     <div class="h5 mb-0">{{ section_progress.get('responded_questions', 0) }}/{{ section_progress.get('total_questions', 0) }}</div>
-                                    <small>Questions Answered</small>
+                                    <small>{{ _('readonly.questions_answered') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -71,31 +71,31 @@
                         {% set section_progress = progress.section_progress.get(section.name, {}) %}
                         {% if section_progress %}
                         <div class="section-summary mb-4">
-                            <h5 class="mb-2">Section Summary</h5>
-                            <p>This section covers {{ section.areas|length }} assessment areas.</p>
+                            <h5 class="mb-2">{{ _('readonly.section_summary') }}</h5>
+                            <p>{{ _('readonly.covers_areas', count=section.areas|length) }}</p>
                             <div class="summary-stats row g-3">
                                 <div class="col-6 col-lg-3">
                                     <div class="stat-box text-center p-3 border rounded">
                                         <div class="stat-value h4">{{ section.areas|length }}</div>
-                                        <div class="stat-label">Areas</div>
+                                        <div class="stat-label">{{ _('readonly.areas') }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-lg-3">
                                     <div class="stat-box text-center p-3 border rounded">
                                         <div class="stat-value h4">{{ section_progress.get('total_questions', 0) }}</div>
-                                        <div class="stat-label">Questions</div>
+                                        <div class="stat-label">{{ _('readonly.questions') }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-lg-3">
                                     <div class="stat-box text-center p-3 border rounded">
                                         <div class="stat-value h4">{{ section_progress.get('responded_questions', 0) }}</div>
-                                        <div class="stat-label">Answered</div>
+                                        <div class="stat-label">{{ _('readonly.answered_label') }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-lg-3">
                                     <div class="stat-box text-center p-3 border rounded">
                                         <div class="stat-value h4">{{ section_progress.get('progress_percentage', 0)|round|int }}%</div>
-                                        <div class="stat-label">Complete</div>
+                                        <div class="stat-label">{{ _('readonly.complete') }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -117,10 +117,10 @@
                                 {% for question in area.questions %}
                                 {% set response = responses.get(question.id) %}
                                 <div class="question-item p-3 border-bottom">
-                                    <div class="question-text h6">{{ question.question }}</div>
+                                    <div class="question-text h6">{{ translate_question(question.id) or question.question }}</div>
                                     
                                     <div class="answer-section mt-2">
-                                        <label class="answer-label small fw-bold">Response</label>
+                                        <label class="answer-label small fw-bold">{{ _('readonly.response') }}</label>
                                         {% if response %}
                                         <div class="answer-value p-3 bg-success bg-opacity-10 border border-success rounded">
                                             {% if response.score %}
@@ -129,11 +129,11 @@
                                             </div>
                                             {% if response.score == 1 and question.level_1_desc %}
                                             <div class="level-description bg-white p-2 rounded border-start border-3 border-primary">
-                                                <i class="bi bi-quote text-muted me-2"></i>{{ question.level_1_desc }}
+                                                <i class="bi bi-quote text-muted me-2"></i>{{ translate_level('level_1') or question.level_1_desc }}
                                             </div>
                                             {% elif response.score == 2 and question.level_2_desc %}
                                             <div class="level-description bg-white p-2 rounded border-start border-3 border-primary">
-                                                <i class="bi bi-quote text-muted me-2"></i>{{ question.level_2_desc }}
+                                                <i class="bi bi-quote text-muted me-2"></i>{{ translate_level('level_2') or question.level_2_desc }}
                                             </div>
                                             {% elif response.score == 3 and question.level_3_desc %}
                                             <div class="level-description bg-white p-2 rounded border-start border-3 border-primary">
@@ -145,13 +145,13 @@
                                             </div>
                                             {% endif %}
                                             {% else %}
-                                            <em>No answer provided</em>
+                                            <em>{{ _('readonly.no_answer') }}</em>
                                             {% endif %}
                                         </div>
                                         
                                         {% if response.notes %}
                                         <div class="answer-notes p-2 bg-info bg-opacity-10 rounded mt-2">
-                                            <strong>Notes:</strong> {{ response.notes }}
+                                            <strong>{{ _('readonly.notes') }}:</strong> {{ response.notes }}
                                         </div>
                                         {% endif %}
                                         
@@ -159,13 +159,13 @@
                                         <div class="answer-timestamp mt-2">
                                             <small class="text-muted">
                                                 <i class="bi bi-clock me-1"></i>
-                                                Answered on {{ response.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                                                {{ _('readonly.answered_on') }} {{ response.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
                                             </small>
                                         </div>
                                         {% endif %}
                                         {% else %}
                                         <div class="answer-value p-2 bg-warning bg-opacity-10 rounded">
-                                            <em>Not answered</em>
+                                            <em>{{ _('readonly.not_answered') }}</em>
                                         </div>
                                         {% endif %}
                                     </div>
@@ -178,13 +178,13 @@
                     
                     <!-- Navigation -->
                     <div class="navigation-section bg-light p-4 text-center">
-                        <h4 class="mb-3">Section Navigation</h4>
+                        <h4 class="mb-3">{{ _('readonly.section_navigation') }}</h4>
                         
                         <div class="d-flex gap-3 justify-content-center flex-wrap">
                             <a href="{{ url_for('assessment.view_readonly_sections', assessment_id=assessment.id) }}" 
                                class="btn btn-outline-primary">
                                 <i class="bi bi-arrow-left me-2"></i>
-                                Back to Sections
+                                {{ _('readonly.back_to_sections') }}
                             </a>
                             
                             <!-- Previous Section -->

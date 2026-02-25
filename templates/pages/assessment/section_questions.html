@@ -391,15 +391,15 @@
                                 {{ section.name }}
                             </h1>
                             <p class="mb-0 opacity-75">
-                                Section {{ current_section_index + 1 }} of {{ total_sections }}
+                                {{ _('section_questions.section_of', current=current_section_index + 1, total=total_sections) }}
                             </p>
                         </div>
                         
                         <!-- Section Progress -->
                         <div class="section-progress">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>{{ section.name }} Progress</span>
-                                <span>{{ current_section_index + 1 }}/{{ total_sections }} sections</span>
+                                <span>{{ _('section_questions.progress_label', section=section.name) }}</span>
+                                <span>{{ _('section_questions.sections_count', current=current_section_index + 1, total=total_sections) }}</span>
                             </div>
                             <div class="progress" style="height: 6px;">
                                 <div class="progress-bar bg-white" role="progressbar" 
@@ -419,7 +419,7 @@
                             <div class="mb-4">
                                 <h4 class="text-center mb-3">{{ section.description }}</h4>
                                 <div class="text-center text-muted">
-                                    <small>Answer all questions in this section based on your current organizational state</small>
+                                    <small>{{ _('section_questions.answer_instruction') }}</small>
                                 </div>
                             </div>
                             
@@ -431,7 +431,7 @@
                                         <span>{{ area.name }}</span>
                                         <button type="button" class="help-btn area-help-btn ms-2" 
                                                 data-area-id="{{ area.id }}" 
-                                                title="View maturity guidance for this area">
+                                                title="{{ _('section_questions.view_guidance') }}">
                                             <i class="bi bi-info-circle"></i>
                                         </button>
                                     </div>
@@ -447,10 +447,10 @@
                                         <div class="question-header">
                                             <div class="question-text">
                                                 <div class="question-title">
-                                                    {{ question.question }}
+                                                    {{ translate_question(question.id) or question.question }}
                                                     <button type="button" class="help-btn question-help-btn" 
                                                             data-area-id="{{ area.id }}" 
-                                                            title="View guidance for this question">
+                                                            title="{{ _('section_questions.view_question_guidance') }}">
                                                         <i class="bi bi-question-circle"></i>
                                                     </button>
                                                 </div>
@@ -465,8 +465,8 @@
                                                            class="response-radio" id="q{{ question.id }}_1"
                                                            {% if existing_responses.get(question.id) and existing_responses[question.id].score == 1 %}checked{% endif %}>
                                                     <div class="response-details">
-                                                        <div class="response-level">No</div>
-                                                        <div class="response-description">{{ question.level_1_desc }}</div>
+                                                        <div class="response-level">{{ _('section_questions.no') }}</div>
+                                                        <div class="response-description">{{ translate_level('level_1') or question.level_1_desc }}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -476,8 +476,8 @@
                                                            class="response-radio" id="q{{ question.id }}_2"
                                                            {% if existing_responses.get(question.id) and existing_responses[question.id].score == 2 %}checked{% endif %}>
                                                     <div class="response-details">
-                                                        <div class="response-level">Yes</div>
-                                                        <div class="response-description">{{ question.level_2_desc }}</div>
+                                                        <div class="response-level">{{ _('section_questions.yes') }}</div>
+                                                        <div class="response-description">{{ translate_level('level_2') or question.level_2_desc }}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -487,12 +487,12 @@
                                         <div class="notes-section">
                                             <label for="notes_{{ question.id }}" class="form-label text-muted small">
                                                 <i class="bi bi-chat-text me-1"></i>
-                                                Additional notes (optional)
+                                                {{ _('section_questions.additional_notes') }}
                                             </label>
                                             <textarea name="notes_{{ question.id }}" 
                                                       id="notes_{{ question.id }}" 
                                                       class="notes-textarea"
-                                                      placeholder="Add any additional context or clarification...">{{ existing_responses.get(question.id).notes if existing_responses.get(question.id) else '' }}</textarea>
+                                                      placeholder="{{ _('section_questions.notes_placeholder') }}">{{ existing_responses.get(question.id).notes if existing_responses.get(question.id) else '' }}</textarea>
                                         </div>
                                     </div>
                                     {% endif %}
@@ -500,7 +500,7 @@
                                     {% if not any_rendered %}
                                     <div class="alert alert-secondary">
                                         <i class="bi bi-info-circle me-2"></i>
-                                        Questions for this area will be added soon.
+                                        {{ _('section_questions.questions_coming') }}
                                     </div>
                                     {% endif %}
                                 </div>
@@ -515,13 +515,13 @@
                                 <a href="{{ url_for('assessment.section_questions', assessment_id=assessment.id, section_id=all_sections[current_section_index-1].id) if url_for else '/assessment/' + assessment.id|string + '/section/' + all_sections[current_section_index-1].id }}" 
                                    class="btn btn-nav btn-previous">
                                     <i class="bi bi-arrow-left me-2"></i>
-                                    Previous Section
+                                    {{ _('section_questions.previous_section') }}
                                 </a>
                                 {% else %}
                                 <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
                                    class="btn btn-nav btn-previous">
                                     <i class="bi bi-arrow-left me-2"></i>
-                                    Back to Details
+                                    {{ _('section_questions.back_to_details') }}
                                 </a>
                                 {% endif %}
                             </div>
@@ -529,7 +529,7 @@
                             <div class="completion-indicator">
                                 <small class="text-muted">
                                     <i class="bi bi-info-circle me-1"></i>
-                                    All questions are optional, but we recommend answering as many as possible for accurate results
+                                    {{ _('section_questions.optional_note') }}
                                 </small>
                             </div>
                             
@@ -537,11 +537,11 @@
                                 {% if is_last_section %}
                                 <button type="submit" class="btn btn-nav btn-complete" id="completeBtn">
                                     <i class="bi bi-check-circle me-2"></i>
-                                    Complete Assessment
+                                    {{ _('section_questions.complete_assessment') }}
                                 </button>
                                 {% else %}
                                 <button type="submit" class="btn btn-nav btn-next" id="nextBtn">
-                                    Next Section
+                                    {{ _('section_questions.next_section') }}
                                     <i class="bi bi-arrow-right ms-2"></i>
                                 </button>
                                 {% endif %}
@@ -561,7 +561,7 @@
             <div class="modal-header border-0 pb-2">
                 <h5 class="modal-title" id="progressionModalLabel">
                     <i class="bi bi-bullseye text-primary me-2"></i>
-                    Question Guidance
+                    {{ _('section_questions.question_guidance') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -583,22 +583,22 @@
                     <ul class="nav nav-pills mb-3" id="progressionTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="prereq-tab" data-bs-toggle="pill" data-bs-target="#prereq-pane" type="button" role="tab">
-                                <i class="bi bi-check-circle me-1"></i>Prerequisites
+                                <i class="bi bi-check-circle me-1"></i>{{ _('section_questions.prerequisites') }}
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="actions-tab" data-bs-toggle="pill" data-bs-target="#actions-pane" type="button" role="tab">
-                                <i class="bi bi-list-task me-1"></i>Actions
+                                <i class="bi bi-list-task me-1"></i>{{ _('section_questions.actions') }}
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="metrics-tab" data-bs-toggle="pill" data-bs-target="#metrics-pane" type="button" role="tab">
-                                <i class="bi bi-trophy me-1"></i>Metrics
+                                <i class="bi bi-trophy me-1"></i>{{ _('section_questions.metrics') }}
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="tips-tab" data-bs-toggle="pill" data-bs-target="#tips-pane" type="button" role="tab">
-                                <i class="bi bi-lightbulb me-1"></i>Tips
+                                <i class="bi bi-lightbulb me-1"></i>{{ _('section_questions.tips') }}
                             </button>
                         </li>
                     </ul>
@@ -608,7 +608,7 @@
                             <div class="prerequisites-content">
                                 <h6 class="text-muted mb-3">
                                     <i class="bi bi-check-circle-fill text-success me-1"></i>
-                                    Complete these prerequisites first:
+                                    {{ _('section_questions.complete_prerequisites') }}
                                 </h6>
                                 <div id="prerequisitesList" class="content-grid"></div>
                             </div>
@@ -618,7 +618,7 @@
                             <div class="actions-content">
                                 <h6 class="text-muted mb-3">
                                     <i class="bi bi-play-circle-fill text-primary me-1"></i>
-                                    Action items to implement:
+                                    {{ _('section_questions.action_items') }}
                                 </h6>
                                 <div id="actionsList" class="actions-compact"></div>
                             </div>
@@ -628,7 +628,7 @@
                             <div class="metrics-content">
                                 <h6 class="text-muted mb-3">
                                     <i class="bi bi-graph-up text-success me-1"></i>
-                                    Success metrics to track:
+                                    {{ _('section_questions.success_metrics') }}
                                 </h6>
                                 <div id="metricsList" class="metrics-grid"></div>
                             </div>
@@ -638,7 +638,7 @@
                             <div class="tips-content">
                                 <h6 class="text-muted mb-3">
                                     <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
-                                    Common pitfall to avoid:
+                                    {{ _('section_questions.common_pitfall') }}
                                 </h6>
                                 <div id="pitfallContent" class="pitfall-warning"></div>
                             </div>
@@ -648,7 +648,7 @@
             </div>
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Close
+                    <i class="bi bi-x-circle me-1"></i>{{ _('common.close') }}
                 </button>
             </div>
         </div>
@@ -662,7 +662,7 @@
             <div class="modal-header border-0 pb-2">
                 <h5 class="modal-title" id="areaMaturityModalLabel">
                     <i class="bi bi-graph-up-arrow text-primary me-2"></i>
-                    Area Maturity Progress
+                    {{ _('section_questions.area_maturity_progress') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -676,7 +676,7 @@
                 <!-- Descriptive Content -->
                 <div class="card mb-3">
                     <div class="card-header bg-light">
-                        <i class="bi bi-info-circle me-2"></i>About This Area
+                        <i class="bi bi-info-circle me-2"></i>{{ _('section_questions.about_area') }}
                     </div>
                     <div class="card-body">
                         <p class="mb-2" id="areaDescription"></p>
@@ -686,7 +686,7 @@
                 <!-- Risk Content -->
                 <div class="card mb-3">
                     <div class="card-header bg-light">
-                        <i class="bi bi-exclamation-triangle me-2"></i>Risk Context
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{ _('section_questions.risk_context') }}
                     </div>
                     <div class="card-body">
                         <p class="mb-2" id="areaRiskDescription"></p>
@@ -696,7 +696,7 @@
                 <!-- Capability Content -->
                 <div class="card mb-3">
                     <div class="card-header bg-light">
-                        <i class="bi bi-shield-check me-2"></i>Expected Capabilities
+                        <i class="bi bi-shield-check me-2"></i>{{ _('section_questions.expected_capabilities') }}
                     </div>
                     <div class="card-body">
                         <div id="areaObjectivesList" class="mb-2"></div>
@@ -707,7 +707,7 @@
                 <!-- References -->
                 <div class="card mb-3">
                     <div class="card-header bg-light">
-                        <i class="bi bi-bookmarks me-2"></i>References
+                        <i class="bi bi-bookmarks me-2"></i>{{ _('section_questions.references') }}
                     </div>
                     <div class="card-body">
                         <div id="areaReferences">
@@ -725,7 +725,7 @@
             </div>
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Close
+                    <i class="bi bi-x-circle me-1"></i>{{ _('common.close') }}
                 </button>
             </div>
         </div>
@@ -1204,8 +1204,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="d-flex align-items-start">
                 <i class="bi bi-exclamation-triangle"></i>
                 <div>
-                    <strong>Common Pitfall:</strong>
-                    <p>${pitfall || 'No specific pitfall identified for this level.'}</p>
+                    <strong>{{ _('section_questions.common_pitfall_label') }}:</strong>
+                    <p>${pitfall || '{{ _('section_questions.no_pitfall') }}'}</p>
                 </div>
             </div>
         `;
@@ -1271,10 +1271,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 return resp.json();
             }).then(() => {
-                showSaveToast('Response saved', 'success');
+                showSaveToast('{{ _('section_questions.response_saved') }}', 'success');
             }).catch(err => {
                 console.error('Autosave failed:', err);
-                showSaveToast('Save failed', 'danger');
+                showSaveToast('{{ _('section_questions.save_failed') }}', 'danger');
             });
         } catch (e) {
             console.error('Autosave error:', e);
@@ -1287,7 +1287,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (submitBtn) {
             submitBtn.disabled = true;
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving responses...';
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ _('section_questions.saving_responses') }}';
             
             // Restore if there's an error
             setTimeout(() => {
@@ -1303,7 +1303,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.key === 's') {
             e.preventDefault();
-            showSaveToast('Progress indicator', 'info');
+            showSaveToast('{{ _('section_questions.progress_indicator') }}', 'info');
         }
     });
     

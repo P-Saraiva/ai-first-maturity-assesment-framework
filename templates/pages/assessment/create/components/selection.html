@@ -1,10 +1,10 @@
 <div class="card shadow-sm">
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0">Select Domains and Areas</h5>
+      <h5 class="mb-0">{{ _('create.select_domains') }}</h5>
       <div>
-        <button class="btn btn-sm btn-outline-secondary me-2" id="btnSelectAll">Select All</button>
-        <button class="btn btn-sm btn-outline-secondary" id="btnDeselectAll">Deselect All</button>
+        <button class="btn btn-sm btn-outline-secondary me-2" id="btnSelectAll">{{ _('create.select_all') }}</button>
+        <button class="btn btn-sm btn-outline-secondary" id="btnDeselectAll">{{ _('create.deselect_all') }}</button>
       </div>
     </div>
 
@@ -13,10 +13,13 @@
     <div id="domainsAccordion" class="accordion"></div>
 
     <div class="d-flex justify-content-between align-items-center mt-3">
-      <div class="text-muted small">
-        <span id="selDomains">0</span> domains selected • <span id="selAreas">0</span> areas selected
+      <div>
+        <button id="backToOrgInfoBtn" class="btn btn-outline-secondary">{{ _('common.back') }}</button>
+        <span class="text-muted small ms-3">
+          <span id="selDomains">0</span> {{ _('create.domains') }} • <span id="selAreas">0</span> {{ _('assessment.areas') }}
+        </span>
       </div>
-      <button id="startAssessmentBtn" class="btn btn-primary" disabled>Start Assessment</button>
+      <button id="startAssessmentBtn" class="btn btn-primary" disabled>{{ _('assessment.start') }}</button>
     </div>
   </div>
 </div>

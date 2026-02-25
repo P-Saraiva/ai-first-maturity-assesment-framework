@@ -1,10 +1,10 @@
 {% extends "base/layout.html" %}
-{% set page_title = (assessment.team_name + " - Assessment Detail") if assessment and assessment.team_name else "Assessment Detail" %}
+{% set page_title = (assessment.team_name + " - " + _('assessment.detail')) if assessment and assessment.team_name else _('assessment.detail') %}
 {% set show_breadcrumbs = true %}
 {% set breadcrumbs = [
-    {"name": "Home", "url": url_for('main.index') if url_for else '/'},
-    {"name": "Assessments", "url": url_for('assessment.index') if url_for else '/assessment'},
-    {"name": assessment.team_name if assessment and assessment.team_name else "Assessment", "url": "#", "active": true}
+    {"name": _('nav.home'), "url": url_for('main.index') if url_for else '/'},
+    {"name": _('assessment.title'), "url": url_for('assessment.index') if url_for else '/assessment'},
+    {"name": assessment.team_name if assessment and assessment.team_name else _('assessment.title'), "url": "#", "active": true}
 ] %}
 
 {% block head_extra %}
@@ -71,7 +71,7 @@
             <div class="row align-items-center">
                 <div class="col-lg-8">
                     <h1 class="fw-bold mb-3">{{ assessment.team_name or 'Assessment ' + assessment.id|string }}</h1>
-                    <p class="lead mb-3">AI Maturity Assessment</p>
+                    <p class="lead mb-3">{{ _('assessment.ai_maturity') }}</p>
                     <div class="assessment-meta">
                         <span class="badge bg-light text-dark me-2">
                             <i class="bi bi-building me-1"></i>{{ assessment.team_name or 'N/A' }}
@@ -91,7 +91,7 @@
                     {% if assessment.status == 'completed' and assessment.overall_score %}
                     <div class="mt-3">
                         <h3 class="fw-bold mb-0">DevIQ: {{ "%.1f"|format(assessment.overall_score) }}</h3>
-                        <small>Maturity Score</small>
+                        <small>{{ _('assessment.maturity_score') }}</small>
                     </div>
                     {% endif %}
                 </div>
@@ -105,13 +105,13 @@
             {% if progress %}
             <div class="progress-section">
                 <h4 class="fw-bold mb-4">
-                    <i class="bi bi-graph-up me-2"></i>Assessment Progress
+                    <i class="bi bi-graph-up me-2"></i>{{ _('assessment.progress') }}
                 </h4>
                 
                 <!-- Overall Progress -->
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">Overall Completion</h6>
+                        <h6 class="mb-0">{{ _('assessment.overall_completion') }}</h6>
                         <span class="fw-bold text-primary">{{ "%.1f"|format(progress.progress_percentage) }}%</span>
                     </div>
                     <div class="progress" style="height: 12px;">
@@ -119,13 +119,13 @@
                              style="width: {{ progress.progress_percentage }}%"></div>
                     </div>
                     <small class="text-muted">
-                        {{ progress.responded_questions }} of {{ progress.total_questions }} questions completed
+                        {{ _('assessment.questions_completed', answered=progress.responded_questions, total=progress.total_questions) }}
                     </small>
                 </div>
                 
                 <!-- Section Progress -->
                 {% if progress.section_progress %}
-                <h6 class="fw-bold mb-3">Progress by Section</h6>
+                <h6 class="fw-bold mb-3">{{ _('assessment.progress_by_section') }}</h6>
                 {% for section_name, section_data in progress.section_progress.items() %}
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
@@ -146,60 +146,60 @@
             <div class="card action-card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-arrow-right-circle me-2"></i>Next Steps
+                        <i class="bi bi-arrow-right-circle me-2"></i>{{ _('assessment.next_steps') }}
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if assessment.status == 'draft' %}
-                        <p class="card-text">This assessment is ready to begin. Start answering questions to evaluate your AI maturity.</p>
+                        <p class="card-text">{{ _('assessment.draft_desc') }}</p>
                         <a href="{{ url_for('assessment.question', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/question' }}" 
                            class="btn btn-primary">
-                            <i class="bi bi-play-circle me-2"></i>Start Assessment
+                            <i class="bi bi-play-circle me-2"></i>{{ _('assessment.start') }}
                         </a>
                     {% elif assessment.status == 'in_progress' %}
                         <p class="card-text">
-                            Continue where you left off. 
+                            {{ _('assessment.in_progress_desc') }}
                             {% if next_question %}
-                                Your next question is about {{ next_question.area.name if next_question.area else 'assessment topics' }}.
+                                {{ _('assessment.next_question_about', area=next_question.area.name if next_question.area else '') }}
                             {% endif %}
                         </p>
                         {% if next_question %}
                         <a href="{{ url_for('assessment.question', assessment_id=assessment.id, question_id=next_question.id) if url_for else '/assessment/' + assessment.id|string + '/question/' + next_question.id|string }}" 
                            class="btn btn-primary me-2">
-                            <i class="bi bi-play-circle me-2"></i>Continue Assessment
+                            <i class="bi bi-play-circle me-2"></i>{{ _('assessment.continue') }}
                         </a>
                         {% endif %}
                         <a href="{{ url_for('assessment.progress', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/progress' }}" 
                            class="btn btn-outline-secondary">
-                            <i class="bi bi-graph-up me-2"></i>View Detailed Progress
+                            <i class="bi bi-graph-up me-2"></i>{{ _('assessment.view_detailed_progress') }}
                         </a>
                         {% if progress and progress.progress_percentage >= 80 %}
                         <a href="{{ url_for('assessment.complete', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/complete' }}" 
                            class="btn btn-success ms-2">
-                            <i class="bi bi-check-circle me-2"></i>Complete Assessment
+                            <i class="bi bi-check-circle me-2"></i>{{ _('assessment.complete') }}
                         </a>
                         {% endif %}
                     {% elif assessment.status == 'completed' %}
-                        <p class="card-text">This assessment is complete! View your results and recommendations below.</p>
+                        <p class="card-text">{{ _('assessment.completed_desc') }}</p>
                         <a href="{{ url_for('assessment.report', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/report' }}" 
                            class="btn btn-primary me-2">
-                            <i class="bi bi-file-text me-2"></i>View Report
+                            <i class="bi bi-file-text me-2"></i>{{ _('assessment.view_report') }}
                         </a>
                         <div class="btn-group">
                             <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                                <i class="bi bi-download me-2"></i>Export
+                                <i class="bi bi-download me-2"></i>{{ _('assessment.export') }}
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-file-pdf me-2"></i>PDF Report</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-file-excel me-2"></i>Excel Data</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-file-csv me-2"></i>CSV Data</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-file-pdf me-2"></i>{{ _('assessment.pdf_report') }}</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-file-excel me-2"></i>{{ _('assessment.excel_data') }}</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-file-csv me-2"></i>{{ _('assessment.csv_data') }}</a></li>
                             </ul>
                         </div>
                     {% else %}
                         <p class="card-text">This assessment is {{ assessment.status }}.</p>
                         <a href="{{ url_for('assessment.index') if url_for else '/assessment' }}" 
                            class="btn btn-outline-primary">
-                            <i class="bi bi-arrow-left me-2"></i>Back to Assessments
+                            <i class="bi bi-arrow-left me-2"></i>{{ _('assessment.back_to_assessments') }}
                         </a>
                     {% endif %}
                 </div>
@@ -212,29 +212,29 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <h6 class="card-title mb-0">
-                        <i class="bi bi-info-circle me-2"></i>Assessment Information
+                        <i class="bi bi-info-circle me-2"></i>{{ _('assessment.assessment_info') }}
                     </h6>
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
-                        <dt class="col-sm-5">ID:</dt>
+                        <dt class="col-sm-5">{{ _('assessment.id') }}:</dt>
                         <dd class="col-sm-7">{{ assessment.id }}</dd>
                         
-                        <dt class="col-sm-5">Created:</dt>
+                        <dt class="col-sm-5">{{ _('assessment.created') }}:</dt>
                         <dd class="col-sm-7">{{ assessment.created_at.strftime('%m/%d/%Y') if assessment.created_at else 'N/A' }}</dd>
                         
-                        <dt class="col-sm-5">Updated:</dt>
+                        <dt class="col-sm-5">{{ _('assessment.updated') }}:</dt>
                         <dd class="col-sm-7">{{ assessment.updated_at.strftime('%m/%d/%Y') if assessment.updated_at else 'N/A' }}</dd>
                         
                         {% if assessment.completion_date %}
-                        <dt class="col-sm-5">Completed:</dt>
+                        <dt class="col-sm-5">{{ _('assessment.completed') }}:</dt>
                         <dd class="col-sm-7">{{ assessment.completion_date.strftime('%m/%d/%Y') }}</dd>
                         {% endif %}
                         
-                        <dt class="col-sm-5">Assessor:</dt>
+                        <dt class="col-sm-5">{{ _('assessment.assessor') }}:</dt>
                         <dd class="col-sm-7">{{ assessment.assessor_name or 'N/A' }}</dd>
                         
-                        <dt class="col-sm-5">Email:</dt>
+                        <dt class="col-sm-5">{{ _('assessment.email') }}:</dt>
                         <dd class="col-sm-7">{{ assessment.assessor_email or 'N/A' }}</dd>
                     </dl>
                 </div>
@@ -244,7 +244,7 @@
             <div class="card">
                 <div class="card-header">
                     <h6 class="card-title mb-0">
-                        <i class="bi bi-lightning me-2"></i>Quick Actions
+                        <i class="bi bi-lightning me-2"></i>{{ _('assessment.quick_actions') }}
                     </h6>
                 </div>
                 <div class="card-body">
@@ -253,25 +253,25 @@
                         <a href="{{ url_for('assessment.question', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/question' }}" 
                            class="btn btn-primary">
                             <i class="bi bi-play-circle me-2"></i>
-                            {% if assessment.status == 'draft' %}Start{% else %}Continue{% endif %} Assessment
+                            {% if assessment.status == 'draft' %}{{ _('assessment.start') }}{% else %}{{ _('assessment.continue') }}{% endif %}
                         </a>
                         {% endif %}
                         
                         <a href="{{ url_for('assessment.progress', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/progress' }}" 
                            class="btn btn-outline-primary">
-                            <i class="bi bi-graph-up me-2"></i>View Progress
+                            <i class="bi bi-graph-up me-2"></i>{{ _('assessment.view_detailed_progress') }}
                         </a>
                         
                         {% if assessment.status == 'completed' %}
                         <a href="{{ url_for('dashboard.comparison') if url_for else '/dashboard/comparison' }}?assessments={{ assessment.id }}" 
                            class="btn btn-outline-secondary">
-                            <i class="bi bi-bar-chart me-2"></i>Compare Results
+                            <i class="bi bi-bar-chart me-2"></i>{{ _('assessment.view_report') }}
                         </a>
                         {% endif %}
                         
                         <a href="{{ url_for('assessment.index') if url_for else '/assessment' }}" 
                            class="btn btn-outline-secondary">
-                            <i class="bi bi-list me-2"></i>All Assessments
+                            <i class="bi bi-list me-2"></i>{{ _('assessment.back_to_assessments') }}
                         </a>
                     </div>
                 </div>
@@ -283,13 +283,13 @@
     <!-- Assessment Not Found -->
     <div class="text-center py-5">
         <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
-        <h3 class="mt-3">Assessment Not Found</h3>
+        <h3 class="mt-3">{{ _('assessment.not_found') }}</h3>
         <p class="text-muted mb-4">
-            The requested assessment could not be found or you don't have access to it.
+            {{ _('assessment.not_found_desc') }}
         </p>
         <a href="{{ url_for('assessment.index') if url_for else '/assessment' }}" 
            class="btn btn-primary">
-            <i class="bi bi-arrow-left me-2"></i>Back to Assessments
+            <i class="bi bi-arrow-left me-2"></i>{{ _('assessment.back_to_assessments') }}
         </a>
     </div>
     {% endif %}

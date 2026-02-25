@@ -27,15 +27,15 @@
                             <div class="alert-text">
                                 <div class="alert-title">
                                     {% if category == 'success' %}
-                                        Success
+                                        {{ _('alerts.success') }}
                                     {% elif category == 'error' or category == 'danger' %}
-                                        Error
+                                        {{ _('alerts.error') }}
                                     {% elif category == 'warning' %}
-                                        Warning
+                                        {{ _('alerts.warning') }}
                                     {% elif category == 'info' %}
-                                        Information
+                                        {{ _('alerts.info') }}
                                     {% else %}
-                                        Notice
+                                        {{ _('alerts.notice') }}
                                     {% endif %}
                                 </div>
                                 <div class="alert-message">{{ message }}</div>

@@ -1,0 +1,123 @@
+<div class="card shadow-sm">
+  <div class="card-header bg-white">
+    <h5 class="mb-0">
+      <i class="bi bi-building me-2"></i>
+      {{ _('org_form.title') }}
+    </h5>
+    <p class="text-muted small mb-0 mt-1">{{ _('org_form.subtitle') }}</p>
+  </div>
+  <div class="card-body">
+    <div id="orgInfoErrors" class="alert alert-danger d-none" role="alert"></div>
+
+    <div class="row g-3">
+      <!-- Organization Name -->
+      <div class="col-md-6">
+        <label for="orgName" class="form-label fw-semibold">
+          <i class="bi bi-building me-1"></i>{{ _('org_form.org_name_label') }}
+        </label>
+        <input type="text" class="form-control" id="orgName"
+               placeholder="{{ _('org_form.org_name_placeholder') }}"
+               maxlength="200" required>
+        <div class="form-text">{{ _('org_form.org_name_help') }}</div>
+      </div>
+
+      <!-- Account Name -->
+      <div class="col-md-6">
+        <label for="accountName" class="form-label fw-semibold">
+          <i class="bi bi-person-badge me-1"></i>{{ _('org_form.account_name_label') }}
+        </label>
+        <input type="text" class="form-control" id="accountName"
+               placeholder="{{ _('org_form.account_name_placeholder') }}"
+               maxlength="200">
+        <div class="form-text">{{ _('org_form.account_name_help') }}</div>
+      </div>
+
+      <!-- First / Last Name -->
+      <div class="col-md-6">
+        <label for="firstName" class="form-label fw-semibold">
+          <i class="bi bi-person me-1"></i>{{ _('org_form.first_name_label') }}
+        </label>
+        <input type="text" class="form-control" id="firstName"
+               placeholder="{{ _('org_form.first_name_placeholder') }}"
+               maxlength="100" required>
+      </div>
+      <div class="col-md-6">
+        <label for="lastName" class="form-label fw-semibold">
+          {{ _('org_form.last_name_label') }}
+        </label>
+        <input type="text" class="form-control" id="lastName"
+               placeholder="{{ _('org_form.last_name_placeholder') }}"
+               maxlength="100" required>
+      </div>
+
+      <!-- Email -->
+      <div class="col-12">
+        <label for="emailField" class="form-label fw-semibold">
+          <i class="bi bi-envelope me-1"></i>{{ _('org_form.email_label') }}
+        </label>
+        <input type="email" class="form-control" id="emailField"
+               placeholder="{{ _('org_form.email_placeholder') }}"
+               maxlength="200" required>
+        <div class="form-text">{{ _('org_form.email_help') }}</div>
+      </div>
+
+      <!-- Industry -->
+      <div class="col-12">
+        <label class="form-label fw-semibold">
+          <i class="bi bi-briefcase me-1"></i>{{ _('org_form.industry_label') }}
+        </label>
+        <div class="d-flex flex-wrap gap-2" id="industrySelector">
+          {% set industries = [
+            ('automotive',     'bi-car-front',     _('org_form.industry_automotive')),
+            ('bfsi',           'bi-bank',          _('org_form.industry_bfsi')),
+            ('energy_utilities','bi-lightning',     _('org_form.industry_energy')),
+            ('government',     'bi-building-check',_('org_form.industry_government')),
+            ('travel_transport_tourism','bi-airplane',_('org_form.industry_travel')),
+            ('healthcare',     'bi-heart-pulse',   _('org_form.industry_healthcare')),
+            ('media_communications','bi-broadcast', _('org_form.industry_media')),
+            ('retail_commerce','bi-shop',           _('org_form.industry_retail')),
+            ('technology',     'bi-laptop',         _('org_form.industry_technology')),
+            ('other',          'bi-three-dots',     _('org_form.industry_other'))
+          ] %}
+          {% for val, icon, label in industries %}
+          <button type="button"
+                  class="btn btn-outline-secondary industry-btn px-3 py-2"
+                  data-industry="{{ val }}">
+            <i class="bi {{ icon }} me-1"></i>{{ label }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Assessor Section -->
+      <div class="col-12">
+        <hr class="my-2">
+        <h6 class="text-muted mb-3">
+          <i class="bi bi-person-check me-2"></i>{{ _('org_form.assessor_section') }}
+        </h6>
+      </div>
+      <div class="col-md-6">
+        <label for="assessorName" class="form-label fw-semibold">
+          {{ _('org_form.assessor_name_label') }}
+        </label>
+        <input type="text" class="form-control" id="assessorName"
+               placeholder="{{ _('org_form.assessor_name_placeholder') }}"
+               maxlength="200">
+      </div>
+      <div class="col-md-6">
+        <label for="assessorEmail" class="form-label fw-semibold">
+          {{ _('org_form.assessor_email_label') }}
+        </label>
+        <input type="email" class="form-control" id="assessorEmail"
+               placeholder="{{ _('org_form.assessor_email_placeholder') }}"
+               maxlength="200">
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+      <button id="orgInfoNextBtn" class="btn btn-primary" disabled>
+        {{ _('create.continue') }} <i class="bi bi-arrow-right ms-1"></i>
+      </button>
+    </div>
+  </div>
+</div>

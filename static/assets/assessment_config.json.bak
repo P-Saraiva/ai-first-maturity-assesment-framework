@@ -1,0 +1,102 @@
+{
+  "domains": [
+    {
+      "id": "D1",
+      "name": "Governance & Strategy",
+      "areas": [
+        {"id": "A1", "name": "Risk Management", "questions": [
+          {"id": "Q1", "text": "Is there an established risk management framework?"},
+          {"id": "Q2", "text": "Are risks assessed periodically?"}
+        ]},
+        {"id": "A2", "name": "Policy & Compliance", "questions": [
+          {"id": "Q3", "text": "Are security policies documented and accessible?"},
+          {"id": "Q4", "text": "Is compliance continuously monitored?"}
+        ]}
+      ]
+    },
+    {
+      "id": "D2",
+      "name": "Identity & Access",
+      "areas": [
+        {"id": "A3", "name": "Access Control", "questions": [
+          {"id": "Q5", "text": "Are least privilege principles enforced?"},
+          {"id": "Q6", "text": "Is MFA implemented for critical systems?"}
+        ]},
+        {"id": "A4", "name": "Identity Lifecycle", "questions": [
+          {"id": "Q7", "text": "Are joiner/mover/leaver processes defined?"},
+          {"id": "Q8", "text": "Are orphaned accounts periodically reviewed?"}
+        ]}
+      ]
+    },
+    {
+      "id": "D3",
+      "name": "Network & Infrastructure",
+      "areas": [
+        {"id": "A5", "name": "Segmentation", "questions": [
+          {"id": "Q9", "text": "Is the network segmented by trust level?"},
+          {"id": "Q10", "text": "Are segmentation controls validated?"}
+        ]},
+        {"id": "A6", "name": "Patch Management", "questions": [
+          {"id": "Q11", "text": "Is there automated patching?"},
+          {"id": "Q12", "text": "Are critical patches prioritized?"}
+        ]}
+      ]
+    },
+    {
+      "id": "D4",
+      "name": "Data Protection",
+      "areas": [
+        {"id": "A7", "name": "Encryption", "questions": [
+          {"id": "Q13", "text": "Is data encrypted at rest?"},
+          {"id": "Q14", "text": "Is data encrypted in transit?"}
+        ]},
+        {"id": "A8", "name": "Backup & Recovery", "questions": [
+          {"id": "Q15", "text": "Are backups regularly verified?"},
+          {"id": "Q16", "text": "Is recovery time objective defined?"}
+        ]}
+      ]
+    },
+    {
+      "id": "D5",
+      "name": "Application Security",
+      "areas": [
+        {"id": "A9", "name": "Secure SDLC", "questions": [
+          {"id": "Q17", "text": "Are security gates integrated in CI/CD?"},
+          {"id": "Q18", "text": "Is code reviewed for security?"}
+        ]},
+        {"id": "A10", "name": "Vulnerability Management", "questions": [
+          {"id": "Q19", "text": "Are vulnerabilities triaged and tracked?"},
+          {"id": "Q20", "text": "Is remediation time measured?"}
+        ]}
+      ]
+    },
+    {
+      "id": "D6",
+      "name": "Threat Detection & Response",
+      "areas": [
+        {"id": "A11", "name": "Monitoring", "questions": [
+          {"id": "Q21", "text": "Are critical logs centrally collected?"},
+          {"id": "Q22", "text": "Are alerts triaged promptly?"}
+        ]},
+        {"id": "A12", "name": "Incident Response", "questions": [
+          {"id": "Q23", "text": "Is there an IR plan?"},
+          {"id": "Q24", "text": "Are IR exercises conducted?"}
+        ]}
+      ]
+    },
+    {
+      "id": "D7",
+      "name": "Awareness & Training",
+      "areas": [
+        {"id": "A13", "name": "Training Program", "questions": [
+          {"id": "Q25", "text": "Is there mandatory security training?"},
+          {"id": "Q26", "text": "Is phishing simulation conducted?"}
+        ]},
+        {"id": "A14", "name": "Culture & Adoption", "questions": [
+          {"id": "Q27", "text": "Is leadership supporting security initiatives?"},
+          {"id": "Q28", "text": "Are champions engaged across teams?"}
+        ]}
+      ]
+    }
+  ]
+}

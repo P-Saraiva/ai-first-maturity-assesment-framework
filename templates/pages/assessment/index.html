@@ -1,9 +1,9 @@
 {% extends "base/layout.html" %}
-{% set page_title = "Assessment Dashboard" %}
+{% set page_title = _('dashboard.title') %}
 {% set show_breadcrumbs = true %}
 {% set breadcrumbs = [
-    {"name": "Home", "url": url_for('main.index') if url_for else '/'},
-    {"name": "Assessments", "url": "#", "active": true}
+    {"name": _("nav.home"), "url": url_for('main.index') if url_for else '/'},
+    {"name": _("assessment.title"), "url": "#", "active": true}
 ] %}
 
 {% block head_extra %}
@@ -496,31 +496,31 @@
     <div class="dashboard-header">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-                <h1 class="mb-2">Assessment Dashboard</h1>
-                <p class="mb-0 opacity-75">Manage and review your AI-First maturity assessments</p>
+                <h1 class="mb-2">{{ _('dashboard.title') }}</h1>
+                <p class="mb-0 opacity-75">{{ _('dashboard.subtitle') }}</p>
             </div>
             <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
                class="btn btn-light btn-lg">
-                <i class="bi bi-plus-circle me-2"></i>New Assessment
+                <i class="bi bi-plus-circle me-2"></i>{{ _('assessment.new_assessment') }}
             </a>
         </div>
         
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value">{{ total_assessments or 0 }}</div>
-                <div class="stat-label">Total Assessments</div>
+                <div class="stat-label">{{ _('dashboard.total_assessments') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ completed_assessments or 0 }}</div>
-                <div class="stat-label">Completed</div>
+                <div class="stat-label">{{ _('dashboard.completed') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ in_progress_assessments or 0 }}</div>
-                <div class="stat-label">In Progress</div>
+                <div class="stat-label">{{ _('dashboard.in_progress') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ total_sections or 0 }}</div>
-                <div class="stat-label">Sections</div>
+                <div class="stat-label">{{ _('dashboard.sections') }}</div>
             </div>
         </div>
     </div>
@@ -530,23 +530,23 @@
         <form method="GET" id="filterForm">
             <div class="filter-section">
                 <h5 class="mb-3">
-                    <i class="bi bi-funnel me-2"></i>Search & Filter
+                    <i class="bi bi-funnel me-2"></i>{{ _('dashboard.search_filter') }}
                 </h5>
                 
                 <div class="filter-row">
                     <div class="form-group">
-                        <label class="form-label">Search</label>
+                        <label class="form-label">{{ _('dashboard.search') }}</label>
                         <input type="text" 
                                name="search" 
                                class="form-control" 
-                               placeholder="Search by team name or ID..."
+                               placeholder="{{ _('dashboard.search_placeholder') }}"
                                value="{{ search_query or '' }}">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ _('dashboard.status') }}</label>
                         <select name="status" class="form-control">
-                            <option value="">All Statuses</option>
+                            <option value="">{{ _('dashboard.all_statuses') }}</option>
                             {% for status in status_options %}
                             <option value="{{ status }}" {{ 'selected' if status_filter == status else '' }}>
                                 {{ status.replace('_', ' ').title() }}
@@ -556,7 +556,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">From Date</label>
+                        <label class="form-label">{{ _('dashboard.from_date') }}</label>
                         <input type="date" 
                                name="date_from" 
                                class="form-control"
@@ -564,7 +564,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">To Date</label>
+                        <label class="form-label">{{ _('dashboard.to_date') }}</label>
                         <input type="date" 
                                name="date_to" 
                                class="form-control"
@@ -574,11 +574,11 @@
                     <div class="form-group">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-filter">
-                                <i class="bi bi-search me-1"></i>Search
+                                <i class="bi bi-search me-1"></i>{{ _('dashboard.search') }}
                             </button>
                             <a href="{{ url_for('assessment.index') if url_for else '/assessment/' }}" 
                                class="btn btn-clear">
-                                <i class="bi bi-x-circle me-1"></i>Clear
+                                <i class="bi bi-x-circle me-1"></i>{{ _('dashboard.clear') }}
                             </a>
                         </div>
                     </div>
@@ -605,27 +605,27 @@
             <div class="assessment-meta">
                 <div class="meta-item">
                     <i class="bi bi-calendar3"></i>
-                    <span>Created: {{ assessment.created_at.strftime('%B %d, %Y') if assessment.created_at else 'N/A' }}</span>
+                    <span>{{ _('dashboard.created') }}: {{ assessment.created_at.strftime('%B %d, %Y') if assessment.created_at else _('common.na') }}</span>
                 </div>
                 
                 {% if assessment.updated_at %}
                 <div class="meta-item">
                     <i class="bi bi-clock-history"></i>
-                    <span>Updated: {{ assessment.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                    <span>{{ _('dashboard.updated') }}: {{ assessment.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
                 </div>
                 {% endif %}
                 
                 {% if assessment.overall_score %}
                 <div class="meta-item">
                     <i class="bi bi-graph-up"></i>
-                    <span>Overall Score: {{ "%.1f"|format(assessment.overall_score) }}</span>
+                    <span>{{ _('dashboard.overall_score') }}: {{ "%.1f"|format(assessment.overall_score) }}</span>
                 </div>
                 {% endif %}
                 
                 {% if assessment.completion_date %}
                 <div class="meta-item">
                     <i class="bi bi-check-circle"></i>
-                    <span>Completed: {{ assessment.completion_date.strftime('%B %d, %Y') }}</span>
+                    <span>{{ _('assessment.completed') }}: {{ assessment.completion_date.strftime('%B %d, %Y') }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -634,19 +634,19 @@
             {% if assessment.organization_name or assessment.industry or assessment.email %}
             <div class="org-info">
                 <h6 class="mb-2 text-primary">
-                    <i class="bi bi-building me-1"></i>Organization Details
+                    <i class="bi bi-building me-1"></i>{{ _('dashboard.org_details') }}
                 </h6>
                 
                 {% if assessment.organization_name %}
                 <div class="org-detail">
-                    <span class="org-label">Organization:</span>
+                    <span class="org-label">{{ _('dashboard.organization') }}:</span>
                     <span class="org-value">{{ assessment.organization_name }}</span>
                 </div>
                 {% endif %}
                 
                 {% if assessment.industry %}
                 <div class="org-detail">
-                    <span class="org-label">Industry:</span>
+                    <span class="org-label">{{ _('dashboard.industry') }}:</span>
                     <span class="org-value">
                         {% set industry_names = {
                             'automotive': 'Automotive',
@@ -667,14 +667,14 @@
                 
                 {% if assessment.first_name or assessment.last_name %}
                 <div class="org-detail">
-                    <span class="org-label">Contact:</span>
+                    <span class="org-label">{{ _('dashboard.contact') }}:</span>
                     <span class="org-value">{{ assessment.first_name or '' }} {{ assessment.last_name or '' }}</span>
                 </div>
                 {% endif %}
                 
                 {% if assessment.email %}
                 <div class="org-detail">
-                    <span class="org-label">Email:</span>
+                    <span class="org-label">{{ _('assessment.email') }}:</span>
                     <span class="org-value">{{ assessment.email }}</span>
                 </div>
                 {% endif %}
@@ -693,39 +693,39 @@
                 {% if assessment.status|lower == 'completed' %}
                     <a href="{{ url_for('assessment.view_readonly', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/view' }}" 
                        class="btn btn-action btn-view">
-                        <i class="bi bi-info-circle me-1"></i>View Details
+                        <i class="bi bi-info-circle me-1"></i>{{ _('dashboard.view_details') }}
                     </a>
                     <a href="{{ url_for('assessment.report', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/report' }}" 
                        class="btn btn-action btn-continue">
-                        <i class="bi bi-file-earmark-text me-1"></i>View Report
+                        <i class="bi bi-file-earmark-text me-1"></i>{{ _('dashboard.view_report') }}
                     </a>
                 {% elif assessment.status|lower == 'in_progress' %}
                     <a href="{{ url_for('assessment.view_readonly', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/view' }}" 
                        class="btn btn-action btn-view">
-                        <i class="bi bi-info-circle me-1"></i>View Details
+                        <i class="bi bi-info-circle me-1"></i>{{ _('dashboard.view_details') }}
                     </a>
                     <a href="{{ url_for('assessment.section_questions', assessment_id=assessment.id, section_id='FC') if url_for else '/assessment/' + assessment.id|string + '/section/FC' }}" 
                        class="btn btn-action btn-continue">
-                        <i class="bi bi-play-circle me-1"></i>Continue Assessment
+                        <i class="bi bi-play-circle me-1"></i>{{ _('dashboard.continue_assessment') }}
                     </a>
                     <button type="button" class="btn btn-action btn-delete" 
                             onclick="deleteAssessment({{ assessment.id }}, '{{ assessment.organization_name or assessment.team_name or 'Assessment ' + assessment.id|string }}', '{{ assessment.status or 'draft' }}')"
-                            title="Delete Assessment">
-                        <i class="bi bi-trash me-1"></i>Delete
+                            title="{{ _('dashboard.delete') }}">
+                        <i class="bi bi-trash me-1"></i>{{ _('dashboard.delete') }}
                     </button>
                 {% else %}
                     <a href="{{ url_for('assessment.view_readonly', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/view' }}" 
                        class="btn btn-action btn-view">
-                        <i class="bi bi-info-circle me-1"></i>View Details
+                        <i class="bi bi-info-circle me-1"></i>{{ _('dashboard.view_details') }}
                     </a>
                     <a href="{{ url_for('assessment.section_questions', assessment_id=assessment.id, section_id='FC') if url_for else '/assessment/' + assessment.id|string + '/section/FC' }}" 
                        class="btn btn-action btn-continue">
-                        <i class="bi bi-play-circle me-1"></i>Continue Assessment
+                        <i class="bi bi-play-circle me-1"></i>{{ _('dashboard.continue_assessment') }}
                     </a>
                     <button type="button" class="btn btn-action btn-delete" 
                             onclick="deleteAssessment({{ assessment.id }}, '{{ assessment.organization_name or assessment.team_name or 'Assessment ' + assessment.id|string }}', '{{ assessment.status or 'draft' }}')"
-                            title="Delete Assessment">
-                        <i class="bi bi-trash me-1"></i>Delete
+                            title="{{ _('dashboard.delete') }}">
+                        <i class="bi bi-trash me-1"></i>{{ _('dashboard.delete') }}
                     </button>
                 {% endif %}
             </div>
@@ -792,12 +792,12 @@
                 <div class="empty-state-icon">
                     <i class="bi bi-clipboard-data"></i>
                 </div>
-                <h3>No Assessments Found</h3>
+                <h3>{{ _('dashboard.no_assessments') }}</h3>
                 <p>
                     {% if search_query or status_filter or date_from or date_to %}
-                        No assessments match your current filters. Try adjusting your search criteria.
+                        {{ _('dashboard.no_match_filters') }}
                     {% else %}
-                        Get started by creating your first AI-First maturity assessment.
+                        {{ _('dashboard.get_started') }}
                     {% endif %}
                 </p>
                 
@@ -805,13 +805,13 @@
                     {% if search_query or status_filter or date_from or date_to %}
                     <a href="{{ url_for('assessment.index') if url_for else '/assessment/' }}" 
                        class="btn btn-outline-primary">
-                        <i class="bi bi-x-circle me-2"></i>Clear Filters
+                        <i class="bi bi-x-circle me-2"></i>{{ _('dashboard.clear_filters') }}
                     </a>
                     {% endif %}
                     
                     <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
                        class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Create New Assessment
+                        <i class="bi bi-plus-circle me-2"></i>{{ _('dashboard.create_new') }}
                     </a>
                 </div>
             </div>
@@ -830,8 +830,8 @@
                         <i class="bi bi-exclamation-triangle-fill fs-2"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title mb-0" id="deleteConfirmModalLabel">Confirm Deletion</h5>
-                        <small class="opacity-75">This action cannot be undone</small>
+                        <h5 class="modal-title mb-0" id="deleteConfirmModalLabel">{{ _('dashboard.confirm_deletion') }}</h5>
+                        <small class="opacity-75">{{ _('dashboard.cannot_undone') }}</small>
                     </div>
                 </div>
             </div>
@@ -839,13 +839,13 @@
                 <div class="text-center mb-4">
                     <div class="alert alert-warning border-0 bg-light">
                         <i class="bi bi-info-circle text-warning me-2"></i>
-                        <strong>Are you sure you want to delete this assessment?</strong>
+                        <strong>{{ _('dashboard.confirm_delete_msg') }}</strong>
                     </div>
                 </div>
                 
                 <div class="assessment-details bg-light rounded p-3 mb-3">
                     <div class="row g-2">
-                        <div class="col-4 text-muted small">Assessment:</div>
+                        <div class="col-4 text-muted small">{{ _('dashboard.assessment_label') }}:</div>
                         <div class="col-8 fw-semibold" id="deleteAssessmentName">-</div>
                         
                         <div class="col-4 text-muted small">ID:</div>
@@ -861,22 +861,22 @@
                 <div class="warning-text text-center">
                     <p class="text-muted mb-2">
                         <i class="bi bi-database-fill-x text-danger me-1"></i>
-                        This will permanently remove:
+                        {{ _('dashboard.permanently_remove') }}
                     </p>
                     <ul class="list-unstyled text-start text-muted small">
-                        <li><i class="bi bi-dot text-danger"></i> All assessment responses and progress</li>
-                        <li><i class="bi bi-dot text-danger"></i> Organization and contact information</li>
-                        <li><i class="bi bi-dot text-danger"></i> Scoring and analysis data</li>
-                        <li><i class="bi bi-dot text-danger"></i> Historical tracking information</li>
+                        <li><i class="bi bi-dot text-danger"></i> {{ _('dashboard.remove_responses') }}</li>
+                        <li><i class="bi bi-dot text-danger"></i> {{ _('dashboard.remove_org_info') }}</li>
+                        <li><i class="bi bi-dot text-danger"></i> {{ _('dashboard.remove_scoring') }}</li>
+                        <li><i class="bi bi-dot text-danger"></i> {{ _('dashboard.remove_history') }}</li>
                     </ul>
                 </div>
             </div>
             <div class="modal-footer border-0 bg-light justify-content-center">
                 <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Cancel
+                    <i class="bi bi-x-circle me-1"></i>{{ _('dashboard.cancel') }}
                 </button>
                 <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn">
-                    <i class="bi bi-trash me-1"></i>Delete Assessment
+                    <i class="bi bi-trash me-1"></i>{{ _('dashboard.delete_assessment') }}
                 </button>
             </div>
         </div>

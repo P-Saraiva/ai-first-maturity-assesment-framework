@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% set page_title = "Assessment Sections - " + assessment.team_name if assessment and assessment.team_name else "Assessment Sections" %}
+{% set page_title = _('readonly.assessment_sections') + " - " + assessment.team_name if assessment and assessment.team_name else _('readonly.assessment_sections') %}
 
 {% block head_extra %}
 <style>
@@ -308,17 +308,17 @@
                     <!-- Header -->
                     <div class="readonly-overview-header">
                         <div class="readonly-badge">
-                            <i class="bi bi-eye me-1"></i> Read-Only View
+                            <i class="bi bi-eye me-1"></i> {{ _('readonly.read_only_view') }}
                         </div>
                         
                         <div class="row align-items-center">
                             <div class="col-lg-8">
                                 <h1 class="mb-2">
                                     <i class="bi bi-clipboard-data me-2"></i>
-                                    Assessment Sections
+                                    {{ _('readonly.assessment_sections') }}
                                 </h1>
                                 <p class="mb-0 opacity-75">
-                                    AI-First Software Engineering Maturity Assessment
+                                    {{ _('readonly.ai_first_assessment') }}
                                 </p>
                             </div>
                             <div class="col-lg-4 text-lg-end">
@@ -326,16 +326,16 @@
                                 <div class="assessment-stats">
                                     <div class="stat-item">
                                         <div class="stat-value">{{ sections|length }}</div>
-                                        <div class="stat-label">Sections</div>
+                                        <div class="stat-label">{{ _('readonly.sections') }}</div>
                                     </div>
                                     <div class="stat-item">
                                         <div class="stat-value">{{ "{:.0f}".format(progress.progress_percentage) }}%</div>
-                                        <div class="stat-label">Complete</div>
+                                        <div class="stat-label">{{ _('readonly.complete') }}</div>
                                     </div>
                                     {% if assessment.overall_score %}
                                     <div class="stat-item">
                                         <div class="stat-value">{{ "{:.1f}".format(assessment.overall_score) }}</div>
-                                        <div class="stat-label">Score</div>
+                                        <div class="stat-label">{{ _('common.score') }}</div>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -359,16 +359,16 @@
                                         {% endif %}
                                         {% if assessment.industry %}
                                         {% set industry_names = {
-                                            'automotive': 'Automotive',
-                                            'bfsi': 'BFSI',
-                                            'energy_utilities': 'Energy & Utilities',
-                                            'government': 'Government',
-                                            'travel_transport_tourism': 'Travel & Tourism',
-                                            'healthcare': 'Healthcare',
-                                            'media_communications': 'Media & Communications',
-                                            'retail_commerce': 'Retail & Commerce',
-                                            'technology': 'Technology',
-                                            'other': 'Other'
+                                            'automotive': _('org_form.industry_automotive'),
+                                            'bfsi': _('org_form.industry_bfsi'),
+                                            'energy_utilities': _('org_form.industry_energy'),
+                                            'government': _('org_form.industry_government'),
+                                            'travel_transport_tourism': _('org_form.industry_travel'),
+                                            'healthcare': _('org_form.industry_healthcare'),
+                                            'media_communications': _('org_form.industry_media'),
+                                            'retail_commerce': _('org_form.industry_retail'),
+                                            'technology': _('org_form.industry_technology'),
+                                            'other': _('org_form.industry_other')
                                         } %}
                                         <span>• {{ industry_names.get(assessment.industry, assessment.industry.title()) }}</span>
                                         {% endif %}
@@ -382,7 +382,7 @@
                                         </div>
                                         <div>
                                             <i class="bi bi-calendar me-1"></i>
-                                            <small>{{ assessment.created_at.strftime('%Y-%m-%d') if assessment.created_at else 'Unknown' }}</small>
+                                            <small>{{ assessment.created_at.strftime('%Y-%m-%d') if assessment.created_at else _('readonly.unknown') }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -390,7 +390,7 @@
                                 <div class="progress-info">
                                     <div class="text-center">
                                         <div class="h6 mb-1">{{ progress.responded_questions }}/{{ progress.total_questions }}</div>
-                                        <small class="opacity-90">Questions</small>
+                                        <small class="opacity-90">{{ _('readonly.questions') }}</small>
                                     </div>
                                 </div>
                                 {% endif %}
@@ -413,11 +413,11 @@
                             <!-- Completion Badge -->
                             <div class="section-completion-badge {{ completion_status }}">
                                 {% if completion_status == 'completed' %}
-                                    <i class="bi bi-check-circle me-1"></i>Complete
+                                    <i class="bi bi-check-circle me-1"></i>{{ _('readonly.complete') }}
                                 {% elif completion_status == 'in-progress' %}
                                     <i class="bi bi-clock me-1"></i>{{ "{:.0f}".format(section_percentage) }}&#37;
                                 {% else %}
-                                    <i class="bi bi-circle me-1"></i>Pending
+                                    <i class="bi bi-circle me-1"></i>{{ _('readonly.pending') }}
                                 {% endif %}
                             </div>
                             
@@ -448,11 +448,11 @@
                             <div class="section-meta">
                                 <span>
                                     <i class="bi bi-question-circle me-1"></i>
-                                    {{ section.areas|length }} assessment areas
+                                    {{ section.areas|length }} {{ _('readonly.assessment_areas') }}
                                 </span>
                                 {% if section_progress %}
                                 <span>
-                                    {{ section_progress.get('responded_questions', 0) }}/{{ section_progress.get('total_questions', 0) }} answered
+                                    {{ section_progress.get('responded_questions', 0) }}/{{ section_progress.get('total_questions', 0) }} {{ _('readonly.answered') }}
                                 </span>
                                 {% endif %}
                             </div>
@@ -462,37 +462,37 @@
                     
                     <!-- Navigation -->
                     <div class="navigation-section">
-                        <h4 class="mb-3">Navigation</h4>
+                        <h4 class="mb-3">{{ _('readonly.navigation') }}</h4>
                         <p class="text-muted mb-4">
-                            Explore the assessment sections and view responses. Click on any section above to view detailed responses.
+                            {{ _('readonly.nav_desc') }}
                         </p>
                         
                         <div class="d-flex gap-3 justify-content-center flex-wrap">
                             <a href="{{ url_for('assessment.view_readonly', assessment_id=assessment.id) }}" 
                                class="btn-nav btn-secondary-nav">
                                 <i class="bi bi-arrow-left me-2"></i>
-                                Organization Info
+                                {{ _('readonly.org_info_link') }}
                             </a>
                             
                             {% if assessment.status == 'COMPLETED' %}
                             <a href="{{ url_for('assessment.report', assessment_id=assessment.id) }}" 
                                class="btn-nav btn-primary-nav">
                                 <i class="bi bi-graph-up me-2"></i>
-                                View Report
+                                {{ _('readonly.view_report') }}
                             </a>
                             {% endif %}
                             
                             <a href="{{ url_for('assessment.index') }}" 
                                class="btn-nav btn-secondary-nav">
                                 <i class="bi bi-list me-2"></i>
-                                All Assessments
+                                {{ _('readonly.all_assessments') }}
                             </a>
                         </div>
                         
                         <div class="mt-4">
                             <small class="text-muted">
                                 <i class="bi bi-info-circle me-1"></i>
-                                This is a read-only view of the assessment responses
+                                {{ _('readonly.read_only_note') }}
                             </small>
                         </div>
                     </div>

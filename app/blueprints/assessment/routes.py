@@ -447,6 +447,161 @@ def create():
         return render_template('pages/assessment/org_information.html')
 
 
+@assessment_bp.route('/submit-assessment', methods=['POST'])
+@csrf.exempt
+def submit_assessment():
+    """
+    Submit a complete assessment from the client-side create flow.
+
+    Mirrors the seed_completed_assessment.py script but accepts user
+    selections (org info, chosen areas, Yes/No answers) via JSON.
+
+    Expects JSON payload:
+        orgInfo: {
+            organization_name, account_name, first_name, last_name,
+            email, industry, assessor_name?, assessor_email?
+        }
+        selectedAreas: [ "ETSI-ESI", "GSA-GSC", ... ]
+        answers: { "ETSI-ESI": [true, false, null, ...], ... }
+
+    Returns JSON:
+        { status: "success", assessment_id: int, redirect: "/assessment/<id>/report" }
+    """
+    try:
+        from app.extensions import db
+
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'status': 'error', 'message': 'Missing JSON payload'}), 400
+
+        org = data.get('orgInfo', {})
+        selected_areas = data.get('selectedAreas', [])
+        answers = data.get('answers', {})
+
+        # ── Validate required org fields ──────────────────────────────
+        required = ['organization_name', 'first_name', 'last_name', 'email', 'industry']
+        missing = [f for f in required if not org.get(f, '').strip()]
+        if missing:
+            return jsonify({
+                'status': 'error',
+                'message': f'Missing required fields: {", ".join(missing)}'
+            }), 400
+
+        if not selected_areas:
+            return jsonify({
+                'status': 'error',
+                'message': 'No areas selected'
+            }), 400
+
+        # ── Create Assessment record ─────────────────────────────────
+        now = datetime.utcnow()
+        assessment = Assessment(
+            organization_name=org.get('organization_name', '').strip(),
+            account_name=org.get('account_name', '').strip() or org.get('organization_name', '').strip(),
+            team_name=org.get('account_name', '').strip() or org.get('organization_name', '').strip(),
+            first_name=org.get('first_name', '').strip(),
+            last_name=org.get('last_name', '').strip(),
+            email=org.get('email', '').strip(),
+            industry=org.get('industry', '').strip(),
+            assessor_name=org.get('assessor_name', '').strip() or None,
+            assessor_email=org.get('assessor_email', '').strip() or None,
+            status='IN_PROGRESS',
+            created_at=now,
+            updated_at=now,
+        )
+        db.session.add(assessment)
+        db.session.flush()
+        assessment_id = assessment.id
+
+        logger.info(f"[submit-assessment] Created assessment {assessment_id}")
+
+        # ── Insert responses for each selected area ──────────────────
+        total_responses = 0
+        for area_id in selected_areas:
+            area = db.session.query(Area).get(area_id)
+            if not area:
+                logger.warning(f"Area {area_id} not found, skipping")
+                continue
+
+            questions = sorted(
+                [q for q in area.questions if getattr(q, 'is_active', 1) and q.is_binary],
+                key=lambda q: q.display_order
+            )
+            area_answers = answers.get(area_id, [])
+
+            for idx, q in enumerate(questions):
+                if idx < len(area_answers) and area_answers[idx] is not None:
+                    score = 2 if area_answers[idx] else 1
+                else:
+                    score = 1  # unanswered defaults to No
+
+                response = Response(
+                    assessment_id=assessment_id,
+                    question_id=q.id,
+                    score=score,
+                    timestamp=now,
+                )
+                db.session.add(response)
+                total_responses += 1
+
+        db.session.commit()
+        logger.info(f"[submit-assessment] Inserted {total_responses} responses")
+
+        # ── Trigger scoring (same as seed script) ────────────────────
+        try:
+            scoring_service = ScoringService(db.session)
+            scoring_results = scoring_service.calculate_assessment_score(assessment_id)
+
+            assessment.status = 'COMPLETED'
+            assessment.completion_date = now
+            assessment.overall_score = scoring_results.get('overall_percentage')
+            assessment.deviq_classification = scoring_results.get('maturity_level_display')
+
+            # Store section scores if available
+            section_scores = scoring_results.get('section_scores', {})
+            keys = list(section_scores.keys())
+            if len(keys) > 0:
+                assessment.foundational_score = section_scores[keys[0]].get('score')
+            if len(keys) > 1:
+                assessment.transformation_score = section_scores[keys[1]].get('score')
+            if len(keys) > 2:
+                assessment.enterprise_score = section_scores[keys[2]].get('score')
+            if len(keys) > 3:
+                assessment.governance_score = section_scores[keys[3]].get('score')
+
+            assessment.results_json = json.dumps(scoring_results, default=str)
+            db.session.commit()
+
+            logger.info(
+                f"[submit-assessment] Assessment {assessment_id} COMPLETED "
+                f"({scoring_results.get('overall_percentage', 0)*100:.1f}%, "
+                f"{scoring_results.get('maturity_level_display', 'N/A')})"
+            )
+
+        except Exception as scoring_err:
+            logger.error(f"[submit-assessment] Scoring error: {scoring_err}")
+            assessment.status = 'COMPLETED'
+            assessment.completion_date = now
+            db.session.commit()
+
+        manage_assessment_session(assessment_id)
+
+        return jsonify({
+            'status': 'success',
+            'assessment_id': assessment_id,
+            'redirect': url_for('assessment.report', assessment_id=assessment_id),
+        })
+
+    except Exception as e:
+        logger.error(f"[submit-assessment] Unexpected error: {e}")
+        try:
+            from app.extensions import db
+            db.session.rollback()
+        except Exception:
+            pass
+        return jsonify({'status': 'error', 'message': 'Internal server error'}), 500
+
+
 @assessment_bp.route('/<int:assessment_id>/section/<section_id>')
 def section_questions(assessment_id, section_id):
     """
@@ -1789,17 +1944,19 @@ def report(assessment_id):
                 current_domain_level_name = a_score.get('sse_level') or 'Informal'
                 current_domain_level = sse_rank.get(current_domain_level_name, 1)
 
-                # Determine gaps and strengths from responses
+                # Determine gaps and strengths from responses (translated)
                 gaps = []
                 strengths = []
+                from app.models.question_i18n import get_question_text
                 for q in questions_by_area.get(area_id, []):
+                    q_text = get_question_text(q.id) or q.question
                     r = responses_dict.get(q.id)
                     if not r:
-                        gaps.append(q.question)
+                        gaps.append(q_text)
                     elif hasattr(r, 'score') and int(r.score) >= 2:
-                        strengths.append(q.question)
+                        strengths.append(q_text)
                     else:
-                        gaps.append(q.question)
+                        gaps.append(q_text)
 
                 # Current-level definition card (Area-based)
                 cur_def = get_area_definition(area_id, current_domain_level)
@@ -2196,17 +2353,19 @@ def download_pdf(assessment_id):
                 current_domain_level_name = a_score.get('sse_level') or 'Informal'
                 current_domain_level = sse_rank.get(current_domain_level_name, 1)
 
-                # Determine gaps and strengths from responses
+                # Determine gaps and strengths from responses (translated)
                 gaps = []
                 strengths = []
+                from app.models.question_i18n import get_question_text
                 for q in questions_by_area.get(area_id, []):
+                    q_text = get_question_text(q.id) or q.question
                     r = responses_dict.get(q.id)
                     if not r:
-                        gaps.append(q.question)
+                        gaps.append(q_text)
                     elif hasattr(r, 'score') and int(r.score) >= 2:
-                        strengths.append(q.question)
+                        strengths.append(q_text)
                     else:
-                        gaps.append(q.question)
+                        gaps.append(q_text)
 
                 # Current-level definition card
                 cur_def = get_area_definition(area_id, current_domain_level)

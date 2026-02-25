@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_lang|default('en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-First Maturity Assessment Report - {{ organization_name }}</title>
+    <title>{{ _('report.title') }} - {{ organization_name }}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -229,17 +229,17 @@
         <div class="row align-items-center">
             <div class="col-8">
                 <h1 class="fw-bold mb-3">
-                    AI-First Maturity Assessment Report
+                    {{ _('report.title') }}
                 </h1>
                 <h2 class="mb-3">{{ organization_name }}</h2>
                 <div class="d-flex gap-3 mb-3">
                     <span class="badge bg-light">
                         <i class="bi bi-calendar-check me-1"></i>
-                        Completed: {{ completion_date.strftime('%B %d, %Y') if completion_date else 'N/A' }}
+                        {{ _('assessment.completed') }}: {{ completion_date.strftime('%B %d, %Y') if completion_date else _('common.na') }}
                     </span>
                     <span class="badge bg-light">
                         <i class="bi bi-clipboard-data me-1"></i>
-                        {{ responses_count }}/{{ total_questions }} Questions
+                        {{ responses_count }}/{{ total_questions }} {{ _('assessment.questions') }}
                     </span>
                 </div>
             </div>
@@ -247,11 +247,11 @@
                 <div class="score-circle mb-3">
                     <div class="text-center">
                         <div class="fw-bold" style="font-size: 2rem;">{{ "%.1f"|format(overall_score_0to5) }}</div>
-                        <div class="fw-semibold">Final Score (0–5)</div>
+                        <div class="fw-semibold">{{ _('report.score_label') }} (0–5)</div>
                     </div>
                 </div>
                 <h3 class="fw-bold">{{ overall_level }}</h3>
-                <p class="mb-0">Current SSE-CMM Maturity</p>
+                <p class="mb-0">{{ _('report.sse_cmm_level') }}</p>
             </div>
         </div>
     </div>
@@ -260,11 +260,11 @@
     {% set has_org_info = assessment.first_name or assessment.last_name or assessment.email or assessment.assessor_name or assessment.industry %}
     {% if has_org_info %}
     <div class="section-breakdown">
-        <h4 class="fw-bold mb-3">Organizational Information</h4>
+        <h4 class="fw-bold mb-3">{{ _('report.org_info') }}</h4>
         <div class="org-info-grid">
             {% if assessment.first_name or assessment.last_name %}
             <div class="org-info-item">
-                <h6 class="text-muted mb-1"><i class="bi bi-person me-1"></i>Contact Person</h6>
+                <h6 class="text-muted mb-1"><i class="bi bi-person me-1"></i>{{ _('org_info.contact_person') }}</h6>
                 <p class="mb-0 fw-semibold">{{ assessment.first_name or '' }} {{ assessment.last_name or '' }}</p>
                 {% if assessment.email %}
                 <small class="text-muted"><i class="bi bi-envelope me-1"></i>{{ assessment.email }}</small>
@@ -274,14 +274,14 @@
             
             {% if assessment.team_name and assessment.team_name != organization_name %}
             <div class="org-info-item">
-                <h6 class="text-muted mb-1"><i class="bi bi-people me-1"></i>Team</h6>
+                <h6 class="text-muted mb-1"><i class="bi bi-people me-1"></i>{{ _('org_info.team') }}</h6>
                 <p class="mb-0 fw-semibold">{{ assessment.team_name }}</p>
             </div>
             {% endif %}
             
             {% if assessment.assessor_name %}
             <div class="org-info-item">
-                <h6 class="text-muted mb-1"><i class="bi bi-clipboard-check me-1"></i>Assessor</h6>
+                <h6 class="text-muted mb-1"><i class="bi bi-clipboard-check me-1"></i>{{ _('org_info.assessor_name') }}</h6>
                 <p class="mb-0 fw-semibold">{{ assessment.assessor_name }}</p>
                 {% if assessment.assessor_email %}
                 <small class="text-muted"><i class="bi bi-envelope me-1"></i>{{ assessment.assessor_email }}</small>
@@ -291,7 +291,7 @@
             
             {% if assessment.industry %}
             <div class="org-info-item">
-                <h6 class="text-muted mb-1"><i class="bi bi-diagram-3 me-1"></i>Industry</h6>
+                <h6 class="text-muted mb-1"><i class="bi bi-diagram-3 me-1"></i>{{ _('org_info.industry') }}</h6>
                 <p class="mb-0 fw-semibold">{{ assessment.industry | upper }}</p>
             </div>
             {% endif %}
@@ -308,38 +308,38 @@
             </p>
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 <div style="display: flex; align-items: center; padding: 8px 12px; background: #fff5f5; border-left: 4px solid #dc3545; border-radius: 4px;">
-                    <span class="badge" style="background-color: #dc3545; color: white; min-width: 60px; text-align: center; margin-right: 12px;">Level 1</span>
+                    <span class="badge" style="background-color: #dc3545; color: white; min-width: 60px; text-align: center; margin-right: 12px;">{{ _('maturity.level_1') }}</span>
                     <div>
-                        <strong style="color: #dc3545;">Informal</strong>
-                        <span class="text-muted" style="margin-left: 6px;">— Ad-hoc level. Practices are reactive and inconsistent; risks often addressed after incidents.</span>
+                        <strong style="color: #dc3545;">{{ _('maturity.informal') }}</strong>
+                        <span class="text-muted" style="margin-left: 6px;">— {{ _('maturity.informal_desc') }}</span>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; padding: 8px 12px; background: #fff8e1; border-left: 4px solid #ffc107; border-radius: 4px;">
-                    <span class="badge" style="background-color: #ffc107; color: #212529; min-width: 60px; text-align: center; margin-right: 12px;">Level 2</span>
+                    <span class="badge" style="background-color: #ffc107; color: #212529; min-width: 60px; text-align: center; margin-right: 12px;">{{ _('maturity.level_2') }}</span>
                     <div>
-                        <strong style="color: #ffc107;">Defined</strong>
-                        <span class="text-muted" style="margin-left: 6px;">— Basic controls exist; practices depend heavily on individuals.</span>
+                        <strong style="color: #ffc107;">{{ _('maturity.defined') }}</strong>
+                        <span class="text-muted" style="margin-left: 6px;">— {{ _('maturity.defined_desc') }}</span>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; padding: 8px 12px; background: #e3f2fd; border-left: 4px solid #0dcaf0; border-radius: 4px;">
-                    <span class="badge" style="background-color: #0dcaf0; color: #212529; min-width: 60px; text-align: center; margin-right: 12px;">Level 3</span>
+                    <span class="badge" style="background-color: #0dcaf0; color: #212529; min-width: 60px; text-align: center; margin-right: 12px;">{{ _('maturity.level_3') }}</span>
                     <div>
-                        <strong style="color: #0dcaf0;">Systematic</strong>
-                        <span class="text-muted" style="margin-left: 6px;">— Processes are documented, standardized, and repeatable; risk, ethics, and security are embedded.</span>
+                        <strong style="color: #0dcaf0;">{{ _('maturity.systematic') }}</strong>
+                        <span class="text-muted" style="margin-left: 6px;">— {{ _('maturity.systematic_desc') }}</span>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; padding: 8px 12px; background: #e8f5e9; border-left: 4px solid #198754; border-radius: 4px;">
-                    <span class="badge" style="background-color: #198754; color: white; min-width: 60px; text-align: center; margin-right: 12px;">Level 4</span>
+                    <span class="badge" style="background-color: #198754; color: white; min-width: 60px; text-align: center; margin-right: 12px;">{{ _('maturity.level_4') }}</span>
                     <div>
-                        <strong style="color: #198754;">Integrated</strong>
-                        <span class="text-muted" style="margin-left: 6px;">— Practices are measured; decisions informed by data, monitoring, and trends.</span>
+                        <strong style="color: #198754;">{{ _('maturity.integrated') }}</strong>
+                        <span class="text-muted" style="margin-left: 6px;">— {{ _('maturity.integrated_desc') }}</span>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; padding: 8px 12px; background: #ede7f6; border-left: 4px solid #0d6efd; border-radius: 4px;">
-                    <span class="badge" style="background-color: #0d6efd; color: white; min-width: 60px; text-align: center; margin-right: 12px;">Level 5</span>
+                    <span class="badge" style="background-color: #0d6efd; color: white; min-width: 60px; text-align: center; margin-right: 12px;">{{ _('maturity.level_5') }}</span>
                     <div>
-                        <strong style="color: #0d6efd;">Optimized</strong>
-                        <span class="text-muted" style="margin-left: 6px;">— Continuous improvement; lessons and emerging risks are systematically incorporated.</span>
+                        <strong style="color: #0d6efd;">{{ _('maturity.optimized') }}</strong>
+                        <span class="text-muted" style="margin-left: 6px;">— {{ _('maturity.optimized_desc') }}</span>
                     </div>
                 </div>
             </div>
@@ -348,7 +348,7 @@
 
     <!-- Key Performance Metrics -->
     <div class="no-break">
-        <h4 class="fw-bold mb-4">Key Performance Metrics</h4>
+        <h4 class="fw-bold mb-4">{{ _('report.key_metrics') }}</h4>
         <div class="row">
             {% for section in section_scores %}
             <div class="col-6 mb-3">
@@ -356,11 +356,11 @@
                     <h3 class="fw-bold mb-2" style="color: {{ section.color }};">
                         {{ "%.1f"|format(section.score_0to5) }}
                     </h3>
-                    <h6 class="mb-1">{{ section.name }} — Confirmed Capabilities</h6>
+                    <h6 class="mb-1">{{ section.name }} — {{ _('report.confirmed_capabilities') }}</h6>
                     <div class="progress-bar-simple">
                         <div class="progress-fill-simple" style="width: {{ section.percentage }}%; background-color: {{ section.color }};"></div>
                     </div>
-                    <small class="text-muted mt-1">{{ section.level }} (SSE Level)</small>
+                    <small class="text-muted mt-1">{{ section.level }} ({{ _('report.sse_level') }})</small>
                 </div>
             </div>
             {% endfor %}
@@ -369,14 +369,14 @@
 
     <!-- Assessment Visualizations -->
     <div class="page-break">
-        <h4 class="fw-bold mb-4">Assessment Visualizations</h4>
+        <h4 class="fw-bold mb-4">{{ _('report.assessment_visualizations') }}</h4>
         
         <div class="row mb-4">
             <div class="col-6">
                 <div class="section-breakdown">
-                    <h5 class="mb-3"><i class="bi bi-pie-chart me-2"></i>Section Performance Overview</h5>
+                    <h5 class="mb-3"><i class="bi bi-pie-chart me-2"></i>{{ _('report.section_performance') }}</h5>
                     <p class="small text-muted mb-3">
-                        Performance across key AI maturity sections. Each section reflects the percentage of confirmed capabilities (0%–100%).
+                        {{ _('report.section_performance_desc') }}
                     </p>
                     <div class="chart-placeholder">
                         {% for section in section_scores %}
@@ -390,15 +390,15 @@
                             </div>
                         </div>
                         {% endfor %}
-                        <small class="text-muted">{{ section_scores | length }} sections assessed</small>
+                        <small class="text-muted">{{ section_scores | length }} {{ _('report.sections_assessed') }}</small>
                     </div>
                 </div>
             </div>
             <div class="col-6">
                 <div class="section-breakdown">
-                    <h5 class="mb-3"><i class="bi bi-bar-chart me-2"></i>Maturity Level Distribution</h5>
+                    <h5 class="mb-3"><i class="bi bi-bar-chart me-2"></i>{{ _('report.maturity_distribution') }}</h5>
                     <p class="small text-muted mb-3">
-                        How sections are distributed across maturity levels. Numbers show sections at each level.
+                        {{ _('report.maturity_distribution_desc') }}
                     </p>
                     <div class="chart-placeholder">
                         {% set level_colors_map = {'Informal': '#a1a1aa', 'Defined': '#22c55e', 'Systematic': '#3b82f6', 'Integrated': '#f59e0b', 'Optimized': '#8b5cf6'} %}
@@ -415,7 +415,7 @@
                             </div>
                         </div>
                         {% endfor %}
-                        <small class="text-muted">{{ chart_data.maturity_distribution.values() | sum }} sections distributed</small>
+                        <small class="text-muted">{{ chart_data.maturity_distribution.values() | sum }} {{ _('report.sections_distributed') }}</small>
                     </div>
                 </div>
             </div>
@@ -424,8 +424,8 @@
 
     <!-- Section Maturity Breakdown -->
     <div class="no-break">
-        <h4 class="fw-bold mb-4"><i class="bi bi-list-check me-2"></i>Section Maturity Breakdown</h4>
-        <p class="text-muted mb-3 small">Which specific sections achieved each maturity level:</p>
+        <h4 class="fw-bold mb-4"><i class="bi bi-list-check me-2"></i>{{ _('report.section_maturity_breakdown') }}</h4>
+        <p class="text-muted mb-3 small">{{ _('report.section_maturity_breakdown_desc') }}</p>
         <div class="row">
             {% set maturity_levels = ['Informal', 'Defined', 'Systematic', 'Integrated', 'Optimized'] %}
             {% set level_colors = ['#a1a1aa', '#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6'] %}
@@ -468,7 +468,7 @@
 
     <!-- Key Insights -->
     <div class="page-break">
-        <h4 class="fw-bold mb-4"><i class="bi bi-lightbulb me-2" style="color: #ffc107;"></i>Key Insights</h4>
+        <h4 class="fw-bold mb-4"><i class="bi bi-lightbulb me-2" style="color: #ffc107;"></i>{{ _('report.key_insights') }}</h4>
         <div class="row">
             {% for insight in insights %}
             <div class="col-4 mb-3">
@@ -487,30 +487,30 @@
     <!-- Priority Areas for Improvement -->
     {% if priority_areas %}
     <div class="no-break">
-        <h4 class="fw-bold mb-4"><i class="bi bi-target me-2" style="color: #dc3545;"></i>Priority Areas for Improvement</h4>
+        <h4 class="fw-bold mb-4"><i class="bi bi-target me-2" style="color: #dc3545;"></i>{{ _('report.priority_areas') }}</h4>
         <div class="row">
             {% for area in priority_areas %}
             <div class="col-4 mb-3">
                 <div class="priority-area" style="border-top: 4px solid {{ area.color }};">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="fw-bold mb-0">#{{ area.rank }} Priority</h6>
+                        <h6 class="fw-bold mb-0">#{{ area.rank }} {{ _('report.priority') }}</h6>
                         <span class="badge" style="background-color: {{ area.color }}; color: white;">{{ area.level }}</span>
                     </div>
                     <h5 class="fw-bold" style="color: {{ area.color }};">{{ area.name }}</h5>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="small">Current:</span>
+                        <span class="small">{{ _('report.current') }}:</span>
                         <span class="fw-bold" style="color: {{ area.color }}; font-size: 1.2rem;">
                             {{ "%.1f"|format(area.score_0to5) }}
                         </span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="small">Improvement Potential:</span>
+                        <span class="small">{{ _('report.improvement_potential') }}:</span>
                         <span class="fw-bold small" style="color: #28a745;">
                             +{{ (area.improvement_potential or 0)|round(1) }} pp
                         </span>
                     </div>
                     {% if area.areas %}
-                    <h6 class="fw-bold mt-2 mb-1 small">Focus Areas:</h6>
+                    <h6 class="fw-bold mt-2 mb-1 small">{{ _('report.focus_areas') }}:</h6>
                     <ul class="mb-0" style="list-style: none; padding-left: 0;">
                         {% for sub_area in area.areas %}
                         <li class="mb-1 small">
@@ -528,9 +528,9 @@
 
     <!-- Area Maturity Overview -->
     <div class="page-break">
-        <h2 class="fw-bold mb-3"><i class="bi bi-collection me-2" style="color: #007bff;"></i>Area Maturity Overview</h2>
+        <h2 class="fw-bold mb-3"><i class="bi bi-collection me-2" style="color: #007bff;"></i>{{ _('report.area_maturity_overview') }}</h2>
         <p class="text-muted mb-4 small">
-            This report describes the current assessed state: levels, answers, gaps, and risks.
+            {{ _('report.area_maturity_overview_desc') }}
         </p>
 
         {% for area_id, roadmap in area_roadmap_data.items() %}
@@ -540,16 +540,16 @@
                     <i class="bi bi-question-circle me-2"></i>
                     {{ roadmap.area_name }}
                 </h5>
-                <p class="mb-0 opacity-75 small">Area-level maturity based on assessed current level</p>
+                <p class="mb-0 opacity-75 small">{{ _('report.area_level_maturity_desc') }}</p>
             </div>
 
             <!-- Current Level -->
             <div class="progress-indicator">
                 <div class="progress-step">{{ roadmap.current_level }}</div>
                 <div>
-                    <h6 class="mb-1 fw-bold">Current Level {{ roadmap.current_level }} ({{ roadmap.current_level_name }})</h6>
+                    <h6 class="mb-1 fw-bold">{{ _('report.current_level') }} {{ roadmap.current_level }} ({{ roadmap.current_level_name }})</h6>
                     {% if roadmap.domain_normalized is not none %}
-                    <p class="text-muted mb-0 small">Normalized score: {{ "%.2f"|format(roadmap.domain_normalized) }}</p>
+                    <p class="text-muted mb-0 small">{{ _('report.normalized_score') }}: {{ "%.2f"|format(roadmap.domain_normalized) }}</p>
                     {% endif %}
                 </div>
             </div>
@@ -557,7 +557,7 @@
             <!-- About This Area -->
             {% if roadmap.area_description %}
             <div class="mb-3">
-                <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>About this Area</h6>
+                <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>{{ _('report.about_area') }}</h6>
                 <p class="text-muted small">{{ roadmap.area_description }}</p>
             </div>
             {% endif %}
@@ -565,7 +565,7 @@
             <!-- Risk Context -->
             <div class="mb-3">
                 <h6 class="fw-bold" style="color: #dc3545;">
-                    <i class="bi bi-exclamation-triangle me-2"></i>Risk Context
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ _('report.risk_context') }}
                 </h6>
                 {% set domain = (area_domain_details|default({})).get(area_id, {}) %}
                 {% if domain and domain.risk_description %}
@@ -579,13 +579,13 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="text-muted small">No specific risk context provided.</p>
+                    <p class="text-muted small">{{ _('report.no_risk_context') }}</p>
                 {% endif %}
             </div>
 
             <!-- References -->
             <div class="mb-3">
-                <h6 class="fw-bold"><i class="bi bi-bookmarks me-2"></i>References</h6>
+                <h6 class="fw-bold"><i class="bi bi-bookmarks me-2"></i>{{ _('report.references') }}</h6>
                 {% set refs = domain.references if domain else None %}
                 <div class="mb-2">
                     <span class="badge" style="background-color: #6c757d; color: white;">MITRE ATLAS</span>
@@ -600,7 +600,7 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                        <p class="text-muted small">No MITRE references.</p>
+                        <p class="text-muted small">{{ _('report.no_mitre_refs') }}</p>
                     {% endif %}
                 </div>
                 <div class="mb-2">
@@ -616,7 +616,7 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                        <p class="text-muted small">No NIST references.</p>
+                        <p class="text-muted small">{{ _('report.no_nist_refs') }}</p>
                     {% endif %}
                 </div>
             </div>
@@ -624,7 +624,7 @@
             <!-- Confirmed Capabilities -->
             <div class="mb-3">
                 <h6 class="fw-bold" style="color: #28a745;">
-                    <i class="bi bi-check-circle me-2"></i>Confirmed Capabilities (Yes)
+                    <i class="bi bi-check-circle me-2"></i>{{ _('report.confirmed_capabilities') }} (Yes)
                 </h6>
                 {% if roadmap.strengths and roadmap.strengths|length > 0 %}
                     {% for strength in roadmap.strengths %}
@@ -634,14 +634,14 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-muted small">No confirmed capabilities identified yet for this area.</p>
+                    <p class="text-muted small">{{ _('report.no_strengths') }}</p>
                 {% endif %}
             </div>
 
             <!-- Key Gaps -->
             <div class="mb-3">
                 <h6 class="fw-bold" style="color: #dc3545;">
-                    <i class="bi bi-exclamation-triangle me-2"></i>Key Gaps (No/Unanswered)
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ _('report.key_gaps') }} (No/Unanswered)
                 </h6>
                 {% if roadmap.gaps and roadmap.gaps|length > 0 %}
                     {% for gap in roadmap.gaps %}
@@ -651,7 +651,7 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-muted small">Well done. No gaps identified for this area.</p>
+                    <p class="text-muted small">{{ _('report.no_gaps') }}</p>
                 {% endif %}
             </div>
         </div>
@@ -659,10 +659,9 @@
 
         {% if not area_roadmap_data %}
         <div style="background: #cce5ff; border: 1px solid #b8daff; border-radius: 8px; padding: 20px;">
-            <h5 class="fw-bold"><i class="bi bi-info-circle me-2"></i>No Roadmap Available</h5>
+            <h5 class="fw-bold"><i class="bi bi-info-circle me-2"></i>{{ _('report.no_roadmap') }}</h5>
             <p class="mb-0 small">
-                Complete more assessment questions to generate a personalized roadmap
-                for your AI-First maturity journey.
+                {{ _('report.no_roadmap_desc') }}
             </p>
         </div>
         {% endif %}
@@ -671,8 +670,8 @@
     <!-- Footer -->
     <div class="mt-5 pt-4" style="border-top: 1px solid #e9ecef;">
         <div class="text-center small text-muted">
-            <p class="mb-1">AI-First Software Engineering Maturity Assessment Report</p>
-            <p class="mb-0">Generated on {{ completion_date.strftime('%B %d, %Y') if completion_date else 'N/A' }}</p>
+            <p class="mb-1">{{ _('app.name') }}</p>
+            <p class="mb-0">{{ _('report.generated_on') }} {{ completion_date.strftime('%B %d, %Y') if completion_date else 'N/A' }}</p>
         </div>
     </div>
 </body>

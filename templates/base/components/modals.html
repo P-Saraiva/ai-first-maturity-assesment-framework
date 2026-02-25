@@ -10,11 +10,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p id="confirmationMessage">Are you sure you want to proceed with this action?</p>
+                <p id="confirmationMessage">{{ _('modals.confirm_message') }}</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('modals.cancel') }}</button>
+                <button type="button" class="btn btn-danger" id="confirmActionBtn">{{ _('modals.confirm') }}</button>
             </div>
         </div>
     </div>
@@ -29,7 +29,7 @@
                 <div class="spinner-border text-primary mb-3" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mb-0" id="loadingMessage">Processing your request...</p>
+                <p class="mb-0" id="loadingMessage">{{ _('modals.processing') }}</p>
             </div>
         </div>
     </div>
@@ -49,7 +49,7 @@
             <div class="modal-body">
                 <form id="exportForm">
                     <div class="mb-3">
-                        <label for="exportFormat" class="form-label">Export Format</label>
+                        <label for="exportFormat" class="form-label">{{ _('modals.export_format') }}</label>
                         <select class="form-select" id="exportFormat" name="format" required>
                             <option value="">Choose format...</option>
                             <option value="csv">CSV (Comma Separated Values)</option>
@@ -60,11 +60,11 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Include Options</label>
+                        <label class="form-label">{{ _('modals.include_options') }}</label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="includeResponses" name="include_responses" checked>
                             <label class="form-check-label" for="includeResponses">
-                                Include detailed responses
+                                {{ _('modals.include_responses') }}
                             </label>
                         </div>
                         <div class="form-check">
@@ -76,17 +76,17 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="includeRecommendations" name="include_recommendations" checked>
                             <label class="form-check-label" for="includeRecommendations">
-                                Include recommendations
+                                {{ _('modals.include_recommendations') }}
                             </label>
                         </div>
                     </div>
                     
                     <div class="mb-3" id="assessmentSelection" style="display: none;">
-                        <label for="selectedAssessments" class="form-label">Select Assessments</label>
+                        <label for="selectedAssessments" class="form-label">{{ _('modals.select_assessments') }}</label>
                         <select class="form-select" id="selectedAssessments" name="assessment_ids" multiple>
                             <!-- Options will be populated dynamically -->
                         </select>
-                        <div class="form-text">Hold Ctrl/Cmd to select multiple assessments.</div>
+                        <div class="form-text">{{ _('modals.select_multiple') }}</div>
                     </div>
                 </form>
                 
@@ -95,14 +95,14 @@
                         <div class="spinner-border spinner-border-sm me-2" role="status">
                             <span class="visually-hidden">Exporting...</span>
                         </div>
-                        <span>Generating export file...</span>
+                        <span>{{ _('modals.generating_export') }}</span>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('modals.cancel') }}</button>
                 <button type="button" class="btn btn-primary" id="startExportBtn">
-                    <i class="bi bi-download me-1"></i>Export
+                    <i class="bi bi-download me-1"></i>{{ _('modals.export_btn') }}
                 </button>
             </div>
         </div>
@@ -124,15 +124,15 @@
                 <!-- Content will be loaded dynamically -->
                 <div class="text-center py-4">
                     <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{{ _('modals.loading') }}</span>
                     </div>
-                    <p class="mt-2">Loading assessment details...</p>
+                    <p class="mt-2">{{ _('modals.loading_details') }}</p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('modals.close') }}</button>
                 <button type="button" class="btn btn-primary" id="editAssessmentBtn" style="display: none;">
-                    <i class="bi bi-pencil me-1"></i>Edit
+                    <i class="bi bi-pencil me-1"></i>{{ _('modals.edit') }}
                 </button>
             </div>
         </div>
@@ -155,9 +155,9 @@
                 <div id="previewChart" style="height: 400px;"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('modals.close') }}</button>
                 <button type="button" class="btn btn-primary" id="downloadPreviewBtn">
-                    <i class="bi bi-download me-1"></i>Download
+                    <i class="bi bi-download me-1"></i>{{ _('modals.download') }}
                 </button>
             </div>
         </div>
@@ -179,49 +179,49 @@
                 <form id="settingsForm">
                     <!-- Theme Settings -->
                     <div class="mb-4">
-                        <h6 class="fw-bold">Appearance</h6>
+                        <h6 class="fw-bold">{{ _('nav.appearance') }}</h6>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="theme" id="themeLight" value="light">
                             <label class="form-check-label" for="themeLight">
-                                <i class="bi bi-sun me-1"></i>Light Theme
+                                <i class="bi bi-sun me-1"></i>{{ _('nav.light') }}
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="theme" id="themeDark" value="dark">
                             <label class="form-check-label" for="themeDark">
-                                <i class="bi bi-moon me-1"></i>Dark Theme
+                                <i class="bi bi-moon me-1"></i>{{ _('nav.dark') }}
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="theme" id="themeAuto" value="auto" checked>
                             <label class="form-check-label" for="themeAuto">
-                                <i class="bi bi-circle-half me-1"></i>Auto (System)
+                                <i class="bi bi-circle-half me-1"></i>{{ _('nav.auto') }}
                             </label>
                         </div>
                     </div>
                     
                     <!-- Notification Settings -->
                     <div class="mb-4">
-                        <h6 class="fw-bold">Notifications</h6>
+                        <h6 class="fw-bold">{{ _('modals.notifications') }}</h6>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
                             <label class="form-check-label" for="emailNotifications">
-                                Email notifications
+                                {{ _('modals.email_notifications') }}
                             </label>
                         </div>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="browserNotifications">
                             <label class="form-check-label" for="browserNotifications">
-                                Browser notifications
+                                {{ _('modals.browser_notifications') }}
                             </label>
                         </div>
                     </div>
                     
                     <!-- Assessment Settings -->
                     <div class="mb-4">
-                        <h6 class="fw-bold">Assessment Preferences</h6>
+                        <h6 class="fw-bold">{{ _('modals.assessment_preferences') }}</h6>
                         <div class="mb-3">
-                            <label for="defaultPageSize" class="form-label">Default items per page</label>
+                            <label for="defaultPageSize" class="form-label">{{ _('modals.default_per_page') }}</label>
                             <select class="form-select form-select-sm" id="defaultPageSize">
                                 <option value="10">10</option>
                                 <option value="25" selected>25</option>
@@ -239,9 +239,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('modals.cancel') }}</button>
                 <button type="button" class="btn btn-primary" id="saveSettingsBtn">
-                    <i class="bi bi-check me-1"></i>Save Settings
+                    <i class="bi bi-check me-1"></i>{{ _('modals.save_settings') }}
                 </button>
             </div>
         </div>

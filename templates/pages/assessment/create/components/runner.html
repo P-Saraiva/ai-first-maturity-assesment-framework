@@ -1,17 +1,22 @@
 <div class="card shadow-sm">
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0">Assessment</h5>
+      <h5 class="mb-0">{{ _('create.assessment_label') }}</h5>
       <div class="text-muted small">
-        <span id="statDomains">0</span> domains • <span id="statAreas">0</span> areas • <span id="statAnswered">0</span>/<span id="statTotal">0</span> answered
+        <span id="statDomains">0</span> {{ _('create.domains') }} • <span id="statAreas">0</span> {{ _('assessment.areas') }} • <span id="statAnswered">0</span>/<span id="statTotal">0</span> {{ _('create.answered') }}
       </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress mb-3" style="height: 6px">
+      <div id="runnerProgress" class="progress-bar bg-success" role="progressbar" style="width:0%"></div>
     </div>
 
     <div id="runnerContainer"></div>
 
     <div class="d-flex justify-content-between align-items-center mt-3">
-      <button id="backToSelectionBtn" class="btn btn-outline-secondary">Back</button>
-      <button id="finishAssessmentBtn" class="btn btn-success">Finish & Generate Report</button>
+      <button id="backToSelectionBtn" class="btn btn-outline-secondary">{{ _('common.back') }}</button>
+      <button id="finishAssessmentBtn" class="btn btn-success">{{ _('create.finish_generate') }}</button>
     </div>
   </div>
 </div>

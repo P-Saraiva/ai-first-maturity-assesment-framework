@@ -1,9 +1,9 @@
 {% extends "base/layout.html" %}
-{% set page_title = "About - AI-First Software Engineering Maturity Assessment" %}
+{% set page_title = _('about.page_title') %}
 {% set show_breadcrumbs = true %}
 {% set breadcrumbs = [
-    {"name": "Home", "url": url_for('main.index') if url_for else '/'},
-    {"name": "About", "url": "#", "active": true}
+    {"name": _('nav.home'), "url": url_for('main.index') if url_for else '/'},
+    {"name": _('nav.about'), "url": "#", "active": true}
 ] %}
 
 {% block head_extra %}
@@ -61,19 +61,15 @@
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <h1 class="display-4 fw-bold mb-4">
-                    About the AI Trust & Security Maturity Assessment
+                    {{ _('about.hero_title') }}
                 </h1>
                 <p class="lead mb-4">
-                    Empowering organizations worldwide to securely navigate their AI transformation 
-                    journey through a comprehensive maturity assessment. Gain insights into your current 
-                    AI trust and security posture, using industry best practices, guidances and standards to
-                    identify gaps and opportunities for improvement. Receive a detailed report highlighting potential risks 
-                    to build a secure-driven roadmap for AI-first applications.
+                    {{ _('about.hero_desc') }}
                 </p>
                 <div class="hero-badges">
-                    <span class="badge bg-light text-dark fs-6 me-2 p-2">Research-Based</span>
-                    <span class="badge bg-light text-dark fs-6 me-2 p-2">Industry Validated</span>
-                    <span class="badge bg-light text-dark fs-6 p-2">Continuously Updated</span>
+                    <span class="badge bg-light text-dark fs-6 me-2 p-2">{{ _('about.badge_research') }}</span>
+                    <span class="badge bg-light text-dark fs-6 me-2 p-2">{{ _('about.badge_validated') }}</span>
+                    <span class="badge bg-light text-dark fs-6 p-2">{{ _('about.badge_updated') }}</span>
                 </div>
             </div>
             <div class="col-lg-4 text-center">
@@ -95,22 +91,22 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-10 mx-auto">
-                <h2 class="display-6 fw-bold mb-3">Purpose of the Assessment</h2>
+                <h2 class="display-6 fw-bold mb-3">{{ _('about.purpose_title') }}</h2>
                 <p class="lead text-muted">
-                    This assessment helps organizations understand, measure, and manage their maturity in the use of Artificial Intelligence from a trust, security, risk, and governance perspective.
+                    {{ _('about.purpose_desc') }}
                 </p>
                 <p class="text-muted">
-                    Rather than focusing solely on technical performance, the assessment evaluates AI systems as socio-technical systems, where risks emerge from the interaction between:
+                    {{ _('about.purpose_detail') }}
                 </p>
                 <ul class="text-muted">
-                    <li>Technology</li>
-                    <li>People</li>
-                    <li>Processes</li>
-                    <li>Data</li>
-                    <li>Governance structures</li>
+                    <li>{{ _('about.purpose_tech') }}</li>
+                    <li>{{ _('about.purpose_people') }}</li>
+                    <li>{{ _('about.purpose_processes') }}</li>
+                    <li>{{ _('about.purpose_data') }}</li>
+                    <li>{{ _('about.purpose_governance') }}</li>
                 </ul>
                 <p class="text-muted">
-                    The primary goal is to enable organizations to identify material AI risks early, understand root causes, and prioritize practical improvements aligned with frameworks such as OWASP AIMA, NIST AI RMF, and MITRE ATLAS.
+                    {{ _('about.purpose_goal') }}
                 </p>
             </div>
         </div>
@@ -122,7 +118,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center mb-5">
-                <h2 class="display-5 fw-bold mb-4">Learn more about this project</h2>
+                <h2 class="display-5 fw-bold mb-4">{{ _('about.learn_more_title') }}</h2>
             </div>
         </div>
         <div class="row g-4">
@@ -132,11 +128,9 @@
                         <div class="text-center mb-3">
                             <i class="bi bi-flag" style="font-size: 3rem;"></i>
                         </div>
-                        <h4 class="text-center mb-3">The Mission</h4>
+                        <h4 class="text-center mb-3">{{ _('about.mission_title') }}</h4>
                         <p class="text-center mb-0">
-                            This project has the goal to democratize AI-first and secure software engineering by providing organizations with 
-                            comprehensive assessment tools, actionable insights, and rich resources that 
-                            accelerate their digital transformation and competitive advantage.
+                            {{ _('about.mission_desc') }}
                         </p>
                     </div>
                 </div>
@@ -147,15 +141,15 @@
                         <div class="text-center mb-3">
                             <i class="bi bi-eye" style="font-size: 3rem;"></i>
                         </div>
-                        <h4 class="text-center mb-3">The Vision</h4>
+                        <h4 class="text-center mb-3">{{ _('about.vision_title') }}</h4>
                         <p class="text-center mb-0">
-                            The vision is to move organizations from reactive, compliance-driven AI practices toward proactive, risk-informed, and maturity-driven AI governance.
+                            {{ _('about.vision_desc') }}
                         </p>
                         <ul class="text-muted">
-                            <li>AI risks are anticipated rather than discovered after incidents.</li>
-                            <li>Ethical, legal, and security considerations are embedded into business and operational processes.</li>
-                            <li>Decision-making is supported by evidence, metrics, and continuous monitoring.</li>
-                            <li>AI systems remain trustworthy, secure, and aligned with organizational values throughout their lifecycle.</li>
+                            <li>{{ _('about.vision_1') }}</li>
+                            <li>{{ _('about.vision_2') }}</li>
+                            <li>{{ _('about.vision_3') }}</li>
+                            <li>{{ _('about.vision_4') }}</li>
                         </ul>
                     </div>
                 </div>
@@ -173,12 +167,12 @@
             <div class="col-lg-6">
                 <div class="card feature-card h-100">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3">This assessment is:</h5>
+                        <h5 class="fw-bold mb-3">{{ _('about.is_title') }}</h5>
                         <ul class="text-muted mb-0">
-                            <li>A maturity-based diagnostic tool, not a pass/fail audit</li>
-                            <li>A risk-oriented framework, not a checklist</li>
-                            <li>A way to surface hidden or emerging AI risks (incl. governance)</li>
-                            <li>A foundation for prioritized, roadmap-driven improvement</li>
+                            <li>{{ _('about.is_1') }}</li>
+                            <li>{{ _('about.is_2') }}</li>
+                            <li>{{ _('about.is_3') }}</li>
+                            <li>{{ _('about.is_4') }}</li>
                         </ul>
                     </div>
                 </div>
@@ -186,12 +180,12 @@
             <div class="col-lg-6">
                 <div class="card feature-card h-100">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3">This assessment is not:</h5>
+                        <h5 class="fw-bold mb-3">{{ _('about.is_not_title') }}</h5>
                         <ul class="text-muted mb-0">
-                            <li>A regulatory certification</li>
-                            <li>A one-time compliance exercise</li>
-                            <li>A purely technical evaluation of model performance</li>
-                            <li>A substitute for technical audits or penetration testing</li>
+                            <li>{{ _('about.is_not_1') }}</li>
+                            <li>{{ _('about.is_not_2') }}</li>
+                            <li>{{ _('about.is_not_3') }}</li>
+                            <li>{{ _('about.is_not_4') }}</li>
                         </ul>
                     </div>
                 </div>
@@ -207,9 +201,9 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-10 mx-auto text-center mb-5">
-                <h2 class="display-5 fw-bold mb-4">AI Trust & Security Maturity Framework</h2>
+                <h2 class="display-5 fw-bold mb-4">{{ _('about.framework_title') }}</h2>
                 <p class="lead text-muted">
-                    Comprehensive evaluation across 7 critical dimensions of AI-driven systems maturity.
+                    {{ _('about.framework_desc') }}
                 </p>
             </div>
         </div>
@@ -220,13 +214,12 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-building text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="card-title fw-bold">Foundational Capabilities</h5>
+                        <h5 class="card-title fw-bold">{{ _('about.fc_title') }}</h5>
                         <p class="card-text text-muted">
-                            Core building blocks including AI infrastructure & tooling, team AI literacy & skills, 
-                            code generation & review, and documentation & knowledge management.
+                            {{ _('about.fc_desc') }}
                         </p>
                         <div class="mt-3">
-                            <small class="fw-semibold text-muted">4 Capability Areas</small>
+                            <small class="fw-semibold text-muted">{{ _('about.fc_areas') }}</small>
                         </div>
                     </div>
                 </div>
@@ -237,13 +230,12 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-arrow-repeat text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="card-title fw-bold">Transformation Capabilities</h5>
+                        <h5 class="card-title fw-bold">{{ _('about.tc_title') }}</h5>
                         <p class="card-text text-muted">
-                            Advanced capabilities including intent-to-architecture translation, AI-driven testing, 
-                            intelligent CI/CD, monitoring & observability, and legacy system modernization.
+                            {{ _('about.tc_desc') }}
                         </p>
                         <div class="mt-3">
-                            <small class="fw-semibold text-muted">5 Capability Areas</small>
+                            <small class="fw-semibold text-muted">{{ _('about.tc_areas') }}</small>
                         </div>
                     </div>
                 </div>
@@ -254,13 +246,12 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-diagram-3 text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="card-title fw-bold">Enterprise Integration</h5>
+                        <h5 class="card-title fw-bold">{{ _('about.ei_title') }}</h5>
                         <p class="card-text text-muted">
-                            Enterprise-scale capabilities including data governance, vendor standardization, 
-                            system integration, cost management, performance & scalability, and business continuity.
+                            {{ _('about.ei_desc') }}
                         </p>
                         <div class="mt-3">
-                            <small class="fw-semibold text-muted">6 Capability Areas</small>
+                            <small class="fw-semibold text-muted">{{ _('about.ei_areas') }}</small>
                         </div>
                     </div>
                 </div>
@@ -271,13 +262,12 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-shield-check text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="card-title fw-bold">Strategic Governance</h5>
+                        <h5 class="card-title fw-bold">{{ _('about.sg_title') }}</h5>
                         <p class="card-text text-muted">
-                            Leadership frameworks including AI ethics, regulatory compliance, IP management, 
-                            risk management, change management, performance measurement, collaboration, and innovation.
+                            {{ _('about.sg_desc') }}
                         </p>
                         <div class="mt-3">
-                            <small class="fw-semibold text-muted">8 Capability Areas</small>
+                            <small class="fw-semibold text-muted">{{ _('about.sg_areas') }}</small>
                         </div>
                     </div>
                 </div>
@@ -293,9 +283,9 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center mb-5">
-                <h2 class="display-5 fw-bold mb-4"> Maturity Levels</h2>
+                <h2 class="display-5 fw-bold mb-4">{{ _('maturity.title') }}</h2>
                 <p class="lead text-muted">
-                    The maturity model reflects how consistently and effectively AI-related practices are implemented across the organization. Each area is evaluated across five maturity levels:
+                    {{ _('maturity.desc') }}
                 </p>
             </div>
         </div>
@@ -305,14 +295,14 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center">
-                                <span class="badge bg-danger fs-6">Level 1</span>
+                                <span class="badge bg-danger fs-6">{{ _('maturity.level_1') }}</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-danger">Informal</h5>
+                                <h5 class="fw-bold text-danger">{{ _('maturity.informal') }}</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                    Ad-hoc level. Practices are reactive and inconsistent; risks often addressed after incidents.
+                                    {{ _('maturity.informal_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -323,14 +313,14 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center">
-                                <span class="badge bg-warning fs-6">Level 2</span>
+                                <span class="badge bg-warning fs-6">{{ _('maturity.level_2') }}</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-warning">Defined</h5>
+                                <h5 class="fw-bold text-warning">{{ _('maturity.defined') }}</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                    Basic controls exist; practices depend heavily on individuals.
+                                    {{ _('maturity.defined_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -341,14 +331,14 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center">
-                                <span class="badge bg-info fs-6">Level 3</span>
+                                <span class="badge bg-info fs-6">{{ _('maturity.level_3') }}</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-info">Systematic</h5>
+                                <h5 class="fw-bold text-info">{{ _('maturity.systematic') }}</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                    Systematic AI integration across development workflows. Processes are documented, standardized, and repeatable; risk, ethics, and security are embedded.
+                                    {{ _('maturity.systematic_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -359,14 +349,14 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center">
-                                <span class="badge bg-success fs-6">Level 4</span>
+                                <span class="badge bg-success fs-6">{{ _('maturity.level_4') }}</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-success">Integrated</h5>
+                                <h5 class="fw-bold text-success">{{ _('maturity.integrated') }}</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                   Practices are measured; decisions informed by data, monitoring, and trends.
+                                   {{ _('maturity.integrated_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -377,14 +367,14 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center">
-                                <span class="badge bg-primary fs-6">Level 5</span>
+                                <span class="badge bg-primary fs-6">{{ _('maturity.level_5') }}</span>
                             </div>
                             <div class="col-md-3">
-                                <h5 class="fw-bold text-primary">Optimized</h5>
+                                <h5 class="fw-bold text-primary">{{ _('maturity.optimized') }}</h5>
                             </div>
                             <div class="col-md-7">
                                 <p class="mb-0 text-muted">
-                                    Continuous improvement; lessons and emerging risks are systematically incorporated.
+                                    {{ _('maturity.optimized_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -402,9 +392,9 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-10 mx-auto text-center mb-5">
-                <h2 class="display-5 fw-bold mb-4">Assessment Benefits</h2>
+                <h2 class="display-5 fw-bold mb-4">{{ _('about.benefits_title') }}</h2>
                 <p class="lead text-muted">
-                    Transform software engineering practices with comprehensive AI-first maturity insights.
+                    {{ _('about.benefits_desc') }}
                 </p>
             </div>
         </div>
@@ -415,9 +405,9 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-speedometer2 text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="fw-bold">Identirfy Gaps</h5>
+                        <h5 class="fw-bold">{{ _('about.benefit_gaps') }}</h5>
                         <p class="text-muted">
-                            Identify high-risk gaps in AI governance, security, ethics, deployment, and operations.
+                            {{ _('about.benefit_gaps_desc') }}
                         </p>
                     </div>
                 </div>
@@ -428,9 +418,9 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-map text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="fw-bold">Know where you stand</h5>
+                        <h5 class="fw-bold">{{ _('about.benefit_stand') }}</h5>
                         <p class="text-muted">
-                            Understand how organizational maturity influences AI risk exposure.
+                            {{ _('about.benefit_stand_desc') }}
                         </p>
                     </div>
                 </div>
@@ -441,10 +431,9 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-graph-up-arrow text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="fw-bold">Benchmarks</h5>
+                        <h5 class="fw-bold">{{ _('about.benefit_bench') }}</h5>
                         <p class="text-muted">
-                            Get your results from industry standards and identify areas 
-                            for competitive advantage.
+                            {{ _('about.benefit_bench_desc') }}
                         </p>
                     </div>
                 </div>
@@ -457,9 +446,9 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-speedometer2 text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="fw-bold">Map Risks</h5>
+                        <h5 class="fw-bold">{{ _('about.benefit_risks') }}</h5>
                         <p class="text-muted">
-                            Prioritize remediation based on risk severity and maturity level. Create shared understanding of AI risk across stakeholders
+                            {{ _('about.benefit_risks_desc') }}
                         </p>
                     </div>
                 </div>
@@ -470,9 +459,9 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-map text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="fw-bold">Security</h5>
+                        <h5 class="fw-bold">{{ _('about.benefit_security') }}</h5>
                         <p class="text-muted">
-                            Insights to deploy, pause, redesign, or decommission AI systems safely.
+                            {{ _('about.benefit_security_desc') }}
                         </p>
                     </div>
                 </div>
@@ -483,9 +472,9 @@
                         <div class="feature-icon mb-3">
                             <i class="bi bi-graph-up-arrow text-primary" style="font-size: 2.2rem;"></i>
                         </div>
-                        <h5 class="fw-bold">Responsability</h5>
+                        <h5 class="fw-bold">{{ _('about.benefit_responsibility') }}</h5>
                         <p class="text-muted">
-                            A tool you can use to demonstrate due diligence to regulators and auditors.
+                            {{ _('about.benefit_responsibility_desc') }}
                         </p>
                     </div>
                 </div>
@@ -501,16 +490,15 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h2 class="fw-bold mb-3">Ready to Assess Your AI-First Maturity?</h2>
+                <h2 class="fw-bold mb-3">{{ _('about.cta_title') }}</h2>
                 <p class="lead mb-0">
-                    Evaluate your organization's AI-driven development capabilities across foundational, 
-                    transformation, enterprise, and governance dimensions. Get your AFS Score and actionable roadmap.
+                    {{ _('about.cta_desc') }}
                 </p>
             </div>
             <div class="col-lg-4 text-lg-end">
                 <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
                    class="btn btn-light btn-lg">
-                    <i class="bi bi-play-circle me-2"></i>Start Assessment Now
+                    <i class="bi bi-play-circle me-2"></i>{{ _('about.cta_button') }}
                 </a>
             </div>
         </div>

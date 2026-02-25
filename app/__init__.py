@@ -119,6 +119,10 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     # Register context processors
     _register_context_processors(app)
     
+    # Register i18n (internationalisation) support
+    from .i18n import init_app as init_i18n
+    init_i18n(app)
+    
     # Register CLI commands
     _register_cli_commands(app)
     
@@ -341,12 +345,32 @@ def _register_context_processors(app: Flask) -> None:
                 industry_value.replace('_', ' ').title()
             )
         
+        # Question-translation helpers exposed to all templates
+        from app.models.question_i18n import (
+            get_question_text, get_level_desc, get_binary_labels
+        )
+
+        def translate_question(question_id):
+            """Return translated question text (falls back to original)."""
+            return get_question_text(question_id)
+
+        def translate_level(level_key):
+            """Return translated binary level description, e.g. 'Yes'/'Sim'."""
+            return get_level_desc(level_key) or level_key
+
+        def binary_labels():
+            """Return {'level_1': …, 'level_2': …} in current language."""
+            return get_binary_labels()
+
         return {
             'enumerate': enumerate,
             'len': len,
             'str': str,
             'int': int,
-            'format_industry': format_industry
+            'format_industry': format_industry,
+            'translate_question': translate_question,
+            'translate_level': translate_level,
+            'binary_labels': binary_labels,
         }
     
     app.logger.info("Context processors registered")

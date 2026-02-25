@@ -1,11 +1,11 @@
 {% extends "base/layout.html" %}
-{% set page_title = "Assessment Question " + question.number|string %}
+{% set page_title = _('question_page.title') + ' ' + question.number|string %}
 {% set show_breadcrumbs = true %}
 {% set show_progress = true %}
 {% set breadcrumbs = [
-    {"name": "Home", "url": url_for('main.index') if url_for else '/'},
-    {"name": "Assessment", "url": url_for('assessment.create') if url_for else '/assessment/create'},
-    {"name": "Question " + question.number|string, "url": "#", "active": true}
+    {"name": _("nav.home"), "url": url_for('main.index') if url_for else '/'},
+    {"name": _("assessment.title"), "url": url_for('assessment.create') if url_for else '/assessment/create'},
+    {"name": _("question_page.title") + ' ' + question.number|string, "url": "#", "active": true}
 ] %}
 
 {% block head_extra %}
@@ -21,9 +21,9 @@
                 <div class="col-12">
                     <div class="progress-wrapper">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-semibold">Assessment Progress</span>
+                            <span class="fw-semibold">{{ _('question_page.progress') }}</span>
                             <span class="text-muted">
-                                Question {{ current_question_number }} of {{ total_questions }}
+                                {{ _('question_page.question_of', current=current_question_number, total=total_questions) }}
                             </span>
                         </div>
                         <div class="progress assessment-progress mb-2">
@@ -35,7 +35,7 @@
                         </div>
                         <div class="d-flex justify-content-between text-muted small">
                             <span>{{ section_name }}</span>
-                            <span>{{ progress_percentage }}% Complete</span>
+                            <span>{{ _('question_page.complete_pct', pct=progress_percentage) }}</span>
                         </div>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
                                 </div>
                                 <div class="question-meta text-end">
                                     <span class="badge bg-light text-dark border">
-                                        {{ question.difficulty or 'Standard' }}
+                                        {{ question.difficulty or _('question_page.standard') }}
                                     </span>
                                 </div>
                             </div>
@@ -104,7 +104,7 @@
                                                     {% if option.examples %}
                                                     <div class="option-examples mt-2">
                                                         <small class="text-muted">
-                                                            <strong>Examples:</strong> {{ option.examples }}
+                                                            <strong>{{ _('question_page.examples') }}:</strong> {{ option.examples }}
                                                         </small>
                                                     </div>
                                                     {% endif %}
@@ -119,10 +119,10 @@
                                 <div class="mt-4">
                                     <label for="comments" class="form-label">
                                         <i class="bi bi-chat-text me-2"></i>
-                                        Additional Comments (Optional)
+                                        {{ _('question_page.additional_comments') }}
                                     </label>
                                     <textarea class="form-control" id="comments" name="comments" 
-                                              rows="3" placeholder="Share any additional context or thoughts about this question...">{{ current_response.comments if current_response else '' }}</textarea>
+                                              rows="3" placeholder="{{ _('question_page.comments_placeholder') }}">{{ current_response.comments if current_response else '' }}</textarea>
                                 </div>
 
                                 <!-- Save as Draft Option -->
@@ -130,7 +130,7 @@
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="saveAsDraft" name="save_as_draft">
                                         <label class="form-check-label" for="saveAsDraft">
-                                            Save as draft (continue later)
+                                            {{ _('question_page.save_draft') }}
                                         </label>
                                     </div>
                                 </div>
@@ -143,13 +143,13 @@
                                                 {% if has_previous %}
                                                 <a href="{{ url_for('assessment.question', assessment_id=assessment.id, question_number=current_question_number-1) if url_for else '/assessment/' + assessment.id|string + '/question/' + (current_question_number-1)|string }}" 
                                                    class="btn btn-outline-secondary">
-                                                    <i class="bi bi-arrow-left me-2"></i>Previous
+                                                    <i class="bi bi-arrow-left me-2"></i>{{ _('question_page.previous') }}
                                                 </a>
                                                 {% endif %}
                                                 
                                                 <button type="button" class="btn btn-outline-info" id="helpBtn" 
                                                         data-bs-toggle="modal" data-bs-target="#helpModal">
-                                                    <i class="bi bi-question-circle me-2"></i>Help
+                                                    <i class="bi bi-question-circle me-2"></i>{{ _('question_page.help') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -158,17 +158,17 @@
                                                 <button type="submit" name="action" value="save_and_continue" 
                                                         class="btn btn-primary" id="continueBtn" disabled>
                                                     {% if has_next %}
-                                                        <span>Next</span>
+                                                        <span>{{ _('question_page.next') }}</span>
                                                         <i class="bi bi-arrow-right ms-2"></i>
                                                     {% else %}
-                                                        <span>Complete Assessment</span>
+                                                        <span>{{ _('question_page.complete_assessment') }}</span>
                                                         <i class="bi bi-check-circle ms-2"></i>
                                                     {% endif %}
                                                 </button>
                                                 
                                                 <button type="submit" name="action" value="save_and_exit" 
                                                         class="btn btn-outline-secondary">
-                                                    <i class="bi bi-pause-circle me-2"></i>Save & Exit
+                                                    <i class="bi bi-pause-circle me-2"></i>{{ _('question_page.save_exit') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -186,20 +186,20 @@
                         <div class="card-header">
                             <h6 class="mb-0">
                                 <i class="bi bi-info-circle me-2"></i>
-                                Additional Guidance
+                                {{ _('question_page.additional_guidance') }}
                             </h6>
                         </div>
                         <div class="card-body">
                             {% if question.guidance %}
                             <div class="guidance-section mb-3">
-                                <h6>Understanding This Question</h6>
+                                <h6>{{ _('question_page.understanding') }}</h6>
                                 <p class="text-muted">{{ question.guidance }}</p>
                             </div>
                             {% endif %}
                             
                             {% if question.references %}
                             <div class="references-section">
-                                <h6>Learn More</h6>
+                                <h6>{{ _('question_page.learn_more') }}</h6>
                                 <ul class="list-unstyled">
                                     {% for reference in question.references %}
                                     <li class="mb-2">
@@ -222,7 +222,7 @@
                         <div class="card-body py-3">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
-                                    <h6 class="mb-1">{{ section_name }} Progress</h6>
+                                    <h6 class="mb-1">{{ _('question_page.section_progress', section=section_name) }}</h6>
                                     <div class="progress">
                                         <div class="progress-bar bg-success" role="progressbar" 
                                              style="width: {{ section_progress }}%" 
@@ -233,7 +233,7 @@
                                 </div>
                                 <div class="col-md-4 text-md-end">
                                     <span class="text-muted">
-                                        {{ section_completed_questions }} of {{ section_total_questions }} completed
+                                        {{ _('question_page.of_completed', completed=section_completed_questions, total=section_total_questions) }}
                                     </span>
                                 </div>
                             </div>
@@ -252,56 +252,56 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="helpModalLabel">
                     <i class="bi bi-question-circle me-2"></i>
-                    Question Help
+                    {{ _('question_page.question_help') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h6>Scoring Guide</h6>
+                <h6>{{ _('question_page.scoring_guide') }}</h6>
                 <div class="table-responsive">
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>Score</th>
-                                <th>Maturity Level</th>
-                                <th>Description</th>
+                                <th>{{ _('question_page.score_col') }}</th>
+                                <th>{{ _('question_page.maturity_col') }}</th>
+                                <th>{{ _('question_page.description_col') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td><span class="badge bg-danger">1.0</span></td>
-                                <td>Reactive</td>
-                                <td>No formal processes, ad-hoc approach</td>
+                                <td>{{ _('question_page.reactive') }}</td>
+                                <td>{{ _('question_page.reactive_desc') }}</td>
                             </tr>
                             <tr>
                                 <td><span class="badge bg-warning text-dark">2.0</span></td>
-                                <td>Managed</td>
-                                <td>Basic processes established, some repeatability</td>
+                                <td>{{ _('question_page.managed') }}</td>
+                                <td>{{ _('question_page.managed_desc') }}</td>
                             </tr>
                             <tr>
                                 <td><span class="badge bg-primary">3.0</span></td>
-                                <td>Defined</td>
-                                <td>Standardized processes, well-documented</td>
+                                <td>{{ _('question_page.defined') }}</td>
+                                <td>{{ _('question_page.defined_desc') }}</td>
                             </tr>
                             <tr>
                                 <td><span class="badge bg-success">4.0</span></td>
-                                <td>Optimizing</td>
-                                <td>Continuous improvement, data-driven optimization</td>
+                                <td>{{ _('question_page.optimizing') }}</td>
+                                <td>{{ _('question_page.optimizing_desc') }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 
-                <h6 class="mt-4">Assessment Tips</h6>
+                <h6 class="mt-4">{{ _('question_page.assessment_tips') }}</h6>
                 <ul>
-                    <li>Answer based on your current organizational state, not aspirational goals</li>
-                    <li>Consider the majority of your teams/projects, not just the most advanced</li>
-                    <li>Use the additional comments to provide context or clarification</li>
-                    <li>You can save your progress and return later if needed</li>
+                    <li>{{ _('question_page.tip_1') }}</li>
+                    <li>{{ _('question_page.tip_2') }}</li>
+                    <li>{{ _('question_page.tip_3') }}</li>
+                    <li>{{ _('question_page.tip_4') }}</li>
                 </ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Got it!</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('question_page.got_it') }}</button>
             </div>
         </div>
     </div>

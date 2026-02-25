@@ -1,11 +1,11 @@
 {% extends "base/layout.html" %}
-{% set page_title = "Complete Assessment" %}
+{% set page_title = _('assessment.complete_title') %}
 {% set show_breadcrumbs = true %}
 {% set breadcrumbs = [
-    {"name": "Home", "url": url_for('main.index') if url_for else '/'},
-    {"name": "Assessments", "url": url_for('assessment.index') if url_for else '/assessment'},
-    {"name": assessment.name if assessment else "Assessment", "url": url_for('assessment.detail', assessment_id=assessment.id) if assessment and url_for else '#'},
-    {"name": "Complete", "url": "#", "active": true}
+    {"name": _('nav.home'), "url": url_for('main.index') if url_for else '/'},
+    {"name": _('assessment.title'), "url": url_for('assessment.index') if url_for else '/assessment'},
+    {"name": assessment.name if assessment else _('assessment.title'), "url": url_for('assessment.detail', assessment_id=assessment.id) if assessment and url_for else '#'},
+    {"name": _('assessment.complete_title'), "url": "#", "active": true}
 ] %}
 
 {% block content %}
@@ -16,7 +16,7 @@
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
                     <h4 class="card-title mb-0">
-                        <i class="bi bi-check-circle me-2"></i>Complete Assessment
+                        <i class="bi bi-check-circle me-2"></i>{{ _('assessment.complete_title') }}
                     </h4>
                 </div>
                 <div class="card-body p-4">
@@ -24,14 +24,14 @@
                     
                     {% if progress %}
                     <div class="progress-summary mb-4">
-                        <h6 class="text-muted mb-3">Assessment Progress</h6>
+                        <h6 class="text-muted mb-3">{{ _('assessment.progress') }}</h6>
                         <div class="progress mb-2" style="height: 12px;">
                             <div class="progress-bar bg-success" 
                                  style="width: {{ progress.progress_percentage }}%"></div>
                         </div>
                         <div class="d-flex justify-content-between">
                             <small class="text-muted">
-                                {{ progress.responded_questions }} of {{ progress.total_questions }} questions completed
+                                {{ _('assessment.questions_completed', answered=progress.responded_questions, total=progress.total_questions) }}
                             </small>
                             <small class="fw-bold text-success">{{ "%.1f"|format(progress.progress_percentage) }}%</small>
                         </div>
@@ -41,23 +41,22 @@
                     {% if can_complete %}
                     <div class="alert alert-success">
                         <i class="bi bi-check-circle me-2"></i>
-                        <strong>Ready to Complete!</strong> 
-                        You've answered enough questions to generate meaningful results.
+                        <strong>{{ _('complete_page.ready_title') }}</strong> 
+                        {{ _('complete_page.ready_desc') }}
                     </div>
                     
                     <p class="mb-4">
-                        Completing this assessment will calculate your AFS score, determine your AI maturity level, 
-                        and generate personalized recommendations for improvement.
+                        {{ _('complete_page.ready_detail') }}
                     </p>
                     
                     <form method="POST" action="{{ url_for('assessment.finalize', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/finalize' }}">
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="{{ url_for('assessment.detail', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string }}" 
                                class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-2"></i>Back to Assessment
+                                <i class="bi bi-arrow-left me-2"></i>{{ _('assessment.back_to_assessment') }}
                             </a>
                             <button type="submit" class="btn btn-success btn-lg">
-                                <i class="bi bi-check-circle me-2"></i>Complete Assessment
+                                <i class="bi bi-check-circle me-2"></i>{{ _('assessment.complete') }}
                             </button>
                         </div>
                     </form>
@@ -65,12 +64,12 @@
                     {% else %}
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>More Questions Needed</strong> 
-                        Complete at least 80% of questions to generate reliable results.
+                        <strong>{{ _('complete_page.more_needed_title') }}</strong> 
+                        {{ _('complete_page.more_needed_desc') }}
                     </div>
                     
                     <p class="mb-4">
-                        You can still complete the assessment with current progress, but results may be less accurate.
+                        {{ _('complete_page.more_needed_detail') }}
                     </p>
                     
                     <form method="POST" action="{{ url_for('assessment.finalize', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/finalize' }}">
@@ -79,16 +78,16 @@
                             <div>
                                 <a href="{{ url_for('assessment.question', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string + '/question' }}" 
                                    class="btn btn-primary">
-                                    <i class="bi bi-play-circle me-2"></i>Continue Questions
+                                    <i class="bi bi-play-circle me-2"></i>{{ _('complete_page.continue_questions') }}
                                 </a>
                             </div>
                             <div>
                                 <a href="{{ url_for('assessment.detail', assessment_id=assessment.id) if url_for else '/assessment/' + assessment.id|string }}" 
                                    class="btn btn-outline-secondary me-2">
-                                    <i class="bi bi-arrow-left me-2"></i>Back
+                                    <i class="bi bi-arrow-left me-2"></i>{{ _('complete_page.back') }}
                                 </a>
                                 <button type="submit" class="btn btn-warning">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>Complete Anyway
+                                    <i class="bi bi-exclamation-triangle me-2"></i>{{ _('complete_page.complete_anyway') }}
                                 </button>
                             </div>
                         </div>
@@ -100,10 +99,10 @@
     </div>
     {% else %}
     <div class="text-center py-5">
-        <h3>Assessment Not Found</h3>
-        <p class="text-muted">The requested assessment could not be found.</p>
+        <h3>{{ _('assessment.not_found') }}</h3>
+        <p class="text-muted">{{ _('assessment.not_found_desc') }}</p>
         <a href="{{ url_for('assessment.index') if url_for else '/assessment' }}" 
-           class="btn btn-primary">Back to Assessments</a>
+           class="btn btn-primary">{{ _('assessment.back_to_assessments') }}</a>
     </div>
     {% endif %}
 </div>

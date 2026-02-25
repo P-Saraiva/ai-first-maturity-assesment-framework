@@ -1,0 +1,363 @@
+{
+    "_meta": {
+        "description": "Bilingual question translations for the AI-First Maturity Assessment Framework. Portuguese (pt) is the base language stored in the database. English (en) translations are provided here.",
+        "version": "1.0"
+    },
+    "level_descriptions": {
+        "binary": {
+            "en": { "level_1": "No", "level_2": "Yes" },
+            "pt": { "level_1": "Não", "level_2": "Sim" }
+        }
+    },
+    "questions": {
+        "ETSI-ESI-01A": {
+            "en": "Is there basic awareness of the ethical and social impacts of AI use in the organization?",
+            "pt": "Existe conscientização básica sobre impactos éticos e sociais do uso de IA na organização?"
+        },
+        "ETSI-ESI-01B": {
+            "en": "Are ethical issues related to AI use discussed informally when they arise?",
+            "pt": "Questões éticas relacionadas ao uso de IA são discutidas de forma informal quando surgem?"
+        },
+        "ETSI-ESI-01C": {
+            "en": "Are there formal processes to assess ethical and social impacts before or during the use of AI systems?",
+            "pt": "Existem processos formais para avaliar impactos éticos e sociais antes ou durante o uso de sistemas de IA?"
+        },
+        "ETSI-ESI-01D": {
+            "en": "Is there an organizational framework or guideline to support ethical decisions related to AI use?",
+            "pt": "Existe um framework ou diretriz organizacional para apoiar decisões éticas relacionadas ao uso de IA?"
+        },
+        "ETSI-ESI-01E": {
+            "en": "Are ethical impact assessments consistently applied to AI systems and periodically reviewed?",
+            "pt": "Avaliações de impacto ético são aplicadas de forma consistente aos sistemas de IA e revisadas periodicamente?"
+        },
+        "ETSI-ESI-01F": {
+            "en": "Are ethical decisions related to AI incorporated into organizational and business processes?",
+            "pt": "As decisões éticas relacionadas à IA estão incorporadas aos processos organizacionais e de negócio?"
+        },
+
+        "ETSI-ETC-01A": {
+            "en": "Are there informal efforts to explain decisions or outputs of AI systems when requested?",
+            "pt": "Existem esforços informais para explicar decisões ou saídas de sistemas de IA quando solicitado?"
+        },
+        "ETSI-ETC-01B": {
+            "en": "Does communication about how AI systems work occur only reactively or on a case-by-case basis?",
+            "pt": "A comunicação sobre como os sistemas de IA funcionam ocorre apenas de forma reativa ou pontual?"
+        },
+        "ETSI-ETC-01C": {
+            "en": "Are there formal explainability mechanisms for AI systems considered critical?",
+            "pt": "Existem mecanismos formais de explicabilidade para sistemas de IA considerados críticos?"
+        },
+        "ETSI-ETC-01D": {
+            "en": "Are explanations and information about AI decisions documented and shared internally?",
+            "pt": "Explicações e informações sobre decisões de IA são documentadas e compartilhadas internamente?"
+        },
+        "ETSI-ETC-01E": {
+            "en": "Are explainability techniques consistently applied to relevant AI systems?",
+            "pt": "Técnicas de explicabilidade são aplicadas de forma consistente nos sistemas de IA relevantes?"
+        },
+        "ETSI-ETC-01F": {
+            "en": "Does the organization provide clear external communication informing users when they interact with AI?",
+            "pt": "A organização realiza comunicação externa clara informando quando usuários interagem com IA?"
+        },
+
+        "ETSI-BFR-01A": {
+            "en": "Is there basic awareness about bias risks in AI systems used by the organization?",
+            "pt": "Existe conscientização básica sobre riscos de viés em sistemas de IA utilizados pela organização?"
+        },
+        "ETSI-BFR-01B": {
+            "en": "Are informal measures adopted to mitigate biases when identified?",
+            "pt": "Medidas informais são adotadas para mitigar vieses quando identificados?"
+        },
+        "ETSI-BFR-01C": {
+            "en": "Are there systematic procedures to identify and assess biases in AI systems?",
+            "pt": "Existem procedimentos sistemáticos para identificar e avaliar vieses em sistemas de IA?"
+        },
+        "ETSI-BFR-01D": {
+            "en": "Are formal bias mitigation strategies applied and periodically reviewed?",
+            "pt": "Estratégias formais de mitigação de viés são aplicadas e revisadas periodicamente?"
+        },
+        "ETSI-BFR-01E": {
+            "en": "Does bias assessment and mitigation occur throughout the use and operation of AI systems?",
+            "pt": "A avaliação e mitigação de viés ocorre ao longo do uso e operação dos sistemas de IA?"
+        },
+        "ETSI-BFR-01F": {
+            "en": "Are bias mitigation practices continuously monitored in production AI systems?",
+            "pt": "As práticas de mitigação de viés são monitoradas continuamente em sistemas de IA em produção?"
+        },
+
+        "GSA-GSC-01A": {
+            "en": "Is there an initial strategy or informal guideline for AI use in the organization?",
+            "pt": "Existe uma estratégia inicial ou diretriz informal para o uso de IA na organização?"
+        },
+        "GSA-GSC-01B": {
+            "en": "Are there basic metrics to track AI initiatives and usage?",
+            "pt": "Existem métricas básicas para acompanhar iniciativas e uso de IA?"
+        },
+        "GSA-GSC-01C": {
+            "en": "Is the AI strategy formally defined and communicated to stakeholders?",
+            "pt": "A estratégia de IA está formalmente definida e comunicada aos stakeholders?"
+        },
+        "GSA-GSC-01D": {
+            "en": "Are AI-related metrics reviewed and used in management decisions?",
+            "pt": "As métricas relacionadas à IA são revisadas e utilizadas em decisões gerenciais?"
+        },
+        "GSA-GSC-01E": {
+            "en": "Is the AI strategy integrated into the organization's business strategy?",
+            "pt": "A estratégia de IA está integrada à estratégia de negócio da organização?"
+        },
+
+        "GSA-PLA-01A": {
+            "en": "Is there basic awareness of legal and regulatory requirements applicable to AI use (e.g., LGPD, GDPR)?",
+            "pt": "Existe conscientização básica sobre requisitos legais e regulatórios aplicáveis ao uso de IA (ex.: LGPD, GDPR)?"
+        },
+        "GSA-PLA-01B": {
+            "en": "Is there a formal AI use policy clearly communicated internally?",
+            "pt": "Existe uma política formal para uso de IA claramente comunicada internamente?"
+        },
+        "GSA-PLA-01C": {
+            "en": "Are AI-related compliance requirements documented and periodically reviewed?",
+            "pt": "Requisitos de conformidade relacionados à IA são documentados e revisados periodicamente?"
+        },
+        "GSA-PLA-01D": {
+            "en": "Is compliance with legal and ethical AI requirements continuously monitored?",
+            "pt": "A conformidade com requisitos legais e éticos de IA é monitorada continuamente?"
+        },
+        "GSA-PLA-01E": {
+            "en": "Are there whistleblower policies that protect employees who report risks or issues related to AI?",
+            "pt": "Existem políticas de denúncia que protegem colaboradores que reportam riscos ou problemas relacionados à IA?"
+        },
+
+        "GSA-CUL-01A": {
+            "en": "Is there awareness or informal training on security risks associated with AI use?",
+            "pt": "Existe conscientização ou treinamento informal sobre riscos de segurança associados ao uso de IA?"
+        },
+        "GSA-CUL-01B": {
+            "en": "Does communication about AI security risks occur sporadically or on an ad hoc basis?",
+            "pt": "A comunicação sobre riscos de segurança de IA ocorre de forma esporádica ou ad hoc?"
+        },
+        "GSA-CUL-01C": {
+            "en": "Are there formal AI security training programs for relevant teams?",
+            "pt": "Existem programas formais de treinamento em segurança de IA para equipes relevantes?"
+        },
+        "GSA-CUL-01D": {
+            "en": "Does the organization promote continuous communication about AI security best practices?",
+            "pt": "A organização promove comunicação contínua sobre boas práticas de segurança em IA?"
+        },
+        "GSA-CUL-01E": {
+            "en": "Is there an organizational culture of continuous awareness about AI risks?",
+            "pt": "Existe uma cultura organizacional de conscientização contínua sobre riscos de IA?"
+        },
+
+        "IAA-IGO-01A": {
+            "en": "Is there formal clarity about who is responsible for identities and access of AI systems and automated agents?",
+            "pt": "Existe clareza formal sobre quem é responsável por identidades e acessos de sistemas de IA e agentes automatizados?"
+        },
+        "IAA-IGO-01B": {
+            "en": "Do AI systems have some access control or minimum segregation between environments and users?",
+            "pt": "Sistemas de IA possuem algum controle de acesso ou segregação mínima entre ambientes e usuários?"
+        },
+        "IAA-IGO-01C": {
+            "en": "Are accounts and permissions used in AI proof-of-concept projects limited and controlled by the security team?",
+            "pt": "As contas e permissões utilizadas em projetos de prova de conceito com IA são limitadas e controladas por equipe de segurança?"
+        },
+        "IAA-IGO-01D": {
+            "en": "Is the use of generic or shared accounts by AI systems prohibited or controlled?",
+            "pt": "O uso de contas genéricas ou compartilhadas por sistemas de IA é proibido ou controlado?"
+        },
+
+        "IAA-CSM-01A": {
+            "en": "When AI accesses internal databases or APIs, are there mechanisms to protect credentials and prevent leaks?",
+            "pt": "Quando a IA acessa bases ou APIs internas, há mecanismos para proteger credenciais e evitar vazamentos?"
+        },
+        "IAA-CSM-01B": {
+            "en": "Is there automatic rotation of credentials used by AI, agents, or remote integrations?",
+            "pt": "Existe rotação automática de credenciais usadas por IA, agentes ou integrações remotas?"
+        },
+        "IAA-CSM-01C": {
+            "en": "Do AI systems use credentials with least privilege, compatible with their operational function?",
+            "pt": "Sistemas de IA utilizam credenciais com privilégio mínimo, compatível com sua função operacional?"
+        },
+        "IAA-CSM-01D": {
+            "en": "Is there monitoring for misuse or anomalous use of credentials associated with AI?",
+            "pt": "Existe monitoramento de uso indevido ou anômalo de credenciais associadas a IA?"
+        },
+        "IAA-CSM-01E": {
+            "en": "Are AI credentials automatically revoked when systems, agents, or integrations are deactivated?",
+            "pt": "Credenciais de IA são revogadas automaticamente quando sistemas, agentes ou integrações são desativados?"
+        },
+
+        "IAA-AAP-01A": {
+            "en": "Is there an explicit scope limitation for AI-based agent actions?",
+            "pt": "Existe limitação explícita de escopo de ação para agentes baseados em IA?"
+        },
+        "IAA-AAP-01B": {
+            "en": "Do AI agents execute administrative or sensitive actions with human approval?",
+            "pt": "Agentes de IA executam ações administrativas ou sensíveis com aprovação humana?"
+        },
+        "IAA-AAP-01C": {
+            "en": "Are there \"human-in-the-loop\" mechanisms for privileged actions executed by agents?",
+            "pt": "Existem mecanismos de \"human-in-the-loop\" para ações privilegiadas executadas por agentes?"
+        },
+        "IAA-AAP-01D": {
+            "en": "Are actions executed by AI agents: authenticated, recorded, and auditable by their own identity?",
+            "pt": "As ações executadas por agentes de IA são: autenticadas, registradas, auditáveis por identidade própria?"
+        },
+
+        "DPR-IPU-01A": {
+            "en": "Does the asset inventory identify AI systems, including \"Shadow AI\" or AI embedded in corporate software?",
+            "pt": "O inventário de ativos identifica sistemas de IA, incluindo \"Shadow AI\" ou IA embutida em softwares corporativos?"
+        },
+        "DPR-IPU-01B": {
+            "en": "Does the organization maintain records of AI components used (models, APIs, libraries, vendors)?",
+            "pt": "A organização mantém registro dos componentes de IA utilizados (modelos, APIs, bibliotecas, fornecedores)?"
+        },
+        "DPR-IPU-01C": {
+            "en": "Are there technical mechanisms to trace the provenance of AI-generated content?",
+            "pt": "Existem mecanismos técnicos para rastrear a proveniência do conteúdo gerado por IA?"
+        },
+
+        "DPR-DGM-01A": {
+            "en": "Are there informal practices to ensure basic quality of data used by AI systems?",
+            "pt": "Existem práticas informais para garantir qualidade básica dos dados usados por sistemas de IA?"
+        },
+        "DPR-DGM-01B": {
+            "en": "Are data integrity checks performed occasionally?",
+            "pt": "Verificações de integridade de dados são realizadas ocasionalmente?"
+        },
+        "DPR-DGM-01C": {
+            "en": "Are there formal procedures for managing the quality of data used by AI?",
+            "pt": "Existem procedimentos formais para gestão da qualidade dos dados utilizados por IA?"
+        },
+        "DPR-DGM-01D": {
+            "en": "Are data integrity controls consistently applied and regularly reviewed?",
+            "pt": "Controles de integridade de dados são aplicados de forma consistente e revisados regularmente?"
+        },
+        "DPR-DGM-01E": {
+            "en": "Is AI-related data governance formally defined and integrated into operations?",
+            "pt": "A governança de dados relacionados à IA está formalmente definida e integrada às operações?"
+        },
+
+        "PUT-PUC-01A": {
+            "en": "Is there basic awareness about privacy in AI use?",
+            "pt": "Existe conscientização básica sobre privacidade no uso de IA?"
+        },
+        "PUT-PUC-01B": {
+            "en": "Are default privacy settings (Privacy by Default) considered in AI system use?",
+            "pt": "Configurações padrão de privacidade (Privacy by Default) são consideradas no uso de sistemas de IA?"
+        },
+        "PUT-PUC-01C": {
+            "en": "Are there formal privacy-by-design procedures applicable to AI use?",
+            "pt": "Existem procedimentos formais de privacidade por design aplicáveis ao uso de IA?"
+        },
+        "PUT-PUC-01D": {
+            "en": "Do users receive clear information about data and AI usage?",
+            "pt": "Usuários recebem informações claras sobre uso de dados e IA?"
+        },
+        "PUT-PUC-01E": {
+            "en": "Are there mechanisms for users to exercise control over their personal data?",
+            "pt": "Existem mecanismos para que usuários exerçam controle sobre seus dados pessoais?"
+        },
+
+        "TSA-TRO-01A": {
+            "en": "Is there informal identification of threats specifically related to AI use?",
+            "pt": "Existe identificação informal de ameaças específicas relacionadas ao uso de IA?"
+        },
+        "TSA-TRO-01B": {
+            "en": "Are AI threats systematically identified and documented?",
+            "pt": "Ameaças de IA são sistematicamente identificadas e documentadas?"
+        },
+        "TSA-TRO-01C": {
+            "en": "Are formal AI risk mitigation strategies applied and reviewed?",
+            "pt": "Estratégias formais de mitigação de riscos de IA são aplicadas e revisadas?"
+        },
+        "TSA-TRO-01D": {
+            "en": "Are risk assessments integrated into the operational cycle of AI systems?",
+            "pt": "Avaliações de risco são integradas ao ciclo operacional dos sistemas de IA?"
+        },
+
+        "TSA-SDA-01A": {
+            "en": "Are there informal practices for secure deployment of AI systems?",
+            "pt": "Existem práticas informais para implantação segura de sistemas de IA?"
+        },
+        "TSA-SDA-01B": {
+            "en": "Are there formal procedures for secure AI deployment in production?",
+            "pt": "Existem procedimentos formais para implantação segura de IA em produção?"
+        },
+        "TSA-SDA-01C": {
+            "en": "Are technical access controls and isolation applied to models and configurations in production?",
+            "pt": "Controles técnicos de acesso e isolamento são aplicados a modelos e configurações em produção?"
+        },
+        "TSA-SDA-01D": {
+            "en": "Are there formal risk criteria (Go/No-Go) to authorize AI deployments?",
+            "pt": "Existem critérios formais de risco (Go/No-Go) para autorizar implantações de IA?"
+        },
+
+        "TSA-DMH-01A": {
+            "en": "Is there informal tracking of defects or failures in AI systems?",
+            "pt": "Existe rastreamento informal de defeitos ou falhas em sistemas de IA?"
+        },
+        "TSA-DMH-01B": {
+            "en": "Are formal defect management processes for AI systems implemented?",
+            "pt": "Processos formais de gestão de defeitos em sistemas de IA estão implementados?"
+        },
+        "TSA-DMH-01C": {
+            "en": "Is there detection and blocking of harmful synthetic content generation in system outputs?",
+            "pt": "Existe detecção e bloqueio de geração de conteúdo sintético prejudicial na saída dos sistemas?"
+        },
+
+        "QEI-TEI-01A": {
+            "en": "Are basic tests performed to verify security requirements and appropriate AI use?",
+            "pt": "Testes básicos são realizados para verificar requisitos de segurança e uso adequado da IA?"
+        },
+        "QEI-TEI-01B": {
+            "en": "Is there a formal approach to requirements-based testing applicable to AI use?",
+            "pt": "Existe uma abordagem formal para testes baseados em requisitos aplicáveis ao uso de IA?"
+        },
+        "QEI-TEI-01C": {
+            "en": "Are the teams that evaluate AI systems independent from the teams that operate or configure them?",
+            "pt": "As equipes que avaliam sistemas de IA são independentes das equipes que os operam ou configuram?"
+        },
+
+        "QEI-IEC-01A": {
+            "en": "Are there informal procedures for incident response involving AI?",
+            "pt": "Existem procedimentos informais para resposta a incidentes envolvendo IA?"
+        },
+        "QEI-IEC-01B": {
+            "en": "Is there a formal incident response process specific to AI?",
+            "pt": "Existe um processo formal de resposta a incidentes específicos de IA?"
+        },
+        "QEI-IEC-01C": {
+            "en": "Is there a documented deactivation procedure (\"kill switch\") for AI systems, including immediate credential revocation and agent identity deactivation?",
+            "pt": "Existe um procedimento documentado de desativação (\"kill switch\") para sistemas de IA, incluindo revogação imediata de credenciais e desativação de identidade de agentes?"
+        },
+        "QEI-IEC-01D": {
+            "en": "Are there specific playbooks for AI identity compromise?",
+            "pt": "Existem playbooks específicos para comprometimento de identidades de IA?"
+        },
+        "QEI-IEC-01E": {
+            "en": "Are AI events and incidents monitored, recorded, and analyzed regularly?",
+            "pt": "Eventos e incidentes de IA são monitorados, registrados e analisados regularmente?"
+        },
+
+        "QEI-OCM-01A": {
+            "en": "Is the operation of AI systems informally monitored?",
+            "pt": "A operação de sistemas de IA é monitorada informalmente?"
+        },
+        "QEI-OCM-01B": {
+            "en": "Are there formal operational processes for continuous AI management?",
+            "pt": "Existem processos operacionais formais para gestão contínua de IA?"
+        },
+        "QEI-OCM-01C": {
+            "en": "Is AI system access to remote environments (cloud, SaaS, external APIs) explicitly authorized and monitored?",
+            "pt": "O acesso de sistemas de IA a ambientes remotos (cloud, SaaS, APIs externas) é explicitamente autorizado e monitorado?"
+        },
+        "QEI-OCM-01D": {
+            "en": "Is there segregation between AI access to production and non-production environments?",
+            "pt": "Existe segregação entre acessos de IA a ambientes produtivos e não produtivos?"
+        },
+        "QEI-OCM-01E": {
+            "en": "Is the operational effectiveness of AI systems measured and used for continuous improvement?",
+            "pt": "A eficácia operacional dos sistemas de IA é medida e utilizada para melhoria contínua?"
+        }
+    }
+}

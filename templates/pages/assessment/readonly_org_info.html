@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% set page_title = "Assessment View - " + assessment.team_name if assessment and assessment.team_name else "Assessment View" %}
+{% set page_title = _('readonly.assessment_view') + " - " + assessment.team_name if assessment and assessment.team_name else _('readonly.assessment_view') %}
 
 {% block head_extra %}
 <style>
@@ -229,14 +229,14 @@
                     <!-- Header -->
                     <div class="readonly-header" style="position: relative;">
                         <div class="readonly-badge">
-                            <i class="bi bi-eye me-1"></i> Read-Only View
+                            <i class="bi bi-eye me-1"></i> {{ _('readonly.read_only_view') }}
                         </div>
                         <h1 class="mb-2">
                             <i class="bi bi-building me-2"></i>
-                            Organization Information
+                            {{ _('readonly.org_information') }}
                         </h1>
                         <p class="mb-0 opacity-75">
-                            Assessment details for {{ assessment.team_name if assessment.team_name else "Organization" }}
+                            {{ _('readonly.assessment_details', name=assessment.team_name if assessment.team_name else _('readonly.organization')) }}
                         </p>
                     </div>
                     
@@ -249,26 +249,26 @@
                                 <div class="info-section">
                                     <h5 class="mb-3">
                                         <i class="bi bi-building me-2"></i>
-                                        Organization Details
+                                        {{ _('readonly.org_details') }}
                                     </h5>
                                     
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label class="info-label">Organization Name</label>
+                                            <label class="info-label">{{ _('readonly.org_name') }}</label>
                                             <div class="info-value">
-                                                {{ assessment.organization_name or 'Not specified' }}
+                                                {{ assessment.organization_name or _('readonly.not_specified') }}
                                             </div>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="info-label">Account Name</label>
+                                            <label class="info-label">{{ _('readonly.account_name') }}</label>
                                             <div class="info-value">
-                                                {{ assessment.account_name or assessment.team_name or 'Not specified' }}
+                                                {{ assessment.account_name or assessment.team_name or _('readonly.not_specified') }}
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="info-label">Industry</label>
+                                        <label class="info-label">{{ _('readonly.industry') }}</label>
                                         <div>
                                             {% if assessment.industry %}
                                             <span class="industry-display">
@@ -286,21 +286,21 @@
                                                 } %}
                                                 <i class="{{ industry_icons.get(assessment.industry, 'bi-briefcase') }} me-2"></i>
                                                 {% set industry_names = {
-                                                    'automotive': 'Automotive',
-                                                    'bfsi': 'Banking, Financial Services & Insurance',
-                                                    'energy_utilities': 'Energy & Utilities',
-                                                    'government': 'Government & Public Sector',
-                                                    'travel_transport_tourism': 'Travel, Transport & Tourism',
-                                                    'healthcare': 'Healthcare',
-                                                    'media_communications': 'Media & Communications',
-                                                    'retail_commerce': 'Retail & Commerce',
-                                                    'technology': 'Technology',
-                                                    'other': 'Other'
+                                                    'automotive': _('org_form.industry_automotive'),
+                                                    'bfsi': _('org_form.industry_bfsi'),
+                                                    'energy_utilities': _('org_form.industry_energy'),
+                                                    'government': _('org_form.industry_government'),
+                                                    'travel_transport_tourism': _('org_form.industry_travel'),
+                                                    'healthcare': _('org_form.industry_healthcare'),
+                                                    'media_communications': _('org_form.industry_media'),
+                                                    'retail_commerce': _('org_form.industry_retail'),
+                                                    'technology': _('org_form.industry_technology'),
+                                                    'other': _('org_form.industry_other')
                                                 } %}
                                                 {{ industry_names.get(assessment.industry, assessment.industry.title()) }}
                                             </span>
                                             {% else %}
-                                            <div class="info-value">Not specified</div>
+                                            <div class="info-value">{{ _('readonly.not_specified') }}</div>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -310,28 +310,28 @@
                                 <div class="info-section">
                                     <h5 class="mb-3">
                                         <i class="bi bi-person me-2"></i>
-                                        Contact Information
+                                        {{ _('readonly.contact_info') }}
                                     </h5>
                                     
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label class="info-label">First Name</label>
+                                            <label class="info-label">{{ _('readonly.first_name') }}</label>
                                             <div class="info-value">
-                                                {{ assessment.first_name or 'Not specified' }}
+                                                {{ assessment.first_name or _('readonly.not_specified') }}
                                             </div>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="info-label">Last Name</label>
+                                            <label class="info-label">{{ _('readonly.last_name') }}</label>
                                             <div class="info-value">
-                                                {{ assessment.last_name or 'Not specified' }}
+                                                {{ assessment.last_name or _('readonly.not_specified') }}
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="info-label">Email Address</label>
+                                        <label class="info-label">{{ _('readonly.email_address') }}</label>
                                         <div class="info-value">
-                                            {{ assessment.email or 'Not specified' }}
+                                            {{ assessment.email or _('readonly.not_specified') }}
                                         </div>
                                     </div>
                                 </div>
@@ -341,12 +341,12 @@
                                 <div class="info-section">
                                     <h5 class="mb-3">
                                         <i class="bi bi-person-check me-2"></i>
-                                        Assessor Information
+                                        {{ _('readonly.assessor_info') }}
                                     </h5>
                                     
                                     {% if assessment.assessor_name %}
                                     <div class="mb-3">
-                                        <label class="info-label">Assessor Name</label>
+                                        <label class="info-label">{{ _('readonly.assessor_name') }}</label>
                                         <div class="info-value">
                                             {{ assessment.assessor_name }}
                                         </div>
@@ -355,7 +355,7 @@
                                     
                                     {% if assessment.assessor_email %}
                                     <div class="mb-3">
-                                        <label class="info-label">Assessor Email</label>
+                                        <label class="info-label">{{ _('readonly.assessor_email') }}</label>
                                         <div class="info-value">
                                             {{ assessment.assessor_email }}
                                         </div>
@@ -368,11 +368,11 @@
                                 <div class="navigation-buttons">
                                     <a href="{{ url_for('assessment.index') }}" class="btn-nav btn-secondary-nav">
                                         <i class="bi bi-arrow-left me-2"></i>
-                                        Back to Assessments
+                                        {{ _('readonly.back_to_assessments') }}
                                     </a>
                                     <a href="{{ url_for('assessment.view_readonly_sections', assessment_id=assessment.id) }}" 
                                        class="btn-nav btn-primary-nav">
-                                        View Sections
+                                        {{ _('readonly.view_sections') }}
                                         <i class="bi bi-arrow-right ms-2"></i>
                                     </a>
                                 </div>
@@ -384,7 +384,7 @@
                                 <div class="assessment-info">
                                     <h6 class="mb-3">
                                         <i class="bi bi-info-circle me-2"></i>
-                                        Assessment Status
+                                        {{ _('readonly.assessment_status') }}
                                     </h6>
                                     <div class="stats-grid">
                                         <div class="stat-item">
@@ -399,7 +399,7 @@
                                     <div class="mt-3">
                                         <small class="text-muted">
                                             <i class="bi bi-calendar me-1"></i>
-                                            Created: {{ assessment.created_at.isoformat()[:10] if assessment.created_at else 'Unknown' }}
+                                            {{ _('readonly.created') }}: {{ assessment.created_at.isoformat()[:10] if assessment.created_at else _('readonly.unknown') }}
                                         </small>
                                     </div>
                                 </div>
@@ -409,22 +409,22 @@
                                 <div class="progress-overview">
                                     <h6 class="mb-3">
                                         <i class="bi bi-graph-up me-2"></i>
-                                        Progress Overview
+                                        {{ _('readonly.progress_overview') }}
                                     </h6>
                                     <div class="stats-grid">
                                         <div class="stat-item">
                                             <div class="stat-value">{{ "{:.1f}".format(progress.progress_percentage) }}&#37;</div>
-                                            <div class="stat-label">Complete</div>
+                                            <div class="stat-label">{{ _('readonly.complete') }}</div>
                                         </div>
                                         <div class="stat-item">
                                             <div class="stat-value">{{ progress.responded_questions }}/{{ progress.total_questions }}</div>
-                                            <div class="stat-label">Questions</div>
+                                            <div class="stat-label">{{ _('readonly.questions') }}</div>
                                         </div>
                                     </div>
                                     {% if assessment.overall_score %}
                                     <div class="mt-3 text-center">
                                         <div class="h4 text-primary mb-0">{{ "{:.1f}".format(assessment.overall_score) }}</div>
-                                        <small class="text-muted">Overall Score</small>
+                                        <small class="text-muted">{{ _('readonly.overall_score') }}</small>
                                     </div>
                                     {% endif %}
                                 </div>

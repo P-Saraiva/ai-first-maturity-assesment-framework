@@ -1,21 +1,38 @@
 {% extends 'base/layout.html' %}
-{% block title %}Start Assessment{% endblock %}
+{% block title %}{{ _('assessment.start') }}{% endblock %}
 {% block content %}
-<div class="container py-4" id="create-root" data-config-url="{{ url_for('static', filename='assets/assessment_config.json') }}">
-  <h1 class="h3 mb-3">Create Cybersecurity Maturity Assessment</h1>
-  <p class="text-muted mb-4">Dynamically select domains and areas, answer binary questions, and generate a tailored report.</p>
+<div class="container py-4" id="create-root"
+     data-config-url="{{ url_for('static', filename='assets/assessment_config.json') }}"
+     data-submit-url="{{ url_for('assessment.submit_assessment') }}"
+     data-lang="{{ session.get('lang', 'en') }}">
 
-  <!-- Selection Stage -->
+  <h1 class="h3 mb-3">{{ _('assessment.create_title') }}</h1>
+  <p class="text-muted mb-4">{{ _('assessment.create_subtitle') }}</p>
+
+  <!-- Step indicator -->
+  <div id="step-indicator" class="d-flex justify-content-center mb-4 gap-2">
+    <span class="badge rounded-pill step-badge" data-step="org"    id="stepBadge-org">1. {{ _('org_form.title') }}</span>
+    <span class="badge rounded-pill step-badge" data-step="select" id="stepBadge-select">2. {{ _('create.select_domains') }}</span>
+    <span class="badge rounded-pill step-badge" data-step="runner" id="stepBadge-runner">3. {{ _('create.assessment_label') }}</span>
+    <span class="badge rounded-pill step-badge" data-step="report" id="stepBadge-report">4. {{ _('create.final_report') }}</span>
+  </div>
+
+  <!-- Step 1: Organization Info -->
+  <div id="org-info-stage" class="d-none">
+    {% include 'pages/assessment/create/components/org_info.html' %}
+  </div>
+
+  <!-- Step 2: Selection -->
   <div id="selection-stage" class="d-none">
     {% include 'pages/assessment/create/components/selection.html' %}
   </div>
 
-  <!-- Runner Stage -->
+  <!-- Step 3: Runner -->
   <div id="runner-stage" class="d-none">
     {% include 'pages/assessment/create/components/runner.html' %}
   </div>
 
-  <!-- Report Stage -->
+  <!-- Step 4: Report (redirect to server report) -->
   <div id="report-stage" class="d-none">
     {% include 'pages/assessment/create/components/report.html' %}
   </div>
@@ -23,6 +40,14 @@
 
 <!-- Intro Modal -->
 {% include 'pages/assessment/create/components/intro_modal.html' %}
+
+<style>
+  .step-badge { font-size: .8rem; padding: .5em 1em; transition: all .2s; }
+  .step-badge.bg-primary { opacity: 1; }
+  .step-badge.bg-success { opacity: .85; }
+  .step-badge:not(.bg-primary):not(.bg-success) { background: #e9ecef !important; color: #6c757d !important; }
+  .industry-btn.active { background: var(--bs-primary); color: #fff; border-color: var(--bs-primary); }
+</style>
 
 {% endblock %}
 

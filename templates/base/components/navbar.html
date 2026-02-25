@@ -19,8 +19,8 @@
                     </div>
                 </div>
                 <div>
-                    <div class="text-white fw-bold fs-6">AI Trust & Security Maturity Framework</div>
-                    <div class="text-white-50 small">A Cybersecurity Maturity Assessment for AI</div>
+                    <div class="text-white fw-bold fs-6">{{ _('app.name') }}</div>
+                    <div class="text-white-50 small">{{ _('app.subtitle') }}</div>
                 </div>
             </div>
         </a>
@@ -28,7 +28,7 @@
         <!-- Mobile Toggle -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
                 data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" 
-                aria-label="Toggle navigation">
+                aria-label="{{ _('nav.toggle_nav') }}">
             <span class="navbar-toggler-icon"></span>
         </button>
         
@@ -39,32 +39,32 @@
                 <li class="nav-item">
                     <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" 
                        href="{{ url_for('main.index') if url_for else '/' }}">
-                        <i class="bi bi-house-door-fill me-2"></i>Home
+                        <i class="bi bi-house-door-fill me-2"></i>{{ _('nav.home') }}
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if request.endpoint and 'assessment' in request.endpoint %}active{% endif %}" 
                        href="{{ url_for('assessment.index') if url_for else '/assessment' }}">
-                        <i class="bi bi-graph-up-arrow me-2"></i>Dashboard
+                        <i class="bi bi-graph-up-arrow me-2"></i>{{ _('nav.dashboard') }}
                     </a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="toolsDropdown" 
                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-tools me-2"></i>Tools
+                        <i class="bi bi-tools me-2"></i>{{ _('nav.tools') }}
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="toolsDropdown">
-                        <li><h6 class="dropdown-header">Analysis Tools</h6></li>
+                        <li><h6 class="dropdown-header">{{ _('nav.analysis_tools') }}</h6></li>
                         <li>
                             <a class="dropdown-item" href="{{ url_for('assessment.index') if url_for else '/assessment' }}">
-                                <i class="bi bi-clipboard-data me-2"></i>Assessment Dashboard
+                                <i class="bi bi-clipboard-data me-2"></i>{{ _('nav.assessment_dashboard') }}
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><h6 class="dropdown-header">Administration</h6></li>
+                        <li><h6 class="dropdown-header">{{ _('nav.administration') }}</h6></li>
                         <li>
                             <a class="dropdown-item" href="{{ url_for('main.about') if url_for else '/about' }}">
-                                <i class="bi bi-info-circle me-2"></i>About
+                                <i class="bi bi-info-circle me-2"></i>{{ _('nav.about') }}
                             </a>
                         </li>
                     </ul>
@@ -73,29 +73,51 @@
             
             <!-- Action Items -->
             <ul class="navbar-nav">
+                <!-- Language Switcher -->
+                <li class="nav-item dropdown">
+                    <button class="nav-link btn btn-link dropdown-toggle text-white" id="langToggle"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                            title="{{ _('nav.language') }}">
+                        <i class="bi bi-translate"></i>
+                        <span class="d-none d-lg-inline ms-2">{{ supported_languages.get(current_lang, 'EN') }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">{{ _('nav.language') }}</h6></li>
+                        {% for code, name in supported_languages.items() %}
+                        <li>
+                            <a class="dropdown-item {% if current_lang == code %}active{% endif %}"
+                               href="{{ url_for('set_language', lang=code) }}">
+                                {% if code == 'en' %}🇺🇸{% elif code == 'pt' %}🇧🇷{% endif %}
+                                {{ name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+
                 <!-- Theme Toggle -->
                 <li class="nav-item dropdown">
                     <button class="nav-link btn btn-link dropdown-toggle text-white" id="themeToggle" 
                             type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                            title="Switch theme">
+                            title="{{ _('nav.theme') }}">
                         <i class="bi bi-circle-half"></i>
-                        <span class="d-none d-lg-inline ms-2">Theme</span>
+                        <span class="d-none d-lg-inline ms-2">{{ _('nav.theme') }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header">Appearance</h6></li>
+                        <li><h6 class="dropdown-header">{{ _('nav.appearance') }}</h6></li>
                         <li>
                             <button type="button" class="dropdown-item theme-option" data-bs-theme-value="light">
-                                <i class="bi bi-sun-fill me-2"></i>Light
+                                <i class="bi bi-sun-fill me-2"></i>{{ _('nav.light') }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="dropdown-item theme-option" data-bs-theme-value="dark">
-                                <i class="bi bi-moon-stars-fill me-2"></i>Dark
+                                <i class="bi bi-moon-stars-fill me-2"></i>{{ _('nav.dark') }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="dropdown-item theme-option active" data-bs-theme-value="auto">
-                                <i class="bi bi-circle-half me-2"></i>Auto
+                                <i class="bi bi-circle-half me-2"></i>{{ _('nav.auto') }}
                             </button>
                         </li>
                     </ul>
@@ -104,9 +126,9 @@
                 <!-- Help -->
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('main.about') if url_for else '/about' }}"
-                       title="Get help & documentation">
+                       title="{{ _('nav.help') }}">
                         <i class="bi bi-question-circle-fill"></i>
-                        <span class="d-none d-lg-inline ms-2">Help</span>
+                        <span class="d-none d-lg-inline ms-2">{{ _('nav.help') }}</span>
                     </a>
                 </li>
             </ul>

@@ -6,6 +6,9 @@ current state characteristics, guidance, and expectations for each level.
 
 This decouples "roadmap to next level" (MaturityProgression) from
 "current level description" (MaturityDefinition).
+
+Supports bilingual (en/pt) content. The JSON file can store title/description
+as either plain strings (legacy) or dicts with 'en'/'pt' keys.
 """
 
 from __future__ import annotations
@@ -27,6 +30,22 @@ DATA_FILE = os.path.join(
 
 _AREA_DEFS_CACHE: Dict[str, Dict[int, "MaturityDefinition"]] = {}
 _AREA_DEFS_MTIME: float = -1.0
+
+
+def _get_current_lang() -> str:
+    """Get the current language from the i18n module, defaulting to 'en'."""
+    try:
+        from app.i18n import get_locale
+        return get_locale()
+    except Exception:
+        return 'en'
+
+
+def _resolve_lang_value(value, lang: str):
+    """Resolve a bilingual value (dict with 'en'/'pt') or return as-is."""
+    if isinstance(value, dict) and ('en' in value or 'pt' in value):
+        return value.get(lang) or value.get('en') or value.get('pt') or ''
+    return value
 
 
 @dataclass
@@ -60,8 +79,14 @@ class MaturityDefinition:
 
 
 def _load_area_defs() -> Dict[str, Dict[int, MaturityDefinition]]:
-    """Load area definitions from JSON file, with sensible defaults."""
+    """Load area definitions from JSON file, with sensible defaults.
+
+    Handles bilingual fields (title, description) by resolving
+    to the current session language.
+    """
     global _AREA_DEFS_CACHE, _AREA_DEFS_MTIME
+
+    lang = _get_current_lang()
 
     # Support live-reload when file changes or when env flag is set
     reload_flag = os.environ.get('MATURITY_DEFS_RELOAD', 'false').lower() == 'true'
@@ -71,9 +96,10 @@ def _load_area_defs() -> Dict[str, Dict[int, MaturityDefinition]]:
     except Exception:
         current_mtime = -1.0
 
+    # Cache key includes language so switching language triggers reload
+    cache_key = f"{current_mtime}:{lang}"
     if _AREA_DEFS_CACHE and not reload_flag:
-        # If cached and file unchanged, return cache
-        if current_mtime == _AREA_DEFS_MTIME:
+        if getattr(_load_area_defs, '_cache_key', None) == cache_key:
             return _AREA_DEFS_CACHE
 
     defs: Dict[str, Dict[int, MaturityDefinition]] = {}
@@ -90,12 +116,18 @@ def _load_area_defs() -> Dict[str, Dict[int, MaturityDefinition]]:
                         level = int(level_str)
                     except Exception:
                         continue
+                    # Resolve bilingual title/description
+                    raw_title = payload.get('title')
+                    raw_desc = payload.get('description')
+                    title = _resolve_lang_value(raw_title, lang) if raw_title else _default_title(level)
+                    description = _resolve_lang_value(raw_desc, lang) if raw_desc else _default_description(level)
+
                     defs[area_id][level] = MaturityDefinition(
                         entity_type='area',
                         entity_id=area_id,
                         maturity_level=level,
-                        title=payload.get('title') or _default_title(level),
-                        description=payload.get('description') or _default_description(level),
+                        title=title or _default_title(level),
+                        description=description or _default_description(level),
                         characteristics=_join(payload.get('characteristics')),
                         guidance=_join(payload.get('guidance')),
                         expectations=_join(payload.get('expectations')),
@@ -127,6 +159,7 @@ def _load_area_defs() -> Dict[str, Dict[int, MaturityDefinition]]:
 
     _AREA_DEFS_CACHE = defs
     _AREA_DEFS_MTIME = current_mtime
+    _load_area_defs._cache_key = cache_key
     return defs
 
 

@@ -1,5 +1,5 @@
 {% extends "base/layout.html" %}
-{% set page_title = "Page Not Found" %}
+{% set page_title = _('errors.404_title') %}
 {% set hide_breadcrumbs = true %}
 
 {% block head_extra %}
@@ -58,17 +58,17 @@
             </div>
             <h1 class="error-code">404</h1>
             <p class="error-message">
-                Oops! The page you're looking for seems to have wandered off.
+                {{ _('errors.404_desc') }}
             </p>
             <p class="text-muted mb-4">
-                The requested page could not be found. This might be because:
+                {{ _('errors.404_desc') }}
             </p>
             <div class="row justify-content-center mb-4">
                 <div class="col-md-6">
                     <ul class="list-unstyled text-muted">
-                        <li><i class="bi bi-x-circle text-danger me-2"></i>The URL was mistyped</li>
-                        <li><i class="bi bi-x-circle text-danger me-2"></i>The page has been moved or deleted</li>
-                        <li><i class="bi bi-x-circle text-danger me-2"></i>You don't have permission to access this page</li>
+                        <li><i class="bi bi-x-circle text-danger me-2"></i>{{ _('errors.404_reason_1') }}</li>
+                        <li><i class="bi bi-x-circle text-danger me-2"></i>{{ _('errors.404_reason_2') }}</li>
+                        <li><i class="bi bi-x-circle text-danger me-2"></i>{{ _('errors.404_reason_3') }}</li>
                     </ul>
                 </div>
             </div>
@@ -76,22 +76,22 @@
             <div class="error-actions">
                 <a href="{{ url_for('main.index') if url_for else '/' }}" 
                    class="btn btn-primary btn-lg">
-                    <i class="bi bi-house me-2"></i>Go Home
+                    <i class="bi bi-house me-2"></i>{{ _('errors.go_home') }}
                 </a>
                 <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
-                    <i class="bi bi-arrow-left me-2"></i>Go Back
+                    <i class="bi bi-arrow-left me-2"></i>{{ _('errors.go_back') }}
                 </button>
                 <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
                    class="btn btn-success btn-lg">
-                    <i class="bi bi-play-circle me-2"></i>Start Assessment
+                    <i class="bi bi-play-circle me-2"></i>{{ _('assessment.start') }}
                 </a>
             </div>
             
             <div class="mt-5">
                 <p class="text-muted">
-                    Still having trouble? 
+                    {{ _('errors.still_trouble') }}
                     <a href="{{ url_for('main.about') if url_for else '/about' }}" class="text-decoration-none">
-                        Contact support
+                        {{ _('errors.contact_support') }}
                     </a>
                 </p>
             </div>
@@ -106,41 +106,41 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-search me-2"></i>Popular Pages
+                        <i class="bi bi-search me-2"></i>{{ _('errors.popular_pages') }}
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-muted">Assessment</h6>
+                            <h6 class="text-muted">{{ _('assessment.title') }}</h6>
                             <ul class="list-unstyled">
                                 <li>
                                     <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
                                        class="text-decoration-none">
-                                        <i class="bi bi-play-circle me-2"></i>Start New Assessment
+                                        <i class="bi bi-play-circle me-2"></i>{{ _('errors.start_new') }}
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ url_for('assessment.index') if url_for else '/assessment' }}" 
                                        class="text-decoration-none">
-                                        <i class="bi bi-list-ul me-2"></i>My Assessments
+                                        <i class="bi bi-list-ul me-2"></i>{{ _('errors.my_assessments') }}
                                     </a>
                                 </li>
                             </ul>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-muted">Assessment</h6>
+                            <h6 class="text-muted">{{ _('assessment.title') }}</h6>
                             <ul class="list-unstyled">
                                 <li>
                                     <a href="{{ url_for('assessment.index') if url_for else '/assessment' }}" 
                                        class="text-decoration-none">
-                                        <i class="bi bi-clipboard-data me-2"></i>View Assessments
+                                        <i class="bi bi-clipboard-data me-2"></i>{{ _('errors.view_assessments') }}
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
                                        class="text-decoration-none">
-                                        <i class="bi bi-plus-circle me-2"></i>Create Assessment
+                                        <i class="bi bi-plus-circle me-2"></i>{{ _('errors.create_assessment') }}
                                     </a>
                                 </li>
                             </ul>

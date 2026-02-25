@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% set page_title = "AI-First Assessment - Organization Details" %}
+{% set page_title = _('org_form.title') %}
 
 {% block head_extra %}
 <!-- Assessment styles handled by Bootstrap -->
@@ -239,10 +239,10 @@
                     <div class="form-header">
                         <h1 class="mb-2">
                             <i class="bi bi-building me-2"></i>
-                            Organization Information
+                            {{ _('org_form.title') }}
                         </h1>
                         <p class="mb-0 opacity-75">
-                            Let's start by gathering some basic information about your organization
+                            {{ _('org_form.subtitle') }}
                         </p>
                     </div>
                     
@@ -260,26 +260,26 @@
                                     <div class="form-group-enhanced">
                                         <label for="organizationName" class="form-label-enhanced">
                                             <i class="bi bi-building me-2"></i>
-                                            Organization Name *
+                                            {{ _('org_form.org_name_label') }}
                                         </label>
                                         <input type="text" class="form-control form-control-enhanced" 
                                                id="organizationName" name="organization_name" 
-                                               placeholder="Enter your organization name" 
+                                               placeholder="{{ _('org_form.org_name_placeholder') }}" 
                                                required maxlength="200">
-                                        <div class="form-text">The name of your company or organization</div>
+                                        <div class="form-text">{{ _('org_form.org_name_help') }}</div>
                                     </div>
                                     
                                     <!-- Account Name -->
                                     <div class="form-group-enhanced">
                                         <label for="accountName" class="form-label-enhanced">
                                             <i class="bi bi-person-badge me-2"></i>
-                                            Account Name *
+                                            {{ _('org_form.account_name_label') }}
                                         </label>
                                         <input type="text" class="form-control form-control-enhanced" 
                                                id="accountName" name="account_name" 
-                                               placeholder="Enter your account name" 
+                                               placeholder="{{ _('org_form.account_name_placeholder') }}" 
                                                required maxlength="200">
-                                        <div class="form-text">Your specific account or team name within the organization</div>
+                                        <div class="form-text">{{ _('org_form.account_name_help') }}</div>
                                     </div>
                                     
                                     <!-- Candidate Information -->
@@ -288,22 +288,22 @@
                                             <div class="form-group-enhanced">
                                                 <label for="firstName" class="form-label-enhanced">
                                                     <i class="bi bi-person me-2"></i>
-                                                    First Name *
+                                                    {{ _('org_form.first_name_label') }}
                                                 </label>
                                                 <input type="text" class="form-control form-control-enhanced" 
                                                        id="firstName" name="first_name" 
-                                                       placeholder="Your first name" 
+                                                       placeholder="{{ _('org_form.first_name_placeholder') }}" 
                                                        required maxlength="100">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group-enhanced">
                                                 <label for="lastName" class="form-label-enhanced">
-                                                    Last Name *
+                                                    {{ _('org_form.last_name_label') }}
                                                 </label>
                                                 <input type="text" class="form-control form-control-enhanced" 
                                                        id="lastName" name="last_name" 
-                                                       placeholder="Your last name" 
+                                                       placeholder="{{ _('org_form.last_name_placeholder') }}" 
                                                        required maxlength="100">
                                             </div>
                                         </div>
@@ -313,13 +313,13 @@
                                     <div class="form-group-enhanced">
                                         <label for="email" class="form-label-enhanced">
                                             <i class="bi bi-envelope me-2"></i>
-                                            Email Address *
+                                            {{ _('org_form.email_label') }}
                                         </label>
                                         <input type="email" class="form-control form-control-enhanced" 
                                                id="email" name="email" 
-                                               placeholder="your.email@company.com" 
+                                               placeholder="{{ _('org_form.email_placeholder') }}" 
                                                required maxlength="200">
-                                        <div class="form-text">We'll use this to send you your assessment results</div>
+                                        <div class="form-text">{{ _('org_form.email_help') }}</div>
                                     </div>
                                     
                                     <!-- Assessor Information -->
@@ -327,7 +327,7 @@
                                         <div class="col-12">
                                             <h6 class="mt-4 mb-3 text-muted">
                                                 <i class="bi bi-person-check me-2"></i>
-                                                Assessor Information
+                                                {{ _('org_form.assessor_section') }}
                                             </h6>
                                         </div>
                                     </div>
@@ -336,103 +336,103 @@
                                     <div class="form-group-enhanced">
                                         <label for="assessorName" class="form-label-enhanced">
                                             <i class="bi bi-person-badge me-2"></i>
-                                            Assessor Name
+                                            {{ _('org_form.assessor_name_label') }}
                                         </label>
                                         <input type="text" class="form-control form-control-enhanced" 
                                                id="assessorName" name="assessor_name" 
-                                               placeholder="Name of the person conducting this assessment" 
+                                               placeholder="{{ _('org_form.assessor_name_placeholder') }}" 
                                                maxlength="200">
-                                        <div class="form-text">The person responsible for conducting this assessment</div>
+                                        <div class="form-text">{{ _('org_form.assessor_name_help') }}</div>
                                     </div>
                                     
                                     <!-- Assessor Email -->
                                     <div class="form-group-enhanced">
                                         <label for="assessorEmail" class="form-label-enhanced">
                                             <i class="bi bi-envelope-check me-2"></i>
-                                            Assessor Email
+                                            {{ _('org_form.assessor_email_label') }}
                                         </label>
                                         <input type="email" class="form-control form-control-enhanced" 
                                                id="assessorEmail" name="assessor_email" 
-                                               placeholder="assessor.email@company.com" 
+                                               placeholder="{{ _('org_form.assessor_email_placeholder') }}" 
                                                maxlength="200">
-                                        <div class="form-text">Email address of the assessor</div>
+                                        <div class="form-text">{{ _('org_form.assessor_email_help') }}</div>
                                     </div>
                                     
                                     <!-- Industry Selector -->
                                     <div class="form-group-enhanced">
                                         <label class="form-label-enhanced">
                                             <i class="bi bi-briefcase me-2"></i>
-                                            Industry *
+                                            {{ _('org_form.industry_label') }}
                                         </label>
                                         <div class="industry-grid">
                                             <div class="industry-option" data-industry="automotive">
                                                 <input type="radio" name="industry" value="automotive" id="automotive">
                                                 <label for="automotive">
                                                     <i class="bi bi-car-front d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Automotive
+                                                    {{ _('org_form.industry_automotive') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="bfsi">
                                                 <input type="radio" name="industry" value="bfsi" id="bfsi">
                                                 <label for="bfsi">
                                                     <i class="bi bi-bank d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    BFSI
+                                                    {{ _('org_form.industry_bfsi') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="energy_utilities">
                                                 <input type="radio" name="industry" value="energy_utilities" id="energy_utilities">
                                                 <label for="energy_utilities">
                                                     <i class="bi bi-lightning d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Energy & Utilities
+                                                    {{ _('org_form.industry_energy') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="government">
                                                 <input type="radio" name="industry" value="government" id="government">
                                                 <label for="government">
                                                     <i class="bi bi-building-check d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Government Public Sector
+                                                    {{ _('org_form.industry_government') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="travel_transport_tourism">
                                                 <input type="radio" name="industry" value="travel_transport_tourism" id="travel_transport_tourism">
                                                 <label for="travel_transport_tourism">
                                                     <i class="bi bi-airplane d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Travel, Transport & Tourism
+                                                    {{ _('org_form.industry_travel') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="healthcare">
                                                 <input type="radio" name="industry" value="healthcare" id="healthcare">
                                                 <label for="healthcare">
                                                     <i class="bi bi-heart-pulse d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Healthcare
+                                                    {{ _('org_form.industry_healthcare') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="media_communications">
                                                 <input type="radio" name="industry" value="media_communications" id="media_communications">
                                                 <label for="media_communications">
                                                     <i class="bi bi-broadcast d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Media & Communications
+                                                    {{ _('org_form.industry_media') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="retail_commerce">
                                                 <input type="radio" name="industry" value="retail_commerce" id="retail_commerce">
                                                 <label for="retail_commerce">
                                                     <i class="bi bi-shop d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Retail & Commerce
+                                                    {{ _('org_form.industry_retail') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="technology">
                                                 <input type="radio" name="industry" value="technology" id="technology">
                                                 <label for="technology">
                                                     <i class="bi bi-laptop d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Technology
+                                                    {{ _('org_form.industry_technology') }}
                                                 </label>
                                             </div>
                                             <div class="industry-option" data-industry="other">
                                                 <input type="radio" name="industry" value="other" id="other">
                                                 <label for="other">
                                                     <i class="bi bi-three-dots d-block mb-2" style="font-size: 1.5rem;"></i>
-                                                    Other
+                                                    {{ _('org_form.industry_other') }}
                                                 </label>
                                             </div>
                                         </div>
@@ -441,12 +441,12 @@
                                     <!-- Submit Button -->
                                     <button type="submit" class="btn btn-next mt-4" id="submitBtn">
                                         <span class="btn-text">
-                                            Start Assessment
+                                            {{ _('org_form.start_assessment') }}
                                             <i class="bi bi-arrow-right ms-2"></i>
                                         </span>
                                         <span class="btn-loading d-none">
                                             <span class="spinner-border spinner-border-sm me-2"></span>
-                                            Processing...
+                                            {{ _('org_form.processing') }}
                                         </span>
                                     </button>
                                 </form>
@@ -458,16 +458,16 @@
                                 <div class="assessment-info">
                                     <h6 class="mb-3">
                                         <i class="bi bi-info-circle me-2"></i>
-                                        About This Assessment
+                                        {{ _('org_form.about_assessment') }}
                                     </h6>
                                     <p class="mb-3 small">
-                                        This comprehensive assessment evaluates your organization's AI-first software engineering maturity across {{ total_sections if total_sections is not none else 4 }} key sections.
+                                        {{ _('org_form.about_assessment_desc', sections=(total_sections if total_sections is not none else 4)) }}
                                     </p>
                                     <ul class="feature-list">
-                                        <li><i class="bi bi-check-circle"></i> Foundational Capabilities</li>
-                                        <li><i class="bi bi-check-circle"></i> Transformation Capabilities</li>
-                                        <li><i class="bi bi-check-circle"></i> Enterprise Integration</li>
-                                        <li><i class="bi bi-check-circle"></i> Strategic Governance</li>
+                                        <li><i class="bi bi-check-circle"></i> {{ _('org_form.cap_foundational') }}</li>
+                                        <li><i class="bi bi-check-circle"></i> {{ _('org_form.cap_transformation') }}</li>
+                                        <li><i class="bi bi-check-circle"></i> {{ _('org_form.cap_enterprise') }}</li>
+                                        <li><i class="bi bi-check-circle"></i> {{ _('org_form.cap_strategic') }}</li>
                                     </ul>
                                 </div>
                                 
@@ -475,29 +475,29 @@
                                 <div class="progress-overview">
                                     <h6 class="mb-3">
                                         <i class="bi bi-clock me-2"></i>
-                                        Assessment Overview
+                                        {{ _('org_form.overview') }}
                                     </h6>
                                     <div class="stats-grid">
                                         <div class="stat-item">
                                             <div class="stat-value">{{ total_areas if total_areas is not none else 19 }}</div>
-                                            <div class="stat-label">Areas</div>
+                                            <div class="stat-label">{{ _('org_form.areas') }}</div>
                                         </div>
                                         <div class="stat-item">
                                             <div class="stat-value">{{ total_sections if total_sections is not none else 4 }}</div>
-                                            <div class="stat-label">Sections</div>
+                                            <div class="stat-label">{{ _('org_form.sections') }}</div>
                                         </div>
                                         <div class="stat-item">
                                             <div class="stat-value">1-2</div>
-                                            <div class="stat-label">Hours</div>
+                                            <div class="stat-label">{{ _('org_form.hours') }}</div>
                                         </div>
                                         <div class="stat-item">
                                             <div class="stat-value">100%</div>
-                                            <div class="stat-label">Confidential</div>
+                                            <div class="stat-label">{{ _('org_form.confidential') }}</div>
                                         </div>
                                     </div>
                                     <p class="small text-muted mt-3 mb-0">
                                         <i class="bi bi-shield-check me-1"></i>
-                                        Your data is secure and will only be used for generating your assessment report.
+                                        {{ _('org_form.data_secure') }}
                                     </p>
                                 </div>
                             </div>
@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check industry selection
             const industrySelected = document.querySelector('input[name="industry"]:checked');
             if (!industrySelected) {
-                alert('Please select your industry before continuing.');
+                alert('{{ _('org_form.select_industry') }}');
             }
             
             return false;

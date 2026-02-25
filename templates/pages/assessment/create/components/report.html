@@ -1,15 +1,31 @@
 <div class="card shadow-sm">
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0">Final Report</h5>
-      <div class="text-muted small">Overall Score: <span id="overallScore05">0.0</span> / 5.0</div>
+      <h5 class="mb-0">{{ _('create.final_report') }}</h5>
+      <div class="text-muted small">{{ _('create.overall_score') }}: <span id="overallScore05">0.0</span> / 5.0</div>
     </div>
 
     <div id="reportContainer"></div>
 
-    <div class="d-flex justify-content-between align-items-center mt-3">
-      <button id="restartBtn" class="btn btn-outline-secondary">Restart</button>
-      <a href="/assessment" class="btn btn-primary">Go to Assessments</a>
+    <!-- Submitting spinner (shown while POSTing to server) -->
+    <div id="submitSpinner" class="text-center py-5 d-none">
+      <div class="spinner-border text-primary mb-3" role="status" style="width:3rem;height:3rem;">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted" id="submitSpinnerMsg">{{ _('org_form.processing') }}</p>
+    </div>
+
+    <!-- Submit error (shown if POST fails) -->
+    <div id="submitError" class="alert alert-danger d-none" role="alert"></div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3" id="reportActions">
+      <button id="backToRunnerBtn" class="btn btn-outline-secondary">{{ _('common.back') }}</button>
+      <div>
+        <button id="restartBtn" class="btn btn-outline-secondary me-2">{{ _('create.restart') }}</button>
+        <button id="submitAssessmentBtn" class="btn btn-success">
+          <i class="bi bi-check-circle me-1"></i>{{ _('create.finish_generate') }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

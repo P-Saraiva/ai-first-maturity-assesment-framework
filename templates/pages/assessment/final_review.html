@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% set page_title = "Final Review - " + metadata.organization_name if metadata else "Final Review" %}
+{% set page_title = _('final_review.title') + " - " + metadata.organization_name if metadata else _('final_review.title') %}
 
 {% block head_extra %}
 <!-- Assessment styles handled by Bootstrap -->
@@ -550,10 +550,10 @@ body.modal-open {
             
             <h1 class="mb-3">
                 <i class="bi bi-clipboard-check me-2"></i>
-                Final Review
+                {{ _('final_review.title') }}
             </h1>
             <p class="mb-0 opacity-75">
-                Review your responses before generating your maturity assessment report
+                {{ _('final_review.subtitle') }}
             </p>
         </div>
         
@@ -565,21 +565,21 @@ body.modal-open {
                 <div class="candidate-summary">
                     <h5 class="mb-3">
                         <i class="bi bi-person-check me-2"></i>
-                        Assessment Details
+                        {{ _('final_review.assessment_details') }}
                     </h5>
                     <div class="row">
                         <div class="col-md-6">
-                            <strong>Candidate:</strong> {{ metadata.first_name }} {{ metadata.last_name }}<br>
-                            <strong>Organization:</strong> {{ metadata.organization_name }}<br>
+                            <strong>{{ _('final_review.candidate') }}:</strong> {{ metadata.first_name }} {{ metadata.last_name }}<br>
+                            <strong>{{ _('final_review.organization') }}:</strong> {{ metadata.organization_name }}<br>
                             {% if metadata.account_name and metadata.account_name != metadata.organization_name %}
-                            <strong>Account:</strong> {{ metadata.account_name }}<br>
+                            <strong>{{ _('final_review.account') }}:</strong> {{ metadata.account_name }}<br>
                             {% endif %}
-                            <strong>Industry:</strong> {{ format_industry(metadata.industry) }}
+                            <strong>{{ _('final_review.industry') }}:</strong> {{ format_industry(metadata.industry) }}
                         </div>
                         <div class="col-md-6">
-                            <strong>Email:</strong> {{ metadata.email }}<br>
-                            <strong>Started:</strong> {{ metadata.created_at[:19] if metadata.created_at else 'N/A' }}<br>
-                            <strong>Assessment ID:</strong> {{ assessment.id }}
+                            <strong>{{ _('final_review.email') }}:</strong> {{ metadata.email }}<br>
+                            <strong>{{ _('final_review.started') }}:</strong> {{ metadata.created_at[:19] if metadata.created_at else 'N/A' }}<br>
+                            <strong>{{ _('final_review.assessment_id') }}:</strong> {{ assessment.id }}
                         </div>
                     </div>
                 </div>
@@ -589,24 +589,24 @@ body.modal-open {
                 <div class="completion-stats">
                     <h5 class="mb-3">
                         <i class="bi bi-bar-chart me-2"></i>
-                        Completion Summary
+                        {{ _('final_review.completion_summary') }}
                     </h5>
                     <div class="stat-grid">
                         <div class="stat-item">
                             <div class="stat-value">{{ answered_questions }}</div>
-                            <div class="stat-label">Questions Answered</div>
+                            <div class="stat-label">{{ _('final_review.questions_answered') }}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value">{{ total_questions }}</div>
-                            <div class="stat-label">Total Questions</div>
+                            <div class="stat-label">{{ _('final_review.total_questions') }}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value">{{ "%.0f"|format(completion_percentage) }}%</div>
-                            <div class="stat-label">Completion Rate</div>
+                            <div class="stat-label">{{ _('final_review.completion_rate') }}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value">{{ sections|length }}</div>
-                            <div class="stat-label">Sections Covered</div>
+                            <div class="stat-label">{{ _('final_review.sections_covered') }}</div>
                         </div>
                     </div>
                 </div>
@@ -616,23 +616,20 @@ body.modal-open {
                 <div class="completion-warning">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Incomplete Assessment</strong>
+                        <strong>{{ _('final_review.incomplete_assessment') }}</strong>
                     </div>
                     <p class="mb-0 mt-2">
-                        You've completed {{ "%.0f"|format(completion_percentage) }}% of the assessment. 
-                        We recommend answering at least 80% of questions for accurate results. 
-                        You can go back to any section to add more responses.
+                        {{ _('final_review.incomplete_msg', pct="%.0f"|format(completion_percentage)) }}
                     </p>
                 </div>
                 {% else %}
                 <div class="completion-requirement">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-check-circle me-2"></i>
-                        <strong>Assessment Complete</strong>
+                        <strong>{{ _('final_review.assessment_complete') }}</strong>
                     </div>
                     <p class="mb-0 mt-2">
-                        Excellent! You've completed {{ "%.0f"|format(completion_percentage) }}% of the assessment. 
-                        Your responses provide a comprehensive view of your organization's AI-first maturity.
+                        {{ _('final_review.complete_msg', pct="%.0f"|format(completion_percentage)) }}
                     </p>
                 </div>
                 {% endif %}
@@ -641,7 +638,7 @@ body.modal-open {
                 <div class="section-summary">
                     <h5 class="mb-3">
                         <i class="bi bi-list-ul me-2"></i>
-                        Section Summary
+                        {{ _('final_review.section_summary') }}
                     </h5>
                     
                     {% for section in sections %}
@@ -653,7 +650,7 @@ body.modal-open {
                                 </div>
                                 <div>
                                     <div class="section-title">{{ section.name }}</div>
-                                    <small class="text-muted">{{ section.areas|length }} assessment areas</small>
+                                    <small class="text-muted">{{ section.areas|length }} {{ _('final_review.assessment_areas') }}</small>
                                 </div>
                             </div>
                             
@@ -697,18 +694,18 @@ body.modal-open {
                                         <div class="area-level">
                                             <strong>Level {{ avg_level }}</strong>
                                             {% if avg_level == 1 %}
-                                                <span class="text-muted">- Basic</span>
+                                                <span class="text-muted">- {{ _('final_review.basic') }}</span>
                                             {% elif avg_level == 2 %}
-                                                <span class="text-muted">- Evolving</span>
+                                                <span class="text-muted">- {{ _('final_review.evolving') }}</span>
                                             {% elif avg_level == 3 %}
-                                                <span class="text-muted">- Advanced</span>
+                                                <span class="text-muted">- {{ _('final_review.advanced') }}</span>
                                             {% elif avg_level == 4 %}
-                                                <span class="text-muted">- Optimized</span>
+                                                <span class="text-muted">- {{ _('final_review.optimized') }}</span>
                                             {% endif %}
                                         </div>
                                     {% else %}
                                         <div class="area-level text-muted">
-                                            <em>Not assessed</em>
+                                            <em>{{ _('final_review.not_assessed') }}</em>
                                         </div>
                                     {% endif %}
                                     
@@ -716,11 +713,11 @@ body.modal-open {
                                         <div class="status-indicator {{ 'complete' if area_responses|length == area.questions|length else 'partial' if area_responses|length > 0 else 'empty' }}"></div>
                                         <span class="small text-muted">
                                             {% if area_responses|length == area.questions|length %}
-                                                Complete
+                                                {{ _('final_review.complete') }}
                                             {% elif area_responses|length > 0 %}
-                                                Partial
+                                                {{ _('final_review.partial') }}
                                             {% else %}
-                                                Not started
+                                                {{ _('final_review.not_started') }}
                                             {% endif %}
                                         </span>
                                     </div>
@@ -740,7 +737,7 @@ body.modal-open {
                 <a href="{{ url_for('assessment.section_questions', assessment_id=assessment.id, section_id=sections[-1].id) if url_for and sections else '#' }}" 
                    class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-2"></i>
-                    Back to Last Section
+                    {{ _('final_review.back_to_last_section') }}
                 </a>
                 
                 <form method="POST" 
@@ -752,7 +749,7 @@ body.modal-open {
                             id="generateReportBtn"
                             {{ 'disabled' if not can_generate_report else '' }}>
                         <i class="bi bi-file-earmark-text me-2"></i>
-                        Generate Assessment Report
+                        {{ _('final_review.generate_report') }}
                     </button>
                 </form>
             </div>
@@ -761,7 +758,7 @@ body.modal-open {
             <div class="mt-3 text-center">
                 <small class="text-muted">
                     <i class="bi bi-info-circle me-1"></i>
-                    Complete at least 80% of the assessment to generate your report
+                    {{ _('final_review.completion_requirement') }}
                 </small>
             </div>
             {% endif %}
@@ -776,38 +773,38 @@ body.modal-open {
             <i class="bi bi-file-earmark-text"></i>
         </div>
         
-        <h2 class="modal-title">Generate your AI-First Software Engineering Maturity Assessment Report?</h2>
+        <h2 class="modal-title">{{ _('final_review.confirm_title') }}</h2>
         
         <p class="modal-description">
-            This will complete your assessment and create a comprehensive report with your results, recommendations, and next steps.
+            {{ _('final_review.confirm_description') }}
         </p>
         
         <div class="modal-features">
             <div class="feature-item">
                 <span class="feature-icon text-primary">📊</span>
-                <div class="feature-text">Maturity Scores<br>Detailed scoring by section</div>
+                <div class="feature-text">{{ _('final_review.feature_scores') }}<br>{{ _('final_review.feature_scores_desc') }}</div>
             </div>
             <div class="feature-item">
                 <span class="feature-icon text-success">🎯</span>
-                <div class="feature-text">Recommendations<br>Actionable next steps</div>
+                <div class="feature-text">{{ _('final_review.feature_recommendations') }}<br>{{ _('final_review.feature_recommendations_desc') }}</div>
             </div>
             <div class="feature-item">
                 <span class="feature-icon text-warning">📈</span>
-                <div class="feature-text">Benchmarking<br>Industry comparisons</div>
+                <div class="feature-text">{{ _('final_review.feature_benchmarking') }}<br>{{ _('final_review.feature_benchmarking_desc') }}</div>
             </div>
             <div class="feature-item">
                 <span class="feature-icon text-info">🗺️</span>
-                <div class="feature-text">Roadmap<br>Transformation timeline</div>
+                <div class="feature-text">{{ _('final_review.feature_roadmap') }}<br>{{ _('final_review.feature_roadmap_desc') }}</div>
             </div>
         </div>
         
         <div class="modal-actions">
             <button type="button" class="modal-btn modal-btn-cancel" id="modalCancel">
-                Cancel
+                {{ _('common.cancel') }}
             </button>
             <button type="button" class="modal-btn modal-btn-confirm" id="modalConfirm">
                 <span class="loading-spinner"></span>
-                Generate Report
+                {{ _('final_review.generate_report_short') }}
             </button>
         </div>
     </div>
@@ -832,7 +829,7 @@ document.addEventListener('DOMContentLoaded', function() {
             generateBtn.disabled = true;
             generateBtn.innerHTML = `
                 <span class="spinner-border spinner-border-sm me-2"></span>
-                Generating Report...
+                {{ _('final_review.generating_report') }}
             `;
             
             // Show progress message
@@ -842,8 +839,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="d-flex align-items-center">
                     <div class="spinner-border spinner-border-sm me-3"></div>
                     <div>
-                        <strong>Generating your assessment report...</strong><br>
-                        <small>This may take a few moments while we analyze your responses and calculate your maturity scores.</small>
+                        <strong>{{ _('final_review.generating_title') }}</strong><br>
+                        <small>{{ _('final_review.generating_subtitle') }}</small>
                     </div>
                 </div>
             `;

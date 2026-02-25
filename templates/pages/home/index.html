@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% set page_title = "AI-First Software Engineering Maturity Assessment" %}
+{% set page_title = _('app.title') %}
 {% set hide_breadcrumbs = true %}
 
 {% block head_extra %}
@@ -407,21 +407,18 @@ p {
         <div class="row align-items-center">
             <div class="col-lg-8 hero-content scroll-reveal">
                 <h1 class="display-4 fw-bold mb-4">
-                    AI Trust & Security Maturity Framework
+                    {{ _('home.hero_title') }}
                 </h1>
                 <p class="lead mb-4" style="font-size: 1.35rem; line-height: 1.6;">
-                    Evaluate your AI-driven applications' trustworthiness and security posture across key dimensions
-                    including ethical AI practices, data privacy, robustness, and compliance, all based on market frameworks
-                    such as OWASP AIMA, NIST AI RMF and MITRE ATLAS. Obtain a comprehensive final report with potential risks and insights
-                    to build a secure-driven roadmap for AI-first applications.
+                    {{ _('home.hero_subtitle') }}
                 </p>
                 <div class="hero-actions">
                     <a href="{{ url_for('assessment.create') if url_for else '/assessment/create' }}" 
                        class="btn assessment-cta btn-lg me-3">
-                        <i class="bi bi-rocket-takeoff me-2"></i>Start Assessment
+                        <i class="bi bi-rocket-takeoff me-2"></i>{{ _('home.start_assessment') }}
                     </a>
                     <a href="{{ url_for('main.about') if url_for else '/about' }}" class="btn assessment-cta btn-lg me-3">
-                        <i class="bi bi-info-circle me-2"></i>Learn Framework
+                        <i class="bi bi-info-circle me-2"></i>{{ _('home.learn_framework') }}
                     </a>
                 </div>
                 
