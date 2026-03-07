@@ -4,6 +4,9 @@ set -e
 # Initialize database schema
 python scripts/setup_database.py
 
+# Fill up example reports and assessments
+python scripts/seed_completed_assessment.py
+
 # Start Gunicorn with JSON-form entrypoint for proper signal handling
 exec gunicorn 'app:application' \
   --bind 0.0.0.0:5001 \

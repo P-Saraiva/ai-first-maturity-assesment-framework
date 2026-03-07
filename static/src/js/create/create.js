@@ -516,18 +516,18 @@ function renderRunner() {
     const group = btn.closest('.btn-group');
     if (group) {
       group.querySelectorAll('.answer-btn').forEach(b => {
-        b.classList.remove('active', 'btn-success', 'btn-danger');
+        b.classList.remove('active', 'btn-success', 'btn-danger', 'btn-outline-success', 'btn-outline-danger');
         if (b.dataset.answer === 'yes') {
-          b.classList.add(answersByArea[areaId][idx] === true ? 'active' : '', 'btn-outline-success');
           if (answersByArea[areaId][idx] === true) {
-            b.classList.remove('btn-outline-success');
             b.classList.add('btn-success', 'active');
+          } else {
+            b.classList.add('btn-outline-success');
           }
         } else {
-          b.classList.add(answersByArea[areaId][idx] === false ? 'active' : '', 'btn-outline-danger');
           if (answersByArea[areaId][idx] === false) {
-            b.classList.remove('btn-outline-danger');
             b.classList.add('btn-danger', 'active');
+          } else {
+            b.classList.add('btn-outline-danger');
           }
         }
       });

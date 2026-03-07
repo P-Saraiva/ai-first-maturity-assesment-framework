@@ -156,15 +156,15 @@ RESPONSES_IN_ORDER: list[bool] = [
 
 # Assessment metadata
 ASSESSMENT_INFO = {
-    "organization_name": "Segura",
-    "account_name": "Pedro",
-    "team_name": "QA",
-    "first_name": "Pedro",
-    "last_name": "Saraiva",
-    "email": "psaraiva@segura.security",
+    "organization_name": "Org_Example",
+    "account_name": "Account_Example",
+    "team_name": "Team_Example",
+    "first_name": "Example",
+    "last_name": "",
+    "email": "example@email.com",
     "industry": "Technology",
-    "assessor_name": "Pedro Saraiva",
-    "assessor_email": "psaraiva@segura.security",
+    "assessor_name": "Example",
+    "assessor_email": "example@email.com",
 }
 
 

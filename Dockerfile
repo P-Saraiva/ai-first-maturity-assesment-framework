@@ -59,5 +59,13 @@ ENV FLASK_APP=run.py \
 
 # Entrypoint script for proper signal handling
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Ensure the script has executable permissions
+# uncomment for linux
+#RUN chmod +x /usr/local/bin/entrypoint.sh
+#RUN chmod +x /path/to/entrypoint.sh
+
+# Fix Windows line endings and set executable permissions
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
