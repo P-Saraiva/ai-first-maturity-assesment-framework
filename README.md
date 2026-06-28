@@ -1,320 +1,230 @@
-# AI-First Software Engineering Maturity Assessment
+# AI Trust & Security Maturity Framework
 
-[![Video Demo](https://drive.google.com/thumbnail?id=1gJD9Lh0IHOkRoxd9Fm7WjQNQPiO9_Qmh&sz=w1000)](https://drive.google.com/file/d/1gJD9Lh0IHOkRoxd9Fm7WjQNQPiO9_Qmh/view)
+> A Cybersecurity Maturity Assessment for Artificial Intelligence
 
-<div align="center">
-  <a href="https://drive.google.com/file/d/1gJD9Lh0IHOkRoxd9Fm7WjQNQPiO9_Qmh/view" target="_blank" rel="noopener noreferrer">
-    <strong>🎥 ▶️ Click to watch the demo video ▶️ 🎥</strong>
-  </a>
-</div>
+A web platform that lets an organization evaluate, benchmark and evolve the **security and trustworthiness of its AI initiatives**. The application turns a conceptual maturity model into an operational, guided assessment flow with full data traceability, an interactive report and PDF export.
 
-<div align="center">
-  <a href="https://github.com/kranthiB/ai-first-maturity-assesment-framework/raw/main/output/AI_Maturity_Assessment_Report_Engineering_Excellence_Team.pdf" target="_blank" rel="noopener noreferrer">
-    <strong>📄 📥 Download Sample Report (PDF) 📥 📄</strong>
-  </a>
-</div>
+**Author:** Pedro Evangelista Saraiva
 
-## Table of Contents
-
-- [About](#about)
-- [Key Features](#key-features)
-  - [Comprehensive Assessment Platform](#comprehensive-assessment-platform)
-  - [Intelligent User Experience](#intelligent-user-experience)
-  - [Advanced Reporting & Analytics](#advanced-reporting--analytics)
-  - [Assessment Management Dashboard](#assessment-management-dashboard)
-- [Application Architecture](#application-architecture)
-  - [Assessment Workflow](#assessment-workflow)
-  - [Maturity Level Framework](#maturity-level-framework)
-- [Getting Started](#getting-started)
-  - [For Assessment Administrators](#for-assessment-administrators)
-  - [For Assessment Participants](#for-assessment-participants)
-  - [For Leadership Teams](#for-leadership-teams)
-- [Value Proposition](#value-proposition)
-  - [Immediate Benefits](#immediate-benefits)
-  - [Long-term Impact](#long-term-impact)
-  - [Organizational Outcomes](#organizational-outcomes)
-- [Implementation Support](#implementation-support)
-  - [Assessment Methodology](#assessment-methodology)
-  - [Continuous Improvement](#continuous-improvement)
-- [Support and Resources](#support-and-resources)
-- [Setup](#setup)
-
-## About
-
-The **AI-First Software Engineering Maturity Assessment Application** is a comprehensive web-based platform that enables organizations to evaluate, benchmark, and accelerate their AI-driven software development capabilities. This application transforms theoretical assessment frameworks into practical, actionable insights through an intuitive user experience.
-
-## Key Features
-
-### Comprehensive Assessment Platform
-- **Multi-dimensional Evaluation**: Assess maturity across 23 capability areas spanning Foundational Capabilities, Transformation Capabilities, Enterprise Integration, and Strategic Governance
-- **Progressive Assessment Flow**: Guided step-by-step evaluation with contextual help and practical guidance
-- **Flexible Scoring System**: Four-level maturity scale (Basic, Evolving, Advanced, Optimized) with detailed AFS scoring from 1.0-4.0
-
-#### Assessment Dimensions Overview
-
-```mermaid
-graph TB
-    subgraph "AI-First Software Engineering Assessment"
-        A[🏗️ Foundational Capabilities<br/>4 Core Areas<br/>Infrastructure, Skills, Code, Documentation]
-        B[🚀 Transformation Capabilities<br/>5 Advanced Areas<br/>Architecture, Testing, CI/CD, Monitoring, Legacy]
-        C[🏢 Enterprise Integration<br/>6 Organizational Areas<br/>Governance, Vendors, Systems, Cost, Performance, Continuity]
-        D[🎯 Strategic Governance<br/>8 Leadership Areas<br/>Ethics, Compliance, IP, Risk, Change, Performance, Collaboration, Innovation]
-    end
-    
-    A --> E[Comprehensive<br/>Assessment Score<br/>AFS 1.0-4.0]
-    B --> E
-    C --> E
-    D --> E
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#e8f5e8
-    style E fill:#f1f8e9
-```
-
-### Intelligent User Experience
-- **Contextual Guidance**: Interactive help system providing prerequisites, action items, success metrics, and implementation timelines for each capability area
-- **Organization Profiling**: Structured data collection for organization context, industry classification, and assessment parameters
-- **Progress Tracking**: Visual progress indicators and section completion status throughout the assessment journey
-
-### Advanced Reporting & Analytics
-- **Comprehensive Reports**: Detailed assessment reports with maturity scores, gap analysis, and actionable recommendations
-- **Download Capabilities**: Export complete assessment reports for offline review and stakeholder sharing
-- **Benchmarking Insights**: Industry comparison and best practice recommendations
-
-### Assessment Management Dashboard
-- **Centralized Overview**: Unified dashboard displaying all organizational assessments with status tracking
-- **Historical Analysis**: Track maturity progression over time with multiple assessment comparisons
-- **Drill-down Views**: Detailed examination of individual assessments with section-by-section analysis
-
-## Application Architecture
-
-### Assessment Workflow
-
-```mermaid
-flowchart TD
-    A[🏢 Organization Setup<br/>Context & Industry] --> B[🏗️ Foundational Assessment<br/>Infrastructure & Skills]
-    B --> C[🚀 Transformation Evaluation<br/>Advanced Capabilities]
-    C --> D[🏢 Enterprise Integration<br/>Governance & Systems]
-    D --> E[🎯 Strategic Governance<br/>Ethics & Innovation]
-    E --> F[📋 Final Review<br/>Summary & Insights]
-    F --> G[📊 Report Generation<br/>Recommendations & Roadmap]
-    
-    subgraph "Assessment Progress"
-        H[1-2 Hours Total Duration]
-        I[23 Capability Areas]
-        J[Contextual Guidance]
-    end
-    
-    style A fill:#e3f2fd
-    style B fill:#e1f5fe
-    style C fill:#f3e5f5
-    style D fill:#fff3e0
-    style E fill:#e8f5e8
-    style F fill:#fce4ec
-    style G fill:#f1f8e9
-```
-
-1. **Organization Setup**: Capture organizational context, industry, and assessor information
-2. **Foundational Assessment**: Evaluate core AI infrastructure, team skills, code generation, and knowledge management
-3. **Transformation Evaluation**: Assess advanced capabilities including architecture translation, AI-driven testing, CI/CD, and monitoring
-4. **Enterprise Integration**: Review data governance, vendor management, system integration, and performance management
-5. **Strategic Governance**: Examine AI ethics, compliance, IP management, risk management, and innovation readiness
-6. **Final Review**: Comprehensive assessment summary with immediate insights
-7. **Report Generation**: Detailed documentation with recommendations and roadmap
-
-### Maturity Level Framework
-
-```mermaid
-graph LR
-    A[Level 1: Traditional<br/>📊 AFS Score: 1.0-1.7<br/>🔧 Manual processes<br/>⚪ No AI assistance<br/>📚 Limited AI awareness] 
-    
-    A --> B[Level 2: AI-Assisted<br/>📊 AFS Score: 1.8-2.4<br/>🤖 Basic AI tools<br/>👤 Individual usage<br/>📖 Team learning]
-    
-    B --> C[Level 3: AI-Augmented<br/>📊 AFS Score: 2.5-3.2<br/>⚙️ Systematic integration<br/>👥 Coordinated usage<br/>📈 Productivity gains]
-    
-    C --> D[Level 4: AI-First<br/>📊 AFS Score: 3.3-4.0<br/>🚀 Autonomous systems<br/>🧠 Intelligent workflows<br/>🔄 Self-improving]
-    
-    style A fill:#ffebee,stroke:#c62828
-    style B fill:#fff3e0,stroke:#ef6c00
-    style C fill:#e8f5e8,stroke:#2e7d32
-    style D fill:#e3f2fd,stroke:#1565c0
-```
-
-**Level 1: Traditional Development (AFS Score: 1.0-1.7)**
-- Manual processes with minimal AI integration
-- Teams rely on traditional development tools and practices
-- Limited awareness of AI-first methodologies
-
-**Level 2: AI-Assisted Development (AFS Score: 1.8-2.4)**
-- Basic AI tool adoption with individual usage patterns
-- Initial AI assistance for code completion and documentation
-- Beginning team skill development
-
-**Level 3: AI-Augmented Development (AFS Score: 2.5-3.2)**
-- Systematic AI integration across development workflows
-- Standardized AI practices with coordinated usage
-- Measurable productivity improvements
-
-**Level 4: AI-First Development (AFS Score: 3.3-4.0)**
-- Advanced AI-native development with autonomous capabilities
-- Intelligent systems for most development activities
-- Predictive and self-improving processes
-
-## Getting Started
-
-### For Assessment Administrators
-1. Access the application homepage
-2. Navigate to "Create Assessment" to begin a new evaluation
-3. Complete organization information setup
-4. Progress through each assessment dimension
-5. Review results and generate comprehensive reports
-
-### For Assessment Participants
-1. Receive assessment invitation with organization context
-2. Follow guided assessment flow with contextual help
-3. Utilize help icons for detailed guidance on each capability area
-4. Complete all sections for comprehensive evaluation
-
-### For Leadership Teams
-1. Access the dashboard for organizational assessment overview
-2. Review detailed assessment reports and recommendations
-3. Track progress across multiple assessment cycles
-4. Download reports for stakeholder communication and planning
-
-## Value Proposition
-
-```mermaid
-graph TD
-    A[Assessment Input<br/>Current State Evaluation] --> B[Analysis Engine<br/>Gap Identification & Benchmarking]
-    
-    B --> C[Immediate Benefits<br/>⚡ Rapid Assessment<br/>🎯 Actionable Insights<br/>📊 Benchmark Positioning<br/>🗺️ Strategic Planning]
-    
-    B --> D[Long-term Impact<br/>📈 30-80% Productivity Gains<br/>✨ Quality Enhancement<br/>🛡️ Risk Mitigation<br/>🏆 Competitive Advantage]
-    
-    B --> E[Organizational Outcomes<br/>🔄 Digital Transformation<br/>💡 Innovation Capability<br/>⚙️ Operational Excellence<br/>🚀 Future Readiness]
-    
-    C --> F[Strategic Decision Making<br/>Data-Driven AI Transformation]
-    D --> F
-    E --> F
-    
-    style A fill:#e3f2fd
-    style B fill:#fff3e0
-    style C fill:#e8f5e8
-    style D fill:#f3e5f5
-    style E fill:#fce4ec
-    style F fill:#e1f5fe
-```
-
-### Immediate Benefits
-- **Rapid Assessment**: Complete comprehensive evaluation in 1-2 hours
-- **Actionable Insights**: Specific recommendations with implementation timelines
-- **Benchmark Positioning**: Understanding of current maturity relative to industry standards
-- **Strategic Planning**: Clear roadmap for AI transformation initiatives
-
-### Long-term Impact
-- **Productivity Gains**: 30-80% improvement in development velocity through systematic AI adoption
-- **Quality Enhancement**: Intelligent quality assurance and automated review processes
-- **Risk Mitigation**: Structured approach to AI implementation with proven practices
-- **Competitive Advantage**: Industry-leading AI development capabilities
-
-### Organizational Outcomes
-- **Digital Transformation**: Accelerated enterprise-wide AI adoption
-- **Innovation Capability**: Enhanced ability to develop AI-driven solutions
-- **Operational Excellence**: Optimized development processes and workflows
-- **Future Readiness**: Preparation for emerging AI technologies and methodologies
-
-## Assessment Methodology
-The application employs a research-based, industry-validated assessment methodology that evaluates organizational capabilities across multiple dimensions. Each capability area includes:
-
-- **Prerequisites**: Foundational requirements for advancement
-- **Action Items**: Specific implementation steps with detailed guidance
-- **Success Metrics**: Measurable indicators for progress tracking
-- **Timeline Estimates**: Realistic implementation timeframes
-- **Common Pitfalls**: Risk mitigation strategies and lessons learned
-
-## Continuous Improvement
-- **Regular Updates**: Framework updates based on industry developments and user feedback
-- **Benchmark Evolution**: Continuous refinement of industry benchmarks and best practices
-- **Feature Enhancement**: Ongoing platform improvements based on user experience research
-
-## Support and Resources
-
-The application provides comprehensive support through:
-- Interactive help system with contextual guidance
-- Detailed framework documentation
-- Implementation roadmaps and best practices
-- Industry benchmarking and comparison data
-
-## Setup
-
-You can run and manage the application using the provided deployment scripts for Linux/macOS (`docker-deploy.sh`) and Windows (`docker-deploy.bat`).
-
-### Linux/macOS (`docker-deploy.sh`)
-
-```sh
-# Build the Docker image
-./docker-deploy.sh build
-
-# Start the application
-./docker-deploy.sh start
-
-# Run database setup script
-./docker-deploy.sh setup
-
-# Stop the application and remove volumes
-./docker-deploy.sh stop
-
-# View application logs
-./docker-deploy.sh logs
-
-# Access application shell
-./docker-deploy.sh shell
-```
-
-### Windows (`docker-deploy.bat`)
-
-```bat
-REM Build the Docker image
-docker-deploy.bat build
-
-REM Start the application
-docker-deploy.bat start
-
-REM Run database setup script
-docker-deploy.bat setup
-
-REM Stop the application and remove volumes
-docker-deploy.bat stop
-
-REM View application logs
-docker-deploy.bat logs
-
-REM Access application shell
-docker-deploy.bat shell
-```
-
-**Note:**
-- The `stop` command will also remove all persistent volumes (database, uploads, logs).
-- The `setup` command runs the database initialization script inside the container.
-
-## Maturity Progress Refactor (Jan 2026)
-
-This release decouples "roadmap to next level" from "current-level maturity" and introduces Area-level Maturity Progress:
-
-- Question-level guidance: remains unchanged and is accessible via the question ℹ️ button; it aggregates practical prerequisites, actions, metrics, and pitfalls from progression content.
-- Area-level maturity: each Area now has its own ℹ️ button during the assessment and a dedicated card in the final report that reflects the current achieved maturity level (1–5), with characteristics, guidance, and expectations.
-- Final report: Area-level Maturity Progress is always shown, regardless of level, and reflects the current level (not the next level). Next-level roadmaps are no longer shown by default.
-
-Configuration-driven definitions:
-- Area-level maturity definitions are loaded from data/area_maturity_definitions.json. If not present, sensible defaults are derived from SSE level descriptions.
-
-Semantics:
-- Area-level cards describe the current state at the computed level.
-- Question-level modals provide actionable guidance independent of level, aggregated from progression entries.
-- The `shell` command opens a shell inside the running container for advanced troubleshooting or manual operations.
+> **Academic context.** This project was developed as the applied component of my MBA final thesis (*Trabalho de Conclusão de Curso — TCC*), on the topic of **AI security maturity assessment**. It started from a generic AI-engineering maturity concept and was redesigned around a dedicated AI Trust & Security framework, including a refactor from multi-level questions to a binary (Yes/No) scoring model, a Portuguese/English bilingual interface, and a production deployment.
 
 ---
 
-Transform your software engineering organization with AI-first practices. Begin your assessment journey today to understand your current maturity and chart your path toward AI-driven development excellence.
+## Table of Contents
+
+- [Overview](#overview)
+- [The Assessment Framework](#the-assessment-framework)
+  - [Domains](#domains)
+  - [How Scoring Works](#how-scoring-works)
+  - [Maturity Levels](#maturity-levels)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+  - [Technology Stack](#technology-stack)
+  - [Assessment Flow](#assessment-flow)
+  - [Data Model](#data-model)
+- [Getting Started](#getting-started)
+  - [Run with Docker](#run-with-docker)
+  - [Run Locally](#run-locally)
+- [Deployment](#deployment)
+- [Project Structure](#project-structure)
+- [License](#license)
+
+---
+
+## Overview
+
+The platform collects structured assessments organized as **Sections → Areas → Questions**, persists the responses and organizational metadata, computes a maturity score per area / section / overall, and presents an interactive HTML report that can be exported to PDF.
+
+It is a Flask monolith with a server-rendered (Jinja2) UI plus supporting JSON endpoints. The source of truth is a relational database; assessment content (questions, area definitions, translations) lives in versioned JSON so it can evolve without schema migrations. The interface is fully bilingual (**Portuguese / English**).
+
+## The Assessment Framework
+
+The framework evaluates AI trust and security across **7 domains and 18 capability areas**.
+
+### Domains
+
+```mermaid
+graph TB
+    subgraph "AI Trust & Security Maturity Framework"
+        ETSI[⚖️ ETSI<br/>Ethics, Trust & Societal Impact]
+        GSA[🏛️ GSA<br/>Governance, Strategy & Accountability]
+        IAA[🛡️ IAA<br/>Identity, Autonomy & Access Control for AI]
+        DPR[🗄️ DPR<br/>Data & Provenance]
+        PUT[🔒 PUT<br/>Privacy, User Rights & Operational Transparency]
+        TSA[🌐 TSA<br/>Technical Security, Architecture & AI Operations]
+        QEI[✅ QEI<br/>Quality, Evaluation, Incident Handling & Resilience]
+    end
+
+    ETSI --> S[Overall Maturity Score<br/>+ SSE-CMM Level]
+    GSA --> S
+    IAA --> S
+    DPR --> S
+    PUT --> S
+    TSA --> S
+    QEI --> S
+
+    style ETSI fill:#1e3a8a,color:#fff
+    style GSA fill:#065f46,color:#fff
+    style IAA fill:#7c2d12,color:#fff
+    style DPR fill:#0f766e,color:#fff
+    style PUT fill:#7e22ce,color:#fff
+    style TSA fill:#b45309,color:#fff
+    style QEI fill:#0ea5e9,color:#fff
+```
+
+| Code | Domain | Capability Areas |
+|------|--------|------------------|
+| **ETSI** | Ethics, Trust and Societal Impact | Ethics, Social Impact & Transparency · Explainability, Transparency & Communication · Bias, Fairness & Responsible Use |
+| **GSA** | Governance, Strategy and Accountability | Governance, Strategy & Compliance · Policies, Legal Compliance & Accountability · AI Security Awareness & Culture |
+| **IAA** | Identity, Autonomy and Access Control for AI | Identity Governance for AI & Agents · Credential & Secret Management · Agents, Autonomy & Privilege |
+| **DPR** | Data and Provenance | Inventory & Provenance · Data Quality, Governance & Minimization |
+| **PUT** | Privacy, User Rights and Operational Transparency | Privacy, User Transparency & Control |
+| **TSA** | Technical Security, Architecture and AI Operations | Threats, Risks & Operational Security · Secure Deployment & Architecture · Defects, Monitoring & Harmful Content |
+| **QEI** | Quality, Evaluation, Incident Handling and Resilience | Testing, Evaluation & Improvement · Incident & Event Handling · Operational Continuity & Monitoring |
+
+### How Scoring Works
+
+Each question is **binary (Yes/No)** — a "Yes" represents a confirmed control or capability. Scores aggregate bottom-up:
+
+- **Area score** = percentage of "Yes" answers within the area.
+- **Section score** = average of its area percentages.
+- **Overall score** = average of the section percentages.
+
+The resulting percentage is then mapped to a maturity level.
+
+### Maturity Levels
+
+Classification follows an **SSE-CMM-inspired 5-level scale**:
+
+```mermaid
+graph LR
+    A[1 · Informal<br/>0–20%<br/>Ad-hoc controls] --> B[2 · Defined<br/>21–40%<br/>Initial standardization]
+    B --> C[3 · Systematic<br/>41–60%<br/>Governance emerging]
+    C --> D[4 · Integrated<br/>61–80%<br/>Cross-functional adoption]
+    D --> E[5 · Optimized<br/>81–100%<br/>Continuous improvement]
+
+    style A fill:#ffebee,stroke:#c62828
+    style B fill:#fff3e0,stroke:#ef6c00
+    style C fill:#fffde7,stroke:#f9a825
+    style D fill:#e8f5e8,stroke:#2e7d32
+    style E fill:#e3f2fd,stroke:#1565c0
+```
+
+| Level | Range | Meaning |
+|-------|-------|---------|
+| **Informal** | 0–20% | Ad-hoc controls; limited consistency; practices not standardized. |
+| **Defined** | 21–40% | Controls defined; initial standardization; repeatable in pockets. |
+| **Systematic** | 41–60% | Controls systematically applied; governance emerging; wider coverage. |
+| **Integrated** | 61–80% | Controls integrated across the lifecycle; cross-functional adoption; measurable. |
+| **Optimized** | 81–100% | Controls optimized; continuous improvement; predictive and proactive. |
+
+## Key Features
+
+- **Guided assessment flow** — step-by-step evaluation across sections and areas, with contextual help, risk descriptions and references for each area.
+- **Bilingual interface (PT/EN)** — questions, labels and reports are fully internationalized via JSON overlays.
+- **Maturity scoring engine** — binary scoring aggregated per area / section / overall, classified into SSE-CMM levels.
+- **Interactive report** — score breakdown by section and area, gap and strength analysis, and an improvement roadmap.
+- **PDF export** — the report is rendered to PDF on demand via headless Chromium (Playwright).
+- **Assessment dashboard** — overview of all assessments with status tracking and drill-down into individual results.
+- **Audit snapshot** — each completed assessment persists a `results_json` snapshot of its computed scores.
+
+## Architecture
+
+### Technology Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language / Runtime | Python 3.11 |
+| Web framework | Flask (Application Factory pattern) |
+| ORM | SQLAlchemy |
+| Templating | Jinja2 (server-rendered UI) |
+| Database | SQLite (default) · PostgreSQL / MySQL supported |
+| PDF generation | Playwright (headless Chromium) |
+| Packaging / Deploy | Docker · Docker Compose · Fly.io |
+
+### Assessment Flow
+
+```mermaid
+flowchart TD
+    A[🏢 Organization Setup] --> B[📝 Answer Sections<br/>ETSI · GSA · IAA · DPR · PUT · TSA · QEI]
+    B --> C[📋 Final Review<br/>coverage validation]
+    C --> D[📊 Report Generation<br/>scores + recommendations]
+    D --> E[📄 PDF Export]
+```
+
+1. **Organization setup** — capture organization context, industry and assessor info; an assessment record is created with status `IN_PROGRESS`.
+2. **Answer sections** — for each section the app loads its areas and questions; responses are upserted per question (state lives in the database, not the browser session).
+3. **Final review** — validates minimum coverage before completion.
+4. **Report generation** — recalculates scores, marks the assessment `COMPLETED`, persists aggregate scores and a `results_json` snapshot.
+5. **PDF export** — the report view model is re-rendered into a print template and converted to PDF.
+
+### Data Model
+
+- **Section** — top-level domain of the framework (e.g. `TSA`).
+- **Area** — capability sub-domain within a section.
+- **Question** — a binary assessment item.
+- **Assessment** — an evaluation instance (metadata, status, scores, JSON snapshot).
+- **Response** — one answer per question, unique per `(assessment_id, question_id)`.
+
+A detailed architecture document (C4 diagrams, data flow, design trade-offs) is available in [`docs/solution-architecture.md`](docs/solution-architecture.md).
+
+## Getting Started
+
+### Run with Docker
+
+Helper scripts are provided for Linux/macOS (`docker-deploy.sh`) and Windows (`docker-deploy.bat`):
+
+```sh
+./docker-deploy.sh build    # build the image
+./docker-deploy.sh start    # start the application
+./docker-deploy.sh setup    # initialize the database (DDL + seed)
+./docker-deploy.sh logs     # tail logs
+./docker-deploy.sh shell    # open a shell inside the container
+./docker-deploy.sh stop     # stop and remove volumes
+```
+
+> On Windows, use `docker-deploy.bat <command>` with the same verbs.
+> `stop` also removes persistent volumes (database, uploads, logs); `setup` runs the DB initialization script inside the container.
+
+### Run Locally
+
+```sh
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Install the Playwright browser used for PDF export
+playwright install chromium
+
+# 3. Initialize the database (schema + seed data)
+python scripts/setup_database.py
+
+# 4. Start the app
+python run.py
+```
+
+The app defaults to a SQLite database at `instance/app_dev.db` and selects its configuration via `FLASK_ENV`. The set of active domains is controlled by `ACTIVE_SECTION_IDS`.
+
+## Deployment
+
+The repository is configured for deployment to **Fly.io** (see [`fly.toml`](fly.toml)). The Docker image installs Playwright and its Chromium browser so PDF generation works in the container, and a persistent volume is mounted for the SQLite database.
+
+## Project Structure
+
+```
+app/
+  blueprints/      # web routes (main, assessment) + JSON endpoints
+  models/          # SQLAlchemy models + maturity definitions / i18n overlays
+  services/        # scoring, assessment and recommendation services
+  utils/           # scoring helpers (SSE-CMM thresholds, math)
+  i18n/            # PT / EN translation provider + JSON catalogs
+config/            # base / development / production configuration
+data/              # framework content: area definitions, question i18n
+scripts/           # DB schema, seed data, setup & demo seeding
+static/            # JS, assets, images
+templates/         # Jinja2 templates (pages, components, PDF report)
+docs/              # solution architecture documentation
+```
+
+## License
+
+Developed by **Pedro Evangelista Saraiva** as an MBA final thesis (TCC) project. All rights reserved unless otherwise stated.
